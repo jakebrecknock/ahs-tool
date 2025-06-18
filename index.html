@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard | Handyman Estimates</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <div id="sidebar">
+    <h2><i class="fas fa-tools"></i> Estimates Dashboard</h2>
+    
+    <div class="search-container">
+      <label for="search-input"><i class="fas fa-search"></i> Search Estimates</label>
+      <input type="text" id="search-input" placeholder="Search by client, location, or project...">
+      <div class="search-buttons">
+        <button id="search-button" class="button button-primary">
+          <i class="fas fa-search"></i> Search
+        </button>
+        <button id="reset-button" class="button button-secondary">
+          <i class="fas fa-undo"></i> Reset
+        </button>
+      </div>
+    </div>
+
+    <div class="sort-container">
+      <label for="sort-select"><i class="fas fa-sort"></i> Sort By</label>
+      <select id="sort-select" class="sort-select">
+        <option value="date-newest">Date (Newest First)</option>
+        <option value="date-oldest">Date (Oldest First)</option>
+        <option value="price-high">Price (High to Low)</option>
+        <option value="price-low">Price (Low to High)</option>
+        <option value="name-asc">Name (A-Z)</option>
+        <option value="name-desc">Name (Z-A)</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="main">
+    <div class="main-header">
+      <h1><i class="fas fa-clipboard-list"></i> Current Estimates</h1>
+      <button id="new-estimate-btn" class="button button-primary">
+        <i class="fas fa-plus"></i> New Estimate
+      </button>
+    </div>
+    <div id="quote-list"></div>
+  </div>
+
+  <!-- New Estimate Modal -->
+  <div id="estimate-modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2><i class="fas fa-file-invoice-dollar"></i> Create New Estimate</h2>
+        <button class="close-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="estimate-steps">
+          <!-- Step 1: Client Info -->
+          <div id="step-1" class="step active">
+            <h3><i class="fas fa-user"></i> Client Information</h3>
+            <div class="form-group">
+              <label><i class="fas fa-user"></i> Client Name</label>
+              <input type="text" id="client-name" required>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label><i class="fas fa-envelope"></i> Email</label>
+                <input type="email" id="client-email">
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-phone"></i> Phone</label>
+                <input type="tel" id="client-phone" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" placeholder="123-456-7890">
+              </div>
+            </div>
+            <div class="form-group">
+              <label><i class="fas fa-map-marker-alt"></i> Location</label>
+              <input type="text" id="client-location" required>
+            </div>
+            <div class="form-group">
+              <label><i class="fas fa-project-diagram"></i> Project Name</label>
+              <input type="text" id="project-name" required>
+            </div>
+            <div class="form-actions">
+              <button class="button button-secondary next-step" data-next="step-2">
+                Next <i class="fas fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+          
+          <!-- Step 2: Project Selection -->
+          <div id="step-2" class="step">
+            <h3><i class="fas fa-clipboard-check"></i> Select Project Type</h3>
+            <div class="category-buttons">
+              <button class="category-btn" data-category="bathroom">Bathroom</button>
+              <button class="category-btn" data-category="kitchen">Kitchen</button>
+              <button class="category-btn" data-category="bedroom">Bedroom</button>
+              <button class="category-btn" data-category="flooring">Flooring</button>
+              <button class="category-btn" data-category="garage">Garage</button>
+              <button class="category-btn" data-category="aircon">Air Conditioning</button>
+              <button class="category-btn" data-category="roofing">Roofing</button>
+              <button class="category-btn" data-category="concrete">Concrete</button>
+              <button class="category-btn" data-category="basement">Basement</button>
+              <button class="category-btn" data-category="glass">Glass</button>
+              <button class="category-btn" data-category="decking">Decking</button>
+              <button class="category-btn" data-category="misc">Miscellaneous</button>
+            </div>
+            <div id="project-selection"></div>
+            <div class="form-actions">
+              <button class="button button-secondary prev-step" data-prev="step-1">
+                <i class="fas fa-arrow-left"></i> Back
+              </button>
+              <button class="button button-primary next-step" data-next="step-3" disabled>
+                Next <i class="fas fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+          
+          <!-- Step 3: Materials Selection -->
+          <div id="step-3" class="step">
+            <h3><i class="fas fa-box-open"></i> Select Materials</h3>
+            <div id="material-selection"></div>
+            <div class="custom-materials">
+              <h4><i class="fas fa-plus-circle"></i> Add Custom Materials</h4>
+              <div class="material-edit-item">
+                <input type="text" id="custom-material-name" placeholder="Material name">
+                <input type="number" id="custom-material-qty" min="1" value="1" placeholder="Qty">
+                <input type="number" id="custom-material-price" min="0" step="0.01" placeholder="Price">
+                <button type="button" class="button button-primary" id="add-custom-material">
+                  <i class="fas fa-plus"></i> Add
+                </button>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button class="button button-secondary prev-step" data-prev="step-2">
+                <i class="fas fa-arrow-left"></i> Back
+              </button>
+              <button class="button button-primary next-step" data-next="step-4">
+                Next <i class="fas fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+          
+          <!-- Step 4: Additional Details -->
+          <div id="step-4" class="step">
+            <h3><i class="fas fa-tools"></i> Additional Details</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label><i class="fas fa-calendar-day"></i> Days Needed</label>
+                <input type="number" id="project-days" min="1" value="1">
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-users"></i> Workers</label>
+                <input type="number" id="project-workers" min="1" value="1">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label><i class="fas fa-percentage"></i> Discount (%)</label>
+                <input type="number" id="project-discount" min="0" max="100" value="0">
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-dollar-sign"></i> Fees ($)</label>
+                <input type="number" id="project-fees" min="0" step="0.01" value="0">
+              </div>
+            </div>
+            <div class="form-actions">
+              <button class="button button-secondary prev-step" data-prev="step-3">
+                <i class="fas fa-arrow-left"></i> Back
+              </button>
+              <button class="button button-primary" id="save-estimate">
+                <i class="fas fa-save"></i> Save Estimate
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
