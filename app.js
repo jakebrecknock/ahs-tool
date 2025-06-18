@@ -361,14 +361,14 @@ function updateStats() {
 // Setup event listeners
 function setupEventListeners() {
     // Modal controls
-  newEstimateBtn.addEventListener('click', () => {
-    resetForm();  // Reset the form first
-    estimateModal.classList.remove('hidden');
+newEstimateBtn.addEventListener('click', () => {
+    resetForm();
+    estimateModal.classList.add('active');
     showStep('step-1');
 });
     
-   closeModalBtn.addEventListener('click', () => {
-    estimateModal.classList.add('hidden');
+closeModalBtn.addEventListener('click', () => {
+    estimateModal.classList.remove('active');
     resetForm();
 });
     
