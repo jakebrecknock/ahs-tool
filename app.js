@@ -1,302 +1,330 @@
 const pricingData = {
-     bathroom: {
+    bathroom: {
         projects: {
             "Small Remodel": {
-                labor: 1200,
+                labor: 2000,
                 days: "1-2",
+                crew: 1
+            },
+            "Full Renovation": {
+                labor: 24400,
+                days: "10-15",
                 crew: 2
             },
-            "Large Remodel": {
-                labor: 3500,
-                days: "3-5",
-                crew: 3
-            },
-            "Fixture Replacement": {
-                labor: 450,
-                days: "1",
+            "Minor Updates": {
+                labor: 2000,
+                days: "1-2",
                 crew: 1
             }
         },
         materials: {
-            "Tile (sq ft)": { price: 3.50, unit: "sq ft" },
-            "Vanity": { price: 250, unit: "each" },
-            "Toilet": { price: 180, unit: "each" },
-            "Shower Door": { price: 400, unit: "each" }
+            "Vents (8x8 with light)": { price: 100, unit: "each" },
+            "Vents (8x8 no light)": { price: 75, unit: "each" },
+            "Herringbone Tile": { price: 18, unit: "sq ft" },
+            "Glazed Wall Tile": { price: 6, unit: "sq ft" },
+            "Floor Tile": { price: 4, unit: "sq ft" },
+            "Single Vanity": { price: 300, unit: "each" },
+            "Double Vanity": { price: 2000, unit: "each" },
+            "Faucet": { price: 100, unit: "each" },
+            "Can Lighting": { price: 100, unit: "each" },
+            "Heated Floor": { price: 9.50, unit: "sq ft" },
+            "Supply Lines": { price: 7, unit: "ft" },
+            "GFCI Outlets": { price: 75, unit: "each" },
+            "Shower Head": { price: 120, unit: "each" },
+            "Bath Spout": { price: 40, unit: "each" },
+            "Bath": { price: 350, unit: "each" },
+            "Toilet": { price: 400, unit: "each" }
         }
     },
     kitchen: {
         projects: {
-            "Cabinet Refacing": {
-                labor: 2500,
-                days: "2-3",
-                crew: 2
-            },
             "Full Remodel": {
-                labor: 6500,
-                days: "5-7",
-                crew: 3
-            },
-            "Countertop Installation": {
-                labor: 1200,
-                days: "1-2",
+                labor: 36600,
+                days: "15-25",
                 crew: 2
+            },
+            "Cabinet Replacement": {
+                labor: 12200,
+                days: "3-5",
+                crew: 2
+            },
+            "Countertops + Backsplash": {
+                labor: 9760,
+                days: "2-4",
+                crew: 2
+            },
+            "Appliance Updates": {
+                labor: 2000,
+                days: "1-2",
+                crew: 1
             }
         },
         materials: {
-            "Granite Countertop (sq ft)": { price: 45, unit: "sq ft" },
-            "Cabinet Set": { price: 1200, unit: "set" },
-            "Backsplash Tile (sq ft)": { price: 4.25, unit: "sq ft" },
-            "Sink": { price: 220, unit: "each" }
+            "Stock Cabinets": { price: 300, unit: "ft" },
+            "Custom Cabinets": { price: 900, unit: "ft" },
+            "Laminate Countertops": { price: 45, unit: "sq ft" },
+            "Quartz Countertops": { price: 120, unit: "sq ft" },
+            "Granite Countertops": { price: 110, unit: "sq ft" },
+            "Butcher Block Countertops": { price: 80, unit: "sq ft" },
+            "Subway Tile Backsplash": { price: 15, unit: "sq ft" },
+            "Glass Tile Backsplash": { price: 22, unit: "sq ft" },
+            "Mosaic Backsplash": { price: 28, unit: "sq ft" },
+            "Electric Range": { price: 1000, unit: "each" },
+            "Gas Range": { price: 1000, unit: "each" },
+            "Standard Refrigerator": { price: 1500, unit: "each" },
+            "Dishwasher": { price: 800, unit: "each" },
+            "Over-range Microwave": { price: 450, unit: "each" },
+            "Range Hood": { price: 300, unit: "each" },
+            "Undermount Sink": { price: 350, unit: "each" },
+            "Farmhouse Sink": { price: 600, unit: "each" },
+            "Kitchen Faucet": { price: 180, unit: "each" },
+            "Pendant Lights": { price: 120, unit: "each" },
+            "Recessed Lights": { price: 100, unit: "each" },
+            "Under Cabinet Lighting": { price: 35, unit: "ft" },
+            "GFCI Outlets": { price: 75, unit: "each" },
+            "Switches/Dimmers": { price: 60, unit: "each" }
         }
     },
     bedroom: {
         projects: {
-            "Closet Organization": {
-                labor: 600,
-                days: "1",
+            "Basic Refresh": {
+                labor: 1220,
+                days: "1-3",
                 crew: 1
             },
-            "Wall Repair/Paint": {
-                labor: 850,
+            "Closet Upgrade": {
+                labor: 1220,
                 days: "1-2",
                 crew: 1
             },
-            "Flooring Installation": {
-                labor: 1200,
-                days: "2-3",
+            "Flooring Install": {
+                labor: 2440,
+                days: "1-2",
                 crew: 2
             }
         },
         materials: {
-            "Closet System": { price: 350, unit: "each" },
-            "Paint (gallon)": { price: 35, unit: "gallon" },
-            "Hardwood Flooring (sq ft)": { price: 5.75, unit: "sq ft" },
-            "Baseboard (linear ft)": { price: 2.50, unit: "ft" }
+            "Standard Reach-In Closet": { price: 600, unit: "each" },
+            "Walk-In Closet Shelving": { price: 1500, unit: "each" },
+            "Ceiling Fan w/ Light": { price: 200, unit: "each" },
+            "Flush Mount Light": { price: 100, unit: "each" },
+            "Recessed Lighting": { price: 100, unit: "each" },
+            "Interior Door": { price: 200, unit: "each" },
+            "Closet Bifold Door": { price: 180, unit: "each" },
+            "Wall & Ceiling Paint": { price: 2.50, unit: "sq ft" },
+            "Standard Molding": { price: 5, unit: "linear foot" }
         }
     },
     flooring: {
         projects: {
-            "Hardwood Installation": {
-                labor: 1800,
-                days: "2-3",
+            "Hardwood/LVP Install": {
+                labor: 4880,
+                days: "2-4",
                 crew: 2
             },
-            "Tile Installation": {
-                labor: 1500,
-                days: "2-3",
+            "Tile Flooring": {
+                labor: 12200,
+                days: "3-5",
                 crew: 2
             },
-            "Laminate Installation": {
-                labor: 1200,
-                days: "1-2",
+            "Carpet Replacement": {
+                labor: 2440,
+                days: "1",
                 crew: 2
             }
         },
         materials: {
-            "Hardwood (sq ft)": { price: 6.50, unit: "sq ft" },
-            "Tile (sq ft)": { price: 3.75, unit: "sq ft" },
-            "Laminate (sq ft)": { price: 2.25, unit: "sq ft" },
-            "Underlayment (sq ft)": { price: 0.75, unit: "sq ft" }
+            "Solid Hardwood": { price: 10, unit: "sq ft" },
+            "Engineered Hardwood": { price: 8, unit: "sq ft" },
+            "Laminate Flooring": { price: 4.50, unit: "sq ft" },
+            "Luxury Vinyl Plank (LVP)": { price: 6, unit: "sq ft" },
+            "Porcelain Tile": { price: 6.50, unit: "sq ft" },
+            "Stone Tile": { price: 9, unit: "sq ft" },
+            "Carpet": { price: 5.50, unit: "sq ft" }
         }
     },
     garage: {
         projects: {
-            "Door Installation": {
-                labor: 450,
-                days: "1",
-                crew: 1
-            },
-            "Storage System": {
-                labor: 800,
-                days: "1-2",
-                crew: 1
-            },
-            "Floor Coating": {
-                labor: 1200,
-                days: "2",
-                crew: 2
-            }
-        },
-        materials: {
-            "Garage Door": { price: 850, unit: "each" },
-            "Storage Rack": { price: 120, unit: "each" },
-            "Floor Epoxy (sq ft)": { price: 2.25, unit: "sq ft" },
-            "Shelving (linear ft)": { price: 15, unit: "ft" }
-        }
-    },
-    aircon: {
-        projects: {
-            "Unit Installation": {
-                labor: 1200,
+            "Door + Opener Replacement": {
+                labor: 2440,
                 days: "1",
                 crew: 2
             },
-            "Duct Work": {
-                labor: 1800,
+            "Epoxy Floor Coating": {
+                labor: 4880,
                 days: "2-3",
                 crew: 2
             },
-            "Maintenance Service": {
-                labor: 150,
-                days: "1",
+            "Storage & Lighting": {
+                labor: 2000,
+                days: "1-2",
                 crew: 1
             }
         },
         materials: {
-            "AC Unit": { price: 2500, unit: "each" },
-            "Ducting (linear ft)": { price: 8, unit: "ft" },
-            "Thermostat": { price: 120, unit: "each" },
-            "Vent Cover": { price: 25, unit: "each" }
-        }
-    },
-    roofing: {
-        projects: {
-            "Shingle Replacement": {
-                labor: 2500,
-                days: "2-3",
-                crew: 3
-            },
-            "Roof Repair": {
-                labor: 800,
-                days: "1",
-                crew: 2
-            },
-            "Gutter Installation": {
-                labor: 1200,
-                days: "1-2",
-                crew: 2
-            }
-        },
-        materials: {
-            "Shingles (sq ft)": { price: 1.25, unit: "sq ft" },
-            "Flashing (linear ft)": { price: 3.50, unit: "ft" },
-            "Gutter (linear ft)": { price: 6, unit: "ft" },
-            "Downspout": { price: 25, unit: "each" }
-        }
-    },
-    concrete: {
-        projects: {
-            "Patio Installation": {
-                labor: 1800,
-                days: "2-3",
-                crew: 3
-            },
-            "Sidewalk Repair": {
-                labor: 1200,
-                days: "1-2",
-                crew: 2
-            },
-            "Driveway Resurfacing": {
-                labor: 2500,
-                days: "3-4",
-                crew: 3
-            }
-        },
-        materials: {
-            "Concrete (sq yd)": { price: 120, unit: "sq yd" },
-            "Reinforcement Mesh": { price: 1.25, unit: "sq ft" },
-            "Sealer (gallon)": { price: 35, unit: "gallon" },
-            "Form Boards": { price: 8, unit: "each" }
+            "Single Manual Door": { price: 900, unit: "each" },
+            "Single Automatic Door": { price: 1300, unit: "each" },
+            "Double Automatic Door": { price: 1900, unit: "each" },
+            "Chain Drive Opener": { price: 300, unit: "each" },
+            "Belt Drive Opener": { price: 450, unit: "each" },
+            "Wall-mounted Shelving": { price: 400, unit: "each" },
+            "Ceiling Storage Rack": { price: 300, unit: "each" },
+            "LED Strip Light": { price: 120, unit: "each" },
+            "Epoxy Floor Coating": { price: 6, unit: "sq ft" }
         }
     },
     basement: {
         projects: {
-            "Waterproofing": {
-                labor: 3500,
-                days: "3-5",
-                crew: 3
-            },
-            "Finishing": {
-                labor: 5000,
-                days: "5-7",
-                crew: 3
-            },
-            "Egress Window": {
-                labor: 1800,
-                days: "2",
+            "Full Finish": {
+                labor: 36600,
+                days: "21-35",
                 crew: 2
+            },
+            "Bathroom Addition": {
+                labor: 12200,
+                days: "7-14",
+                crew: 2
+            },
+            "Minor Upgrades": {
+                labor: 2440,
+                days: "2-5",
+                crew: 1
             }
         },
         materials: {
-            "Drywall (sheet)": { price: 12, unit: "sheet" },
-            "Insulation (sq ft)": { price: 0.75, unit: "sq ft" },
-            "Flooring (sq ft)": { price: 3.50, unit: "sq ft" },
-            "Egress Window": { price: 850, unit: "each" }
+            "Framing & Insulation": { price: 28, unit: "sq ft" },
+            "Drywall": { price: 4.50, unit: "sq ft" },
+            "Can Lights": { price: 100, unit: "each" },
+            "Sump Pump System": { price: 1600, unit: "each" },
+            "Dehumidifier Unit": { price: 850, unit: "each" },
+            "Full Bath Fixtures": { price: 9000, unit: "each" }
         }
     },
     glass: {
         projects: {
             "Window Replacement": {
-                labor: 250,
-                days: "1",
+                labor: 2440,
+                days: "1-2",
+                crew: 2
+            },
+            "Shower Glass Install": {
+                labor: 1220,
+                days: "0.5-1",
                 crew: 1
             },
-            "Mirror Installation": {
-                labor: 150,
-                days: "1",
-                crew: 1
-            },
-            "Shower Door Installation": {
-                labor: 300,
-                days: "1",
+            "Mirror Install": {
+                labor: 400,
+                days: "0.25-0.5",
                 crew: 1
             }
         },
         materials: {
-            "Window Pane": { price: 120, unit: "each" },
-            "Mirror": { price: 85, unit: "each" },
-            "Shower Glass": { price: 350, unit: "each" },
-            "Glass Shelf": { price: 65, unit: "each" }
+            "Standard Double-Hung Window": { price: 500, unit: "each" },
+            "Picture Window": { price: 700, unit: "each" },
+            "Bay Window": { price: 1600, unit: "each" },
+            "Frameless Shower Enclosure": { price: 1200, unit: "each" },
+            "Sliding Glass Shower Doors": { price: 850, unit: "each" },
+            "Standard Vanity Mirror": { price: 200, unit: "each" },
+            "Custom Cut Mirror": { price: 400, unit: "each" }
         }
     },
     decking: {
         projects: {
             "New Deck Construction": {
-                labor: 3500,
-                days: "4-5",
-                crew: 3
-            },
-            "Deck Repair": {
-                labor: 1200,
-                days: "2-3",
+                labor: 12200,
+                days: "5-10",
                 crew: 2
             },
-            "Stair Installation": {
-                labor: 800,
+            "Stairs/Railing Replacement": {
+                labor: 2440,
                 days: "1-2",
+                crew: 2
+            },
+            "Resurfacing/Staining": {
+                labor: 1220,
+                days: "1-3",
+                crew: 1
+            }
+        },
+        materials: {
+            "Pressure-Treated Framing": { price: 12, unit: "sq ft" },
+            "Steel Framing": { price: 18, unit: "sq ft" },
+            "Pressure-Treated Deck Boards": { price: 16, unit: "sq ft" },
+            "Cedar Deck Boards": { price: 20, unit: "sq ft" },
+            "Composite Deck Boards": { price: 28, unit: "sq ft" },
+            "PVC Deck Boards": { price: 32, unit: "sq ft" },
+            "Wood Railing": { price: 40, unit: "linear foot" },
+            "Composite Railing": { price: 60, unit: "linear foot" },
+            "Cable Railing": { price: 90, unit: "linear foot" },
+            "Basic Wood Steps": { price: 350, unit: "flight" },
+            "Composite Steps": { price: 500, unit: "flight" },
+            "Additional Steps": { price: 90, unit: "each" },
+            "Lattice Wood Skirt": { price: 18, unit: "sq ft" },
+            "Composite Skirt": { price: 25, unit: "sq ft" },
+            "Concrete Footings": { price: 250, unit: "each" },
+            "Support Posts": { price: 90, unit: "each" },
+            "Post Cap Lights": { price: 80, unit: "each" },
+            "Stair Lights": { price: 60, unit: "each" },
+            "Initial Seal/Stain": { price: 3.50, unit: "sq ft" },
+            "Maintenance Recoat": { price: 2, unit: "sq ft" }
+        }
+    },
+    concrete: {
+        projects: {
+            "Driveway": {
+                labor: 12200,
+                days: "3-5",
+                crew: 2
+            },
+            "Walkway or Steps": {
+                labor: 2440,
+                days: "1-3",
+                crew: 2
+            },
+            "Stamped Patio": {
+                labor: 9760,
+                days: "3-4",
                 crew: 2
             }
         },
         materials: {
-            "Deck Board (linear ft)": { price: 3.25, unit: "ft" },
-            "Post": { price: 45, unit: "each" },
-            "Railings (linear ft)": { price: 12, unit: "ft" },
-            "Hardware Kit": { price: 85, unit: "kit" }
+            "Standard Driveway Pour": { price: 10, unit: "sq ft" },
+            "Stamped Driveway": { price: 16, unit: "sq ft" },
+            "Standard Walkway": { price: 8, unit: "sq ft" },
+            "Decorative Walkway": { price: 14, unit: "sq ft" },
+            "Plain Patio": { price: 9, unit: "sq ft" },
+            "Decorative/Stained Patio": { price: 15, unit: "sq ft" },
+            "Concrete Steps": { price: 350, unit: "step" }
         }
     },
     misc: {
         projects: {
-            "Drywall Repair": {
+            "Door Replacement": {
                 labor: 400,
-                days: "1",
+                days: "0.5-1",
                 crew: 1
             },
-            "Painting Service": {
-                labor: 800,
+            "Trim/Baseboard Install": {
+                labor: 2440,
                 days: "1-2",
                 crew: 2
             },
-            "General Handyman": {
-                labor: 65,
-                days: "1",
+            "Drywall Patch/Paint": {
+                labor: 1220,
+                days: "0.25-1",
                 crew: 1
             }
         },
         materials: {
-            "Drywall (sheet)": { price: 12, unit: "sheet" },
-            "Paint (gallon)": { price: 35, unit: "gallon" },
-            "Trim (linear ft)": { price: 2.25, unit: "ft" },
-            "Hardware": { price: 5, unit: "each" }
+            "Steel Exterior Door": { price: 750, unit: "each" },
+            "Wood Exterior Door": { price: 900, unit: "each" },
+            "French Doors": { price: 1200, unit: "each" },
+            "Sliding Glass Door": { price: 1400, unit: "each" },
+            "Small Drywall Patch": { price: 150, unit: "each" },
+            "Large Drywall Patch": { price: 300, unit: "each" },
+            "Caulking/Sealant Work": { price: 5, unit: "ft" },
+            "Baseboard Heater": { price: 250, unit: "each" },
+            "Smoke/CO Detector": { price: 90, unit: "each" }
         }
     }
 };
@@ -781,11 +809,12 @@ function saveEstimate() {
         timestamp: new Date().toISOString()
     };
     
-    // Calculate total with discount applied after fees
+    // Calculate total with fees added first, then discount applied
     const materialsTotal = calculateMaterialsTotal(newEstimate.materials);
-    const subtotal = materialsTotal + newEstimate.laborCost + newEstimate.fees;
-    const discountAmount = (newEstimate.discount || 0) * subtotal / 100;
-    newEstimate.total = subtotal - discountAmount;
+    const subtotal = materialsTotal + newEstimate.laborCost;
+    const totalWithFees = subtotal + newEstimate.fees;
+    const discountAmount = (newEstimate.discount || 0) * totalWithFees / 100;
+    newEstimate.total = totalWithFees - discountAmount;
     
     // Add to estimates array
     const editIndex = saveEstimateBtn.dataset.editIndex;
