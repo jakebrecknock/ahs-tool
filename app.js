@@ -1,177 +1,5 @@
 const pricingData = {
-    bathroom: {
-        projects: {
-            "Small remodel": { labor: (12200 + 18000) / 2, days: "5-7", crew: 2 },
-            "Full renovation": { labor: (24400 + 36600) / 2, days: "10-15", crew: 2 },
-            "Minor updates": { labor: 2000, days: "1-2", crew: 1 }
-        },
-        materials: {
-            "Vents (with light)": { price: 100, unit: "each" },
-            "Vents (no light)": { price: 75, unit: "each" },
-            "Herringbone tile": { price: 18, unit: "sqft" },
-            "Glazed wall tile": { price: 6, unit: "sqft" },
-            "Floor tile": { price: 4, unit: "sqft" },
-            "Single vanity": { price: 300, unit: "each" },
-            "Double vanity": { price: 2000, unit: "each" },
-            "Faucet": { price: 100, unit: "each" },
-            "Can lighting": { price: 100, unit: "4 pack" },
-            "Heated floor": { price: 9.5, unit: "sqft" },
-            "Supply lines": { price: 7, unit: "ft" },
-            "GFCI outlets": { price: 75, unit: "each" },
-            "Shower head": { price: 120, unit: "each" },
-            "Bath spout": { price: 40, unit: "each" },
-            "Bath": { price: 350, unit: "each" },
-            "Toilet": { price: 400, unit: "each" }
-        }
-    },
-    kitchen: {
-        projects: {
-            "Cabinet refacing": { labor: 4500, days: "3-5", crew: 2 },
-            "Full remodel": { labor: 25000, days: "10-15", crew: 3 },
-            "Countertop replacement": { labor: 1500, days: "1-2", crew: 2 }
-        },
-        materials: {
-            "Base cabinets": { price: 200, unit: "each" },
-            "Wall cabinets": { price: 150, unit: "each" },
-            "Granite countertop": { price: 50, unit: "sqft" },
-            "Quartz countertop": { price: 70, unit: "sqft" },
-            "Backsplash tile": { price: 8, unit: "sqft" },
-            "Kitchen sink": { price: 300, unit: "each" },
-            "Faucet": { price: 150, unit: "each" },
-            "Under-cabinet lighting": { price: 120, unit: "each" }
-        }
-    },
-    bedroom: {
-        projects: {
-            "Closet build-out": { labor: 1200, days: "2-3", crew: 1 },
-            "Full remodel": { labor: 8000, days: "5-7", crew: 2 },
-            "Wall repair/paint": { labor: 500, days: "1", crew: 1 }
-        },
-        materials: {
-            "Closet system": { price: 300, unit: "each" },
-            "Drywall": { price: 1.5, unit: "sqft" },
-            "Paint": { price: 35, unit: "gallon" },
-            "Crown molding": { price: 5, unit: "ft" },
-            "Baseboard": { price: 3, unit: "ft" }
-        }
-    },
-    flooring: {
-        projects: {
-            "Hardwood install": { labor: 4, days: "Varies by size", crew: 2 },
-            "Tile install": { labor: 5, days: "Varies by size", crew: 2 },
-            "Laminate install": { labor: 2, unit: "sqft", days: "Varies by size", crew: 2 }
-        },
-        materials: {
-            "Hardwood": { price: 8, unit: "sqft" },
-            "Tile": { price: 4, unit: "sqft" },
-            "Laminate": { price: 3, unit: "sqft" },
-            "Underlayment": { price: 0.5, unit: "sqft" },
-            "Transition strips": { price: 15, unit: "each" }
-        }
-    },
-    garage: {
-        projects: {
-            "Epoxy flooring": { labor: 3, unit: "sqft", days: "2-3", crew: 2 },
-            "Storage system": { labor: 1500, days: "2-3", crew: 2 },
-            "Door replacement": { labor: 500, days: "1", crew: 2 }
-        },
-        materials: {
-            "Epoxy coating": { price: 2.5, unit: "sqft" },
-            "Shelving": { price: 50, unit: "each" },
-            "Garage door": { price: 800, unit: "each" },
-            "Opener": { price: 250, unit: "each" }
-        }
-    },
-    aircon: {
-        projects: {
-            "AC unit install": { labor: 1500, days: "1", crew: 2 },
-            "Ductwork": { labor: 15, unit: "ft", days: "Varies", crew: 2 },
-            "Vent cleaning": { labor: 300, days: "1", crew: 1 }
-        },
-        materials: {
-            "AC unit": { price: 2500, unit: "each" },
-            "Duct": { price: 8, unit: "ft" },
-            "Vent covers": { price: 25, unit: "each" },
-            "Thermostat": { price: 150, unit: "each" }
-        }
-    },
-    roofing: {
-        projects: {
-            "Shingle replacement": { labor: 2.5, unit: "sqft", days: "Varies by size", crew: 3 },
-            "Full roof replacement": { labor: 350, unit: "square", days: "3-5", crew: 4 },
-            "Leak repair": { labor: 300, days: "1", crew: 2 }
-        },
-        materials: {
-            "Asphalt shingles": { price: 1.5, unit: "sqft" },
-            "Underlayment": { price: 0.5, unit: "sqft" },
-            "Flashing": { price: 10, unit: "ft" },
-            "Drip edge": { price: 3, unit: "ft" }
-        }
-    },
-    concrete: {
-        projects: {
-            "Patio": { labor: 6, unit: "sqft", days: "Varies by size", crew: 3 },
-            "Sidewalk": { labor: 8, unit: "sqft", days: "Varies by size", crew: 3 },
-            "Driveway": { labor: 5, unit: "sqft", days: "Varies by size", crew: 4 }
-        },
-        materials: {
-            "Concrete": { price: 5, unit: "sqft" },
-            "Reinforcement": { price: 1, unit: "sqft" },
-            "Forming": { price: 2, unit: "ft" }
-        }
-    },
-    basement: {
-        projects: {
-            "Finishing": { labor: 25, unit: "sqft", days: "Varies by size", crew: 3 },
-            "Waterproofing": { labor: 5000, days: "3-5", crew: 3 },
-            "Egress window": { labor: 2500, days: "2", crew: 3 }
-        },
-        materials: {
-            "Drywall": { price: 1.5, unit: "sqft" },
-            "Insulation": { price: 0.75, unit: "sqft" },
-            "Flooring": { price: 3, unit: "sqft" },
-            "Egress window": { price: 800, unit: "each" }
-        }
-    },
-    glass: {
-        projects: {
-            "Window replacement": { labor: 300, days: "1", crew: 2 },
-            "Mirror install": { labor: 200, days: "1", crew: 2 },
-            "Shower door": { labor: 400, days: "1", crew: 2 }
-        },
-        materials: {
-            "Double pane window": { price: 350, unit: "each" },
-            "Mirror": { price: 20, unit: "sqft" },
-            "Shower glass": { price: 40, unit: "sqft" },
-            "Hardware": { price: 100, unit: "set" }
-        }
-    },
-    decking: {
-        projects: {
-            "New deck": { labor: 15, unit: "sqft", days: "Varies by size", crew: 3 },
-            "Deck repair": { labor: 500, days: "1-2", crew: 2 },
-            "Staining/sealing": { labor: 2, unit: "sqft", days: "Varies by size", crew: 2 }
-        },
-        materials: {
-            "Pressure-treated wood": { price: 5, unit: "sqft" },
-            "Composite decking": { price: 10, unit: "sqft" },
-            "Railings": { price: 30, unit: "ft" },
-            "Fasteners": { price: 50, unit: "set" }
-        }
-    },
-    misc: {
-        projects: {
-            "Drywall repair": { labor: 200, days: "1", crew: 1 },
-            "Painting": { labor: 2, unit: "sqft", days: "Varies by size", crew: 1 },
-            "Handyman services": { labor: 65, unit: "hour", days: "Varies", crew: 1 }
-        },
-        materials: {
-            "Drywall": { price: 1.5, unit: "sqft" },
-            "Paint": { price: 35, unit: "gallon" },
-            "Trim": { price: 3, unit: "ft" },
-            "Hardware": { price: 5, unit: "each" }
-        }
-    }
+    // ... keep your existing pricingData object exactly as is ...
 };
 
 // DOM elements
@@ -193,10 +21,11 @@ const resetButton = document.getElementById('reset-button');
 const sortSelect = document.getElementById('sort-select');
 const totalEstimatesEl = document.getElementById('total-estimates');
 const totalValueEl = document.getElementById('total-value');
+const monthSelect = document.getElementById('month-select');
 
 // Current selection
-let currentCategory = null;
-let currentProject = null;
+let currentCategories = [];
+let currentProjects = {};
 let selectedMaterials = {};
 let estimates = JSON.parse(localStorage.getItem('estimates')) || [];
 let filteredEstimates = [];
@@ -345,9 +174,20 @@ function loadEstimates(searchTerm = '', sortBy = 'date-newest') {
 
 // Update statistics
 function updateStats() {
-    totalEstimatesEl.textContent = estimates.length;
+    const monthFilter = monthSelect.value;
+    const now = new Date();
     
-    const totalValue = estimates.reduce((sum, estimate) => {
+    let filtered = estimates;
+    if (monthFilter !== 'all') {
+        filtered = estimates.filter(estimate => {
+            const date = new Date(estimate.timestamp);
+            return date.getMonth() === parseInt(monthFilter) && date.getFullYear() === now.getFullYear();
+        });
+    }
+    
+    totalEstimatesEl.textContent = filtered.length;
+    
+    const totalValue = filtered.reduce((sum, estimate) => {
         const materialsTotal = calculateMaterialsTotal(estimate.materials);
         const labor = estimate.laborCost || 0;
         const discountAmount = (estimate.discount || 0) * (materialsTotal + labor) / 100;
@@ -356,23 +196,39 @@ function updateStats() {
     }, 0);
     
     totalValueEl.textContent = formatMoney(totalValue);
+    
+    // Calculate monthly total (current month)
+    const currentMonthEstimates = estimates.filter(estimate => {
+        const date = new Date(estimate.timestamp);
+        return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+    });
+    
+    const monthlyValue = currentMonthEstimates.reduce((sum, estimate) => {
+        const materialsTotal = calculateMaterialsTotal(estimate.materials);
+        const labor = estimate.laborCost || 0;
+        const discountAmount = (estimate.discount || 0) * (materialsTotal + labor) / 100;
+        const fees = estimate.fees || 0;
+        return sum + (materialsTotal + labor + fees) - discountAmount;
+    }, 0);
+    
+    document.getElementById('monthly-value').textContent = formatMoney(monthlyValue);
 }
 
 // Setup event listeners
 function setupEventListeners() {
     // Modal controls
-newEstimateBtn.addEventListener('click', () => {
-    resetForm();
-    estimateModal.classList.add('active');
-    estimateModal.classList.remove('hidden');
-    showStep('step-1');
-});
+    newEstimateBtn.addEventListener('click', () => {
+        resetForm();
+        estimateModal.classList.add('active');
+        estimateModal.classList.remove('hidden');
+        showStep('step-1');
+    });
     
-closeModalBtn.addEventListener('click', () => {
-    estimateModal.classList.remove('active');
-    estimateModal.classList.add('hidden');
-    resetForm();
-});
+    closeModalBtn.addEventListener('click', () => {
+        estimateModal.classList.remove('active');
+        estimateModal.classList.add('hidden');
+        resetForm();
+    });
     
     // Step navigation
     nextStepBtns.forEach(btn => {
@@ -394,9 +250,20 @@ closeModalBtn.addEventListener('click', () => {
     // Category selection
     categoryBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
-            currentCategory = e.target.dataset.category;
+            const category = e.target.dataset.category;
+            const index = currentCategories.indexOf(category);
+            
+            if (index === -1) {
+                currentCategories.push(category);
+                e.target.classList.add('selected-category');
+            } else {
+                currentCategories.splice(index, 1);
+                e.target.classList.remove('selected-category');
+                delete currentProjects[category];
+            }
+            
             showProjects();
-            document.querySelector('#step-2 .next-step').disabled = false;
+            document.querySelector('#step-2 .next-step').disabled = currentCategories.length === 0;
         });
     });
     
@@ -426,6 +293,9 @@ closeModalBtn.addEventListener('click', () => {
     sortSelect.addEventListener('change', () => {
         loadEstimates(searchInput.value.trim(), sortSelect.value);
     });
+    
+    // Month filter
+    monthSelect.addEventListener('change', updateStats);
 }
 
 // Show a specific step
@@ -439,7 +309,7 @@ function showStep(stepId) {
 // Validate step before proceeding
 function validateStep(nextStep) {
     if (nextStep === 'step-2') {
-        const requiredFields = ['client-name', 'client-location', 'project-name'];
+        const requiredFields = ['client-name', 'client-location'];
         for (const fieldId of requiredFields) {
             if (!document.getElementById(fieldId).value.trim()) {
                 alert('Please fill in all required fields');
@@ -450,64 +320,88 @@ function validateStep(nextStep) {
     return true;
 }
 
-// Show projects for selected category
+// Show projects for selected categories
 function showProjects() {
-    projectSelection.innerHTML = '<h3>Select Project Type</h3>';
+    projectSelection.innerHTML = '<h3>Select Project Types</h3>';
     materialSelection.innerHTML = '';
     selectedMaterials = {};
-    currentProject = null;
+    
+    currentCategories.forEach(category => {
+        const categoryHeader = document.createElement('h4');
+        categoryHeader.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+        categoryHeader.style.marginTop = '20px';
+        categoryHeader.style.color = 'var(--primary)';
+        projectSelection.appendChild(categoryHeader);
 
-    const projects = pricingData[currentCategory].projects;
-    for (const [projectName, projectData] of Object.entries(projects)) {
-        const projectDiv = document.createElement('div');
-        projectDiv.className = 'project-option';
-        projectDiv.innerHTML = `
-            <h4>${projectName}</h4>
-            <p>Labor: ${formatMoney(projectData.labor)}</p>
-            <p>Duration: ${projectData.days} days | Crew: ${projectData.crew}</p>
-            <button class="button button-primary select-project" data-project="${projectName}">
-                Select
-            </button>
-        `;
-        projectSelection.appendChild(projectDiv);
-    }
+        const projects = pricingData[category].projects;
+        for (const [projectName, projectData] of Object.entries(projects)) {
+            const projectDiv = document.createElement('div');
+            projectDiv.className = 'project-option';
+            projectDiv.innerHTML = `
+                <h4>${projectName}</h4>
+                <p>Labor: ${formatMoney(projectData.labor)}</p>
+                <p>Duration: ${projectData.days} days | Crew: ${projectData.crew}</p>
+                <button class="button button-primary select-project" data-category="${category}" data-project="${projectName}">
+                    ${currentProjects[category] === projectName ? 'Selected' : 'Select'}
+                </button>
+            `;
+            projectSelection.appendChild(projectDiv);
+        }
+    });
 
-    // Set up project selection buttons
     document.querySelectorAll('.select-project').forEach(button => {
         button.addEventListener('click', (e) => {
-            currentProject = e.target.dataset.project;
-            showMaterials();
+            const category = e.target.dataset.category;
+            const project = e.target.dataset.project;
+            
+            if (currentProjects[category] === project) {
+                delete currentProjects[category];
+                e.target.textContent = 'Select';
+            } else {
+                currentProjects[category] = project;
+                e.target.textContent = 'Selected';
+            }
         });
     });
 }
 
-// Show materials for selected project
+// Show materials for selected projects
 function showMaterials() {
     materialSelection.innerHTML = '<h3>Select Materials</h3>';
     selectedMaterials = {};
 
-    const materials = pricingData[currentCategory].materials;
-    for (const [materialName, materialData] of Object.entries(materials)) {
-        const materialDiv = document.createElement('div');
-        materialDiv.className = 'material-option';
-        
-        materialDiv.innerHTML = `
-            <div class="material-label">
-                <input type="checkbox" data-material="${materialName}" data-price="${materialData.price}">
-                ${materialName} - ${formatMoney(materialData.price)}/${materialData.unit}
-            </div>
-            <input type="number" min="1" value="1" class="material-quantity" style="display: none;">
-        `;
-        materialSelection.appendChild(materialDiv);
+    currentCategories.forEach(category => {
+        if (currentProjects[category]) {
+            const categoryHeader = document.createElement('h4');
+            categoryHeader.textContent = `${category.charAt(0).toUpperCase() + category.slice(1)} Materials`;
+            categoryHeader.style.marginTop = '20px';
+            categoryHeader.style.color = 'var(--primary)';
+            materialSelection.appendChild(categoryHeader);
 
-        // Show quantity input when checkbox is checked
-        const checkbox = materialDiv.querySelector('input[type="checkbox"]');
-        const quantityInput = materialDiv.querySelector('.material-quantity');
-        
-        checkbox.addEventListener('change', () => {
-            quantityInput.style.display = checkbox.checked ? 'inline-block' : 'none';
-        });
-    }
+            const materials = pricingData[category].materials;
+            for (const [materialName, materialData] of Object.entries(materials)) {
+                const materialDiv = document.createElement('div');
+                materialDiv.className = 'material-option';
+                
+                materialDiv.innerHTML = `
+                    <div class="material-label">
+                        <input type="checkbox" data-material="${materialName}" data-price="${materialData.price}">
+                        ${materialName} - ${formatMoney(materialData.price)}/${materialData.unit}
+                    </div>
+                    <input type="number" min="1" value="1" class="material-quantity" style="display: none;">
+                `;
+                materialSelection.appendChild(materialDiv);
+
+                // Show quantity input when checkbox is checked
+                const checkbox = materialDiv.querySelector('input[type="checkbox"]');
+                const quantityInput = materialDiv.querySelector('.material-quantity');
+                
+                checkbox.addEventListener('change', () => {
+                    quantityInput.style.display = checkbox.checked ? 'inline-block' : 'none';
+                });
+            }
+        }
+    });
 }
 
 // Add custom material
@@ -556,26 +450,35 @@ function saveEstimate() {
         selectedMaterials[materialName] = {
             price: materialPrice,
             quantity: quantity,
-            unit: pricingData[currentCategory].materials[materialName].unit
+            unit: 'each' // Default unit for selected materials
         };
     });
 
     // Get project data
-    const projectData = pricingData[currentCategory].projects[currentProject];
+    let totalLabor = 0;
+    let totalDays = 0;
+    let totalWorkers = 0;
     
+    Object.entries(currentProjects).forEach(([category, projectName]) => {
+        const projectData = pricingData[category].projects[projectName];
+        totalLabor += projectData.labor;
+        totalDays += parseInt(projectData.days.split('-')[1]) || parseInt(projectData.days) || 1;
+        totalWorkers += projectData.crew || 1;
+    });
+
     // Create new estimate
     const newEstimate = {
         clientName: document.getElementById('client-name').value.trim(),
         clientEmail: document.getElementById('client-email').value.trim(),
         clientPhone: document.getElementById('client-phone').value.trim(),
         clientLocation: document.getElementById('client-location').value.trim(),
-        projectName: document.getElementById('project-name').value.trim(),
-        category: currentCategory,
-        projectType: currentProject,
-        laborCost: projectData.labor,
+        projectName: `${document.getElementById('client-name').value.trim()} - ${Object.values(currentProjects).join(', ')}`,
+        categories: [...currentCategories],
+        projects: {...currentProjects},
+        laborCost: totalLabor,
         materials: selectedMaterials,
-        days: parseInt(document.getElementById('project-days').value) || 1,
-        workers: parseInt(document.getElementById('project-workers').value) || 1,
+        days: parseInt(document.getElementById('project-days').value) || totalDays,
+        workers: parseInt(document.getElementById('project-workers').value) || totalWorkers,
         discount: parseFloat(document.getElementById('project-discount').value) || 0,
         fees: parseFloat(document.getElementById('project-fees').value) || 0,
         timestamp: new Date().toISOString()
@@ -587,12 +490,19 @@ function saveEstimate() {
     newEstimate.total = (materialsTotal + newEstimate.laborCost + newEstimate.fees) - discountAmount;
     
     // Add to estimates array
-    estimates.unshift(newEstimate);
+    const editIndex = saveEstimateBtn.dataset.editIndex;
+    if (editIndex !== undefined) {
+        estimates[editIndex] = newEstimate;
+        delete saveEstimateBtn.dataset.editIndex;
+    } else {
+        estimates.unshift(newEstimate);
+    }
+    
     localStorage.setItem('estimates', JSON.stringify(estimates));
     
     // Close modal and refresh
     estimateModal.classList.remove('active');
-    estimateModal.classList.add('hidden');;
+    estimateModal.classList.add('hidden');
     resetForm();
     loadEstimates();
     updateStats();
@@ -611,7 +521,6 @@ function resetForm() {
     document.getElementById('client-email').value = '';
     document.getElementById('client-phone').value = '';
     document.getElementById('client-location').value = '';
-    document.getElementById('project-name').value = '';
     document.getElementById('project-days').value = '1';
     document.getElementById('project-workers').value = '1';
     document.getElementById('project-discount').value = '0';
@@ -620,12 +529,17 @@ function resetForm() {
     document.getElementById('custom-material-qty').value = '1';
     document.getElementById('custom-material-price').value = '';
     
-    currentCategory = null;
-    currentProject = null;
+    currentCategories = [];
+    currentProjects = {};
     selectedMaterials = {};
     projectSelection.innerHTML = '';
     materialSelection.innerHTML = '';
     document.querySelector('#step-2 .next-step').disabled = true;
+    
+    // Reset category buttons
+    document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.classList.remove('selected-category');
+    });
     
     // Reset to first step
     showStep('step-1');
@@ -656,15 +570,23 @@ window.editEstimate = function(index) {
     document.getElementById('client-email').value = estimate.clientEmail || '';
     document.getElementById('client-phone').value = estimate.clientPhone || '';
     document.getElementById('client-location').value = estimate.clientLocation;
-    document.getElementById('project-name').value = estimate.projectName;
     document.getElementById('project-days').value = estimate.days || 1;
     document.getElementById('project-workers').value = estimate.workers || 1;
     document.getElementById('project-discount').value = estimate.discount || 0;
     document.getElementById('project-fees').value = estimate.fees || 0;
     
-    // Set category and project
-    currentCategory = estimate.category;
-    currentProject = estimate.projectType;
+    // Set categories and projects
+    currentCategories = estimate.categories || [estimate.category];
+    currentProjects = estimate.projects || { [estimate.category]: estimate.projectType };
+    
+    // Highlight selected category buttons
+    document.querySelectorAll('.category-btn').forEach(btn => {
+        if (currentCategories.includes(btn.dataset.category)) {
+            btn.classList.add('selected-category');
+        } else {
+            btn.classList.remove('selected-category');
+        }
+    });
     
     // Show projects and materials
     showProjects();
@@ -672,6 +594,7 @@ window.editEstimate = function(index) {
     
     // Check materials that were selected
     if (estimate.materials) {
+        selectedMaterials = {...estimate.materials};
         Object.keys(estimate.materials).forEach(materialName => {
             const checkbox = document.querySelector(`input[data-material="${materialName}"]`);
             if (checkbox) {
@@ -686,6 +609,9 @@ window.editEstimate = function(index) {
     // Open modal at materials step
     estimateModal.classList.remove('hidden');
     showStep('step-3');
+    
+    // Store the index of the estimate being edited
+    saveEstimateBtn.dataset.editIndex = index;
 };
 
 // Delete estimate
