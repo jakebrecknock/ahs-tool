@@ -361,15 +361,16 @@ function updateStats() {
 // Setup event listeners
 function setupEventListeners() {
     // Modal controls
-    newEstimateBtn.addEventListener('click', () => {
-        estimateModal.classList.remove('hidden');
-        showStep('step-1');
-    });
+  newEstimateBtn.addEventListener('click', () => {
+    resetForm();  // Reset the form first
+    estimateModal.classList.remove('hidden');
+    showStep('step-1');
+});
     
-    closeModalBtn.addEventListener('click', () => {
-        estimateModal.classList.add('hidden');
-        resetForm();
-    });
+   closeModalBtn.addEventListener('click', () => {
+    estimateModal.classList.add('hidden');
+    resetForm();
+});
     
     // Step navigation
     nextStepBtns.forEach(btn => {
@@ -608,12 +609,23 @@ function resetForm() {
     document.getElementById('client-phone').value = '';
     document.getElementById('client-location').value = '';
     document.getElementById('project-name').value = '';
+    document.getElementById('project-days').value = '1';
+    document.getElementById('project-workers').value = '1';
+    document.getElementById('project-discount').value = '0';
+    document.getElementById('project-fees').value = '0';
+    document.getElementById('custom-material-name').value = '';
+    document.getElementById('custom-material-qty').value = '1';
+    document.getElementById('custom-material-price').value = '';
+    
     currentCategory = null;
     currentProject = null;
     selectedMaterials = {};
     projectSelection.innerHTML = '';
     materialSelection.innerHTML = '';
     document.querySelector('#step-2 .next-step').disabled = true;
+    
+    // Reset to first step
+    showStep('step-1');
 }
 
 // Format phone number
