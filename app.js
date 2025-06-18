@@ -364,11 +364,13 @@ function setupEventListeners() {
 newEstimateBtn.addEventListener('click', () => {
     resetForm();
     estimateModal.classList.add('active');
+    estimateModal.classList.remove('hidden');
     showStep('step-1');
 });
     
 closeModalBtn.addEventListener('click', () => {
     estimateModal.classList.remove('active');
+    estimateModal.classList.add('hidden');
     resetForm();
 });
     
@@ -589,7 +591,8 @@ function saveEstimate() {
     localStorage.setItem('estimates', JSON.stringify(estimates));
     
     // Close modal and refresh
-    estimateModal.classList.add('hidden');
+    estimateModal.classList.remove('active');
+    estimateModal.classList.add('hidden');;
     resetForm();
     loadEstimates();
     updateStats();
