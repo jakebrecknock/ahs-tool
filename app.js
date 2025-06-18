@@ -1,5 +1,304 @@
 const pricingData = {
-    // ... keep your existing pricingData object exactly as is ...
+     bathroom: {
+        projects: {
+            "Small Remodel": {
+                labor: 1200,
+                days: "1-2",
+                crew: 2
+            },
+            "Large Remodel": {
+                labor: 3500,
+                days: "3-5",
+                crew: 3
+            },
+            "Fixture Replacement": {
+                labor: 450,
+                days: "1",
+                crew: 1
+            }
+        },
+        materials: {
+            "Tile (sq ft)": { price: 3.50, unit: "sq ft" },
+            "Vanity": { price: 250, unit: "each" },
+            "Toilet": { price: 180, unit: "each" },
+            "Shower Door": { price: 400, unit: "each" }
+        }
+    },
+    kitchen: {
+        projects: {
+            "Cabinet Refacing": {
+                labor: 2500,
+                days: "2-3",
+                crew: 2
+            },
+            "Full Remodel": {
+                labor: 6500,
+                days: "5-7",
+                crew: 3
+            },
+            "Countertop Installation": {
+                labor: 1200,
+                days: "1-2",
+                crew: 2
+            }
+        },
+        materials: {
+            "Granite Countertop (sq ft)": { price: 45, unit: "sq ft" },
+            "Cabinet Set": { price: 1200, unit: "set" },
+            "Backsplash Tile (sq ft)": { price: 4.25, unit: "sq ft" },
+            "Sink": { price: 220, unit: "each" }
+        }
+    },
+    bedroom: {
+        projects: {
+            "Closet Organization": {
+                labor: 600,
+                days: "1",
+                crew: 1
+            },
+            "Wall Repair/Paint": {
+                labor: 850,
+                days: "1-2",
+                crew: 1
+            },
+            "Flooring Installation": {
+                labor: 1200,
+                days: "2-3",
+                crew: 2
+            }
+        },
+        materials: {
+            "Closet System": { price: 350, unit: "each" },
+            "Paint (gallon)": { price: 35, unit: "gallon" },
+            "Hardwood Flooring (sq ft)": { price: 5.75, unit: "sq ft" },
+            "Baseboard (linear ft)": { price: 2.50, unit: "ft" }
+        }
+    },
+    flooring: {
+        projects: {
+            "Hardwood Installation": {
+                labor: 1800,
+                days: "2-3",
+                crew: 2
+            },
+            "Tile Installation": {
+                labor: 1500,
+                days: "2-3",
+                crew: 2
+            },
+            "Laminate Installation": {
+                labor: 1200,
+                days: "1-2",
+                crew: 2
+            }
+        },
+        materials: {
+            "Hardwood (sq ft)": { price: 6.50, unit: "sq ft" },
+            "Tile (sq ft)": { price: 3.75, unit: "sq ft" },
+            "Laminate (sq ft)": { price: 2.25, unit: "sq ft" },
+            "Underlayment (sq ft)": { price: 0.75, unit: "sq ft" }
+        }
+    },
+    garage: {
+        projects: {
+            "Door Installation": {
+                labor: 450,
+                days: "1",
+                crew: 1
+            },
+            "Storage System": {
+                labor: 800,
+                days: "1-2",
+                crew: 1
+            },
+            "Floor Coating": {
+                labor: 1200,
+                days: "2",
+                crew: 2
+            }
+        },
+        materials: {
+            "Garage Door": { price: 850, unit: "each" },
+            "Storage Rack": { price: 120, unit: "each" },
+            "Floor Epoxy (sq ft)": { price: 2.25, unit: "sq ft" },
+            "Shelving (linear ft)": { price: 15, unit: "ft" }
+        }
+    },
+    aircon: {
+        projects: {
+            "Unit Installation": {
+                labor: 1200,
+                days: "1",
+                crew: 2
+            },
+            "Duct Work": {
+                labor: 1800,
+                days: "2-3",
+                crew: 2
+            },
+            "Maintenance Service": {
+                labor: 150,
+                days: "1",
+                crew: 1
+            }
+        },
+        materials: {
+            "AC Unit": { price: 2500, unit: "each" },
+            "Ducting (linear ft)": { price: 8, unit: "ft" },
+            "Thermostat": { price: 120, unit: "each" },
+            "Vent Cover": { price: 25, unit: "each" }
+        }
+    },
+    roofing: {
+        projects: {
+            "Shingle Replacement": {
+                labor: 2500,
+                days: "2-3",
+                crew: 3
+            },
+            "Roof Repair": {
+                labor: 800,
+                days: "1",
+                crew: 2
+            },
+            "Gutter Installation": {
+                labor: 1200,
+                days: "1-2",
+                crew: 2
+            }
+        },
+        materials: {
+            "Shingles (sq ft)": { price: 1.25, unit: "sq ft" },
+            "Flashing (linear ft)": { price: 3.50, unit: "ft" },
+            "Gutter (linear ft)": { price: 6, unit: "ft" },
+            "Downspout": { price: 25, unit: "each" }
+        }
+    },
+    concrete: {
+        projects: {
+            "Patio Installation": {
+                labor: 1800,
+                days: "2-3",
+                crew: 3
+            },
+            "Sidewalk Repair": {
+                labor: 1200,
+                days: "1-2",
+                crew: 2
+            },
+            "Driveway Resurfacing": {
+                labor: 2500,
+                days: "3-4",
+                crew: 3
+            }
+        },
+        materials: {
+            "Concrete (sq yd)": { price: 120, unit: "sq yd" },
+            "Reinforcement Mesh": { price: 1.25, unit: "sq ft" },
+            "Sealer (gallon)": { price: 35, unit: "gallon" },
+            "Form Boards": { price: 8, unit: "each" }
+        }
+    },
+    basement: {
+        projects: {
+            "Waterproofing": {
+                labor: 3500,
+                days: "3-5",
+                crew: 3
+            },
+            "Finishing": {
+                labor: 5000,
+                days: "5-7",
+                crew: 3
+            },
+            "Egress Window": {
+                labor: 1800,
+                days: "2",
+                crew: 2
+            }
+        },
+        materials: {
+            "Drywall (sheet)": { price: 12, unit: "sheet" },
+            "Insulation (sq ft)": { price: 0.75, unit: "sq ft" },
+            "Flooring (sq ft)": { price: 3.50, unit: "sq ft" },
+            "Egress Window": { price: 850, unit: "each" }
+        }
+    },
+    glass: {
+        projects: {
+            "Window Replacement": {
+                labor: 250,
+                days: "1",
+                crew: 1
+            },
+            "Mirror Installation": {
+                labor: 150,
+                days: "1",
+                crew: 1
+            },
+            "Shower Door Installation": {
+                labor: 300,
+                days: "1",
+                crew: 1
+            }
+        },
+        materials: {
+            "Window Pane": { price: 120, unit: "each" },
+            "Mirror": { price: 85, unit: "each" },
+            "Shower Glass": { price: 350, unit: "each" },
+            "Glass Shelf": { price: 65, unit: "each" }
+        }
+    },
+    decking: {
+        projects: {
+            "New Deck Construction": {
+                labor: 3500,
+                days: "4-5",
+                crew: 3
+            },
+            "Deck Repair": {
+                labor: 1200,
+                days: "2-3",
+                crew: 2
+            },
+            "Stair Installation": {
+                labor: 800,
+                days: "1-2",
+                crew: 2
+            }
+        },
+        materials: {
+            "Deck Board (linear ft)": { price: 3.25, unit: "ft" },
+            "Post": { price: 45, unit: "each" },
+            "Railings (linear ft)": { price: 12, unit: "ft" },
+            "Hardware Kit": { price: 85, unit: "kit" }
+        }
+    },
+    misc: {
+        projects: {
+            "Drywall Repair": {
+                labor: 400,
+                days: "1",
+                crew: 1
+            },
+            "Painting Service": {
+                labor: 800,
+                days: "1-2",
+                crew: 2
+            },
+            "General Handyman": {
+                labor: 65,
+                days: "1",
+                crew: 1
+            }
+        },
+        materials: {
+            "Drywall (sheet)": { price: 12, unit: "sheet" },
+            "Paint (gallon)": { price: 35, unit: "gallon" },
+            "Trim (linear ft)": { price: 2.25, unit: "ft" },
+            "Hardware": { price: 5, unit: "each" }
+        }
+    }
 };
 
 // DOM elements
@@ -189,10 +488,9 @@ function updateStats() {
     
     const totalValue = filtered.reduce((sum, estimate) => {
         const materialsTotal = calculateMaterialsTotal(estimate.materials);
-        const labor = estimate.laborCost || 0;
-        const discountAmount = (estimate.discount || 0) * (materialsTotal + labor) / 100;
-        const fees = estimate.fees || 0;
-        return sum + (materialsTotal + labor + fees) - discountAmount;
+        const subtotal = materialsTotal + (estimate.laborCost || 0) + (estimate.fees || 0);
+        const discountAmount = (estimate.discount || 0) * subtotal / 100;
+        return sum + (subtotal - discountAmount);
     }, 0);
     
     totalValueEl.textContent = formatMoney(totalValue);
@@ -205,10 +503,9 @@ function updateStats() {
     
     const monthlyValue = currentMonthEstimates.reduce((sum, estimate) => {
         const materialsTotal = calculateMaterialsTotal(estimate.materials);
-        const labor = estimate.laborCost || 0;
-        const discountAmount = (estimate.discount || 0) * (materialsTotal + labor) / 100;
-        const fees = estimate.fees || 0;
-        return sum + (materialsTotal + labor + fees) - discountAmount;
+        const subtotal = materialsTotal + (estimate.laborCost || 0) + (estimate.fees || 0);
+        const discountAmount = (estimate.discount || 0) * subtotal / 100;
+        return sum + (subtotal - discountAmount);
     }, 0);
     
     document.getElementById('monthly-value').textContent = formatMoney(monthlyValue);
@@ -484,10 +781,11 @@ function saveEstimate() {
         timestamp: new Date().toISOString()
     };
     
-    // Calculate total
+    // Calculate total with discount applied after fees
     const materialsTotal = calculateMaterialsTotal(newEstimate.materials);
-    const discountAmount = (newEstimate.discount || 0) * (materialsTotal + newEstimate.laborCost) / 100;
-    newEstimate.total = (materialsTotal + newEstimate.laborCost + newEstimate.fees) - discountAmount;
+    const subtotal = materialsTotal + newEstimate.laborCost + newEstimate.fees;
+    const discountAmount = (newEstimate.discount || 0) * subtotal / 100;
+    newEstimate.total = subtotal - discountAmount;
     
     // Add to estimates array
     const editIndex = saveEstimateBtn.dataset.editIndex;
