@@ -677,13 +677,16 @@ function validateStep(nextStep) {
                 return false;
             }
         }
+    } else if (nextStep === 'step-3') {
+        if (Object.keys(currentProjects).length === 0) {
+            alert('Please select at least one project');
+            return false;
+        }
     }
     return true;
 }
 
 // Show projects for selected categories
-// Replace the entire showProjects function with this:
-// Replace the entire showProjects function with this:
 function showProjects() {
     projectSelection.innerHTML = '<h3>Select Project Types</h3>';
     materialSelection.innerHTML = '';
@@ -771,34 +774,7 @@ function showProjects() {
     });
 }
 
-    // Keep the button click functionality too
-    document.querySelectorAll('.select-project').forEach(button => {
-        button.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const category = e.target.dataset.category;
-            const project = e.target.dataset.project;
-            const projectDiv = e.target.closest('.project-option');
-            
-            if (currentProjects[category] === project) {
-                delete currentProjects[category];
-                e.target.textContent = 'Select';
-                e.target.classList.remove('selected');
-                projectDiv.classList.remove('selected-project');
-            } else {
-                currentProjects[category] = project;
-                e.target.textContent = 'Selected';
-                e.target.classList.add('selected');
-                projectDiv.classList.add('selected-project');
-            }
-            
-            // Show materials when project is selected
-            if (Object.keys(currentProjects).length > 0) {
-                showMaterials();
-            }
-        });
-    });
-}
-// Show materials for selected projects
+   // Show materials for selected projects
 function showMaterials() {
     materialSelection.innerHTML = '<h3>Select Materials</h3>';
     selectedMaterials = {};
@@ -921,13 +897,19 @@ function saveEstimate() {
         totalWorkers += projectData.crew || 1;
     });
 
+    // Check if we have an edited labor cost
+    const editLaborInput = document.getElementById('edit-labor-cost');
+    if (editLaborInput) {
+        totalLabor = parseFloat(editLaborInput.value) || totalLabor;
+    }
+
     // Create new estimate
     const newEstimate = {
         clientName: document.getElementById('client-name').value.trim(),
         clientEmail: document.getElementById('client-email').value.trim(),
         clientPhone: document.getElementById('client-phone').value.trim(),
         clientLocation: document.getElementById('client-location').value.trim(),
-        projectName: `${document.getElementById('client-name').value.trim()} - ${Object.values(currentProjects).join(', ')}`,
+        projectName: `${Object.values(currentProjects).join(', ')}`,
         categories: [...currentCategories],
         projects: {...currentProjects},
         laborCost: totalLabor,
@@ -939,7 +921,7 @@ function saveEstimate() {
         timestamp: new Date().toISOString()
     };
     
-    // Calculate total with fees added first, then discount applied
+    // Calculate total
     const materialsTotal = calculateMaterialsTotal(newEstimate.materials);
     const labor = newEstimate.laborCost || 0;
     const subtotal = materialsTotal + labor;
