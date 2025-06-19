@@ -444,9 +444,10 @@ function loadEstimates(searchTerm = '', sortBy = 'date-newest') {
     filteredEstimates.forEach((estimate, index) => {
         const materialsTotal = calculateMaterialsTotal(estimate.materials);
         const labor = estimate.laborCost || 0;
-        const discountAmount = (estimate.discount || 0) * (materialsTotal + labor) / 100;
-        const fees = estimate.fees || 0;
-        const finalTotal = (materialsTotal + labor + fees) - discountAmount;
+        const subtotal = materialsTotal + labor;
+        const totalWithFees = subtotal + (estimate.fees || 0);
+        const discountAmount = (estimate.discount || 0) * totalWithFees / 100;
+        const finalTotal = totalWithFees - discountAmount;
         
         const card = document.createElement("div");
         card.className = "quote-card";
@@ -873,8 +874,9 @@ function saveEstimate() {
     
     // Calculate total with fees added first, then discount applied
     const materialsTotal = calculateMaterialsTotal(newEstimate.materials);
-    const subtotal = materialsTotal + newEstimate.laborCost;
-    const totalWithFees = subtotal + newEstimate.fees;
+    const labor = newEstimate.laborCost || 0;
+    const subtotal = materialsTotal + labor;
+    const totalWithFees = subtotal + (newEstimate.fees || 0);
     const discountAmount = (newEstimate.discount || 0) * totalWithFees / 100;
     newEstimate.total = totalWithFees - discountAmount;
     
@@ -965,8 +967,8 @@ window.editEstimate = function(index) {
     document.getElementById('project-fees').value = estimate.fees || 0;
     
     // Set categories and projects
-    currentCategories = estimate.categories || [estimate.category];
-    currentProjects = estimate.projects || { [estimate.category]: estimate.projectType };
+    currentCategories = estimate.categories || [];
+    currentProjects = estimate.projects || {};
     
     // Highlight selected category buttons
     document.querySelectorAll('.category-btn').forEach(btn => {
@@ -995,7 +997,8 @@ window.editEstimate = function(index) {
         });
     }
     
-    // Open modal at materials step
+    // Open modal and show materials step
+    estimateModal.classList.add('active');
     estimateModal.classList.remove('hidden');
     showStep('step-3');
     
