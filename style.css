@@ -68,6 +68,46 @@ body {
 }
 
 .project-option {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    transition: all 0.2s ease;
+}
+
+.project-option:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+
+.project-option h4 {
+    color: var(--primary);
+    margin-bottom: 5px;
+}
+
+.project-option p {
+    font-size: 14px;
+    color: var(--text-light);
+    margin: 5px 0;
+}
+
+.project-option.selected-project {
+    border: 2px solid var(--primary);
+    background-color: var(--primary-lightest);
+}
+
+.select-project {
+    margin-top: 10px;
+    width: 100%;
+}
+
+.select-project.selected {
+    background-color: var(--primary);
+    color: white;
+}
+
+.project-option {
     cursor: pointer;
     transition: all 0.2s ease;
     position: relative;

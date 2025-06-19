@@ -399,18 +399,34 @@ function init() {
     updateStats();
 }
 
+// Auto-format phone number
+document.getElementById('client-phone').addEventListener('input', function(e) {
+    const input = e.target.value.replace(/\D/g, '').substring(0, 10);
+    const areaCode = input.substring(0, 3);
+    const middle = input.substring(3, 6);
+    const last = input.substring(6, 10);
+    
+    if (input.length > 6) {
+        e.target.value = `${areaCode}-${middle}-${last}`;
+    } else if (input.length > 3) {
+        e.target.value = `${areaCode}-${middle}`;
+    } else if (input.length > 0) {
+        e.target.value = `${areaCode}`;
+    }
+});
+
 // Load estimates from localStorage
-function loadEstimates(searchTerm = '', sortBy = 'date-newest') {
+function loadEstimates(searchTerm = '', sortBy = 'date-newest', monthFilter = 'all') {
     filteredEstimates = [...estimates];
     
-    // Apply search filter if term exists
-    if (searchTerm) {
-        const term = searchTerm.toLowerCase();
-        filteredEstimates = filteredEstimates.filter(estimate => 
-            (estimate.clientName && estimate.clientName.toLowerCase().includes(term)) ||
-            (estimate.projectName && estimate.projectName.toLowerCase().includes(term)) ||
-            (estimate.clientLocation && estimate.clientLocation.toLowerCase().includes(term))
-        );
+    // Apply month filter if not 'all'
+    if (monthFilter !== 'all') {
+        const now = new Date();
+        filteredEstimates = filteredEstimates.filter(estimate => {
+            const date = new Date(estimate.timestamp);
+            return date.getMonth() === parseInt(monthFilter) && 
+                   date.getFullYear() === now.getFullYear();
+        });
     }
     
     // Apply sorting
@@ -635,9 +651,13 @@ function setupEventListeners() {
     saveEstimateBtn.addEventListener('click', saveEstimate);
     
     // Search functionality
-    searchButton.addEventListener('click', () => {
-        loadEstimates(searchInput.value.trim(), sortSelect.value);
-    });
+  searchButton.addEventListener('click', () => {
+    loadEstimates(searchInput.value.trim(), sortSelect.value, monthSelect.value);
+});
+
+monthSelect.addEventListener('change', () => {
+    loadEstimates(searchInput.value.trim(), sortSelect.value, monthSelect.value);
+});
     
     resetButton.addEventListener('click', () => {
         searchInput.value = '';
@@ -687,7 +707,6 @@ function validateStep(nextStep) {
 }
 
 // Show projects for selected categories
-// Replace the entire showProjects function with this:
 function showProjects() {
     projectSelection.innerHTML = '<h3>Select Project Types</h3>';
     
@@ -744,7 +763,6 @@ function showProjects() {
         }
     });
 }
-
    // Show materials for selected projects
 function showMaterials() {
     materialSelection.innerHTML = '<h3>Select Materials</h3>';
