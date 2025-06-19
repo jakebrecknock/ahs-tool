@@ -429,6 +429,52 @@ nav button:hover {
     border-top: 1px solid var(--light-gray);
 }
 
+body {
+    background-color: #f5ebe0; /* Cream color */
+    color: #212529; /* Dark color */
+}
+
+header {
+    background-color: #e63946; /* Primary red color */
+    color: white;
+    padding: 20px;
+    border-radius: 8px 8px 0 0;
+    margin-bottom: 20px;
+}
+
+.btn-next, #saveEstimateBtn, #editEstimateBtn, #exportEstimateBtn {
+    background-color: #e63946;
+    color: white;
+}
+
+.btn-next:hover, #saveEstimateBtn:hover, #editEstimateBtn:hover, #exportEstimateBtn:hover {
+    background-color: #c1121f; /* Darker red */
+}
+
+.estimate-card {
+    background-color: white;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.estimate-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.category-card.selected {
+    background-color: rgba(230, 57, 70, 0.1);
+    border-color: #e63946;
+}
+
+.modal-content {
+    background-color: white;
+    border-radius: 8px;
+}
+
 /* Modal Styles */
 .modal {
     display: none;

@@ -1,18 +1,3 @@
-// Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyC37V1uqBjG4kEyH81vzNQ-eGfTz5XZrc8",
-  authDomain: "ahs-tool.firebaseapp.com",
-  projectId: "ahs-tool",
-  storageBucket: "ahs-tool.firebasestorage.app",
-  messagingSenderId: "613725752549",
-  appId: "1:613725752549:web:6fcdb627422efbc68b580c",
-  measurementId: "G-X90TBYBYWD"
-};
-
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
-
 // DOM Elements
 const dashboardView = document.getElementById('dashboardView');
 const newEstimateView = document.getElementById('newEstimateView');

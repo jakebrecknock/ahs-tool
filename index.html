@@ -69,8 +69,8 @@
                         </div>
                         <div class="form-group">
                             <label for="customerPhone">Phone Number</label>
-                            <input type="tel" id="customerPhone" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" required>
-                            <small>Format: 123-456-7890</small>
+                            <input type="tel" id="customerPhone" required>
+                            <small>Format: (123) 456-7890</small>
                         </div>
                         <div class="form-group">
                             <label for="jobLocation">Job Location</label>
@@ -154,7 +154,22 @@
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <script src="firebase-config.js"></script>
-    <script src="script.js"></script>
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC37V1uqBjG4kEyH81vzNQ-eGfTz5XZrc8",
+            authDomain: "ahs-tool.firebaseapp.com",
+            projectId: "ahs-tool",
+            storageBucket: "ahs-tool.appspot.com",
+            messagingSenderId: "613725752549",
+            appId: "1:613725752549:web:6fcdb627422efbc68b580c",
+            measurementId: "G-X90TBYBYWD"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+    </script>
+    <script src="app.js"></script>
 </body>
 </html>
