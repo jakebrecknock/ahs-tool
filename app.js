@@ -910,14 +910,7 @@ function saveEstimate() {
     });
 
     // Get project data
- let totalLabor = parseFloat(document.getElementById('edit-labor-cost')?.value) || 0;
-if (!totalLabor) {
-    // Fallback to calculated labor if edit field wasn't shown
-    Object.entries(currentProjects).forEach(([category, projectName]) => {
-        const projectData = pricingData[category].projects[projectName];
-        totalLabor += projectData.labor;
-    });
-};
+    let totalLabor = 0;
     let totalDays = 0;
     let totalWorkers = 0;
     
