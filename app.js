@@ -777,7 +777,7 @@ function showProjects() {
    // Show materials for selected projects
 function showMaterials() {
     materialSelection.innerHTML = '<h3>Select Materials</h3>';
-    selectedMaterials = {};
+    // Don't reset selectedMaterials here - we want to preserve any existing selections
 
     currentCategories.forEach(category => {
         if (currentProjects[category]) {
@@ -792,23 +792,27 @@ function showMaterials() {
                 const materialDiv = document.createElement('div');
                 materialDiv.className = 'material-option';
                 
+                // Check if this material is already selected
+                const isSelected = selectedMaterials[materialName] !== undefined;
+                const quantity = isSelected ? selectedMaterials[materialName].quantity : 1;
+                
                 materialDiv.innerHTML = `
                     <div class="material-label">
-                        <input type="checkbox" data-material="${materialName}" data-price="${materialData.price}" data-unit="${materialData.unit}">
+                        <input type="checkbox" data-material="${materialName}" data-price="${materialData.price}" data-unit="${materialData.unit}"
+                            ${isSelected ? 'checked' : ''}>
                         ${materialName} - ${formatMoney(materialData.price)}/${materialData.unit}
                     </div>
-                    <input type="number" min="1" value="1" class="material-quantity" style="display: none;">
+                    <input type="number" min="1" value="${quantity}" class="material-quantity" 
+                        style="display: ${isSelected ? 'inline-block' : 'none'};">
                 `;
                 materialSelection.appendChild(materialDiv);
 
-                // Show quantity input when checkbox is checked
                 const checkbox = materialDiv.querySelector('input[type="checkbox"]');
                 const quantityInput = materialDiv.querySelector('.material-quantity');
                 
                 checkbox.addEventListener('change', () => {
                     quantityInput.style.display = checkbox.checked ? 'inline-block' : 'none';
                     
-                    // Update selected materials
                     if (checkbox.checked) {
                         selectedMaterials[materialName] = {
                             price: parseFloat(checkbox.dataset.price),
@@ -820,7 +824,6 @@ function showMaterials() {
                     }
                 });
                 
-                // Update quantity when changed
                 quantityInput.addEventListener('change', () => {
                     if (checkbox.checked) {
                         selectedMaterials[materialName] = {
@@ -871,18 +874,22 @@ function addCustomMaterial() {
 // Save the estimate
 function saveEstimate() {
     // Get selected materials from checkboxes
-    document.querySelectorAll('#material-selection input[type="checkbox"]:checked').forEach(checkbox => {
+    document.querySelectorAll('#material-selection input[type="checkbox"]').forEach(checkbox => {
         const materialName = checkbox.dataset.material;
-        const materialPrice = parseFloat(checkbox.dataset.price);
-        const quantityInput = checkbox.closest('.material-option').querySelector('.material-quantity');
-        
-        let quantity = parseFloat(quantityInput.value) || 1;
-        
-        selectedMaterials[materialName] = {
-            price: materialPrice,
-            quantity: quantity,
-            unit: checkbox.dataset.unit || 'each'
-        };
+        if (checkbox.checked) {
+            const materialPrice = parseFloat(checkbox.dataset.price);
+            const quantityInput = checkbox.closest('.material-option').querySelector('.material-quantity');
+            
+            let quantity = parseFloat(quantityInput.value) || 1;
+            
+            selectedMaterials[materialName] = {
+                price: materialPrice,
+                quantity: quantity,
+                unit: checkbox.dataset.unit || 'each'
+            };
+        } else {
+            delete selectedMaterials[materialName];
+        }
     });
 
     // Get project data
@@ -971,7 +978,7 @@ function resetForm() {
     
     currentCategories = [];
     currentProjects = {};
-    selectedMaterials = {};
+    selectedMaterials = {}; // Reset materials here instead of in showMaterials()
     projectSelection.innerHTML = '';
     materialSelection.innerHTML = '';
     document.querySelector('#step-2 .next-step').disabled = true;
@@ -1078,12 +1085,12 @@ window.deleteEstimate = function(index) {
 
 // Generate PDF
 window.generatePDF = function(index) {
-    const estimate = filteredEstimates[index];
-    const materialsTotal = calculateMaterialsTotal(estimate.materials);
-    const labor = estimate.laborCost || 0;
-    const discountAmount = (estimate.discount || 0) * (materialsTotal + labor) / 100;
-    const fees = estimate.fees || 0;
-    const finalTotal = (materialsTotal + labor + fees) - discountAmount;
+   const materialsTotal = calculateMaterialsTotal(newEstimate.materials);
+    const labor = newEstimate.laborCost || 0;
+    const subtotal = materialsTotal + labor;
+    const totalWithFees = subtotal + (newEstimate.fees || 0);
+    const discountAmount = (newEstimate.discount || 0) * totalWithFees / 100;
+    newEstimate.total = totalWithFees - discountAmount;
     
     const htmlContent = `
         <!DOCTYPE html>
