@@ -297,6 +297,41 @@ const pricingData = {
             "Concrete Steps": { price: 350, unit: "step" }
         }
     },
+    roofing: {
+        projects: {
+            "Shingle Roof Replacement": {
+                labor: 24400,
+                days: "3-5",
+                crew: 3
+            },
+            "Tile Roof Replacement": {
+                labor: 36600,
+                days: "5-7",
+                crew: 3
+            },
+            "Roof Repair": {
+                labor: 2440,
+                days: "1-2",
+                crew: 2
+            },
+            "Gutter Installation": {
+                labor: 1220,
+                days: "1",
+                crew: 2
+            }
+        },
+        materials: {
+            "Asphalt Shingles": { price: 3.50, unit: "sq ft" },
+            "Architectural Shingles": { price: 5, unit: "sq ft" },
+            "Clay Tile": { price: 15, unit: "sq ft" },
+            "Concrete Tile": { price: 10, unit: "sq ft" },
+            "Metal Roofing": { price: 12, unit: "sq ft" },
+            "Underlayment": { price: 1.50, unit: "sq ft" },
+            "Flashing": { price: 8, unit: "linear foot" },
+            "Gutters": { price: 10, unit: "linear foot" },
+            "Downspouts": { price: 8, unit: "linear foot" }
+        }
+    },
     misc: {
         projects: {
             "Door Replacement": {
@@ -658,7 +693,7 @@ function showProjects() {
         categoryHeader.style.color = 'var(--primary)';
         projectSelection.appendChild(categoryHeader);
 
-        const projects = pricingData[category].projects;
+        const projects = pricingData[category]?.projects || {};
         for (const [projectName, projectData] of Object.entries(projects)) {
             const projectDiv = document.createElement('div');
             projectDiv.className = 'project-option';
@@ -686,6 +721,11 @@ function showProjects() {
                 currentProjects[category] = project;
                 e.target.textContent = 'Selected';
             }
+            
+            // Show materials when project is selected
+            if (Object.keys(currentProjects).length > 0) {
+                showMaterials();
+            }
         });
     });
 }
@@ -703,14 +743,14 @@ function showMaterials() {
             categoryHeader.style.color = 'var(--primary)';
             materialSelection.appendChild(categoryHeader);
 
-            const materials = pricingData[category].materials;
+            const materials = pricingData[category]?.materials || {};
             for (const [materialName, materialData] of Object.entries(materials)) {
                 const materialDiv = document.createElement('div');
                 materialDiv.className = 'material-option';
                 
                 materialDiv.innerHTML = `
                     <div class="material-label">
-                        <input type="checkbox" data-material="${materialName}" data-price="${materialData.price}">
+                        <input type="checkbox" data-material="${materialName}" data-price="${materialData.price}" data-unit="${materialData.unit}">
                         ${materialName} - ${formatMoney(materialData.price)}/${materialData.unit}
                     </div>
                     <input type="number" min="1" value="1" class="material-quantity" style="display: none;">
@@ -723,6 +763,28 @@ function showMaterials() {
                 
                 checkbox.addEventListener('change', () => {
                     quantityInput.style.display = checkbox.checked ? 'inline-block' : 'none';
+                    
+                    // Update selected materials
+                    if (checkbox.checked) {
+                        selectedMaterials[materialName] = {
+                            price: parseFloat(checkbox.dataset.price),
+                            quantity: parseFloat(quantityInput.value) || 1,
+                            unit: checkbox.dataset.unit
+                        };
+                    } else {
+                        delete selectedMaterials[materialName];
+                    }
+                });
+                
+                // Update quantity when changed
+                quantityInput.addEventListener('change', () => {
+                    if (checkbox.checked) {
+                        selectedMaterials[materialName] = {
+                            price: parseFloat(checkbox.dataset.price),
+                            quantity: parseFloat(quantityInput.value) || 1,
+                            unit: checkbox.dataset.unit
+                        };
+                    }
                 });
             }
         }
@@ -764,7 +826,7 @@ function addCustomMaterial() {
 
 // Save the estimate
 function saveEstimate() {
-    // Get selected materials
+    // Get selected materials from checkboxes
     document.querySelectorAll('#material-selection input[type="checkbox"]:checked').forEach(checkbox => {
         const materialName = checkbox.dataset.material;
         const materialPrice = parseFloat(checkbox.dataset.price);
@@ -775,7 +837,7 @@ function saveEstimate() {
         selectedMaterials[materialName] = {
             price: materialPrice,
             quantity: quantity,
-            unit: 'each' // Default unit for selected materials
+            unit: checkbox.dataset.unit || 'each'
         };
     });
 
