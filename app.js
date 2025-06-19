@@ -682,6 +682,8 @@ function validateStep(nextStep) {
 }
 
 // Show projects for selected categories
+// Replace the entire showProjects function with this:
+// Replace the entire showProjects function with this:
 function showProjects() {
     projectSelection.innerHTML = '<h3>Select Project Types</h3>';
     materialSelection.innerHTML = '';
@@ -698,29 +700,67 @@ function showProjects() {
         for (const [projectName, projectData] of Object.entries(projects)) {
             const projectDiv = document.createElement('div');
             projectDiv.className = 'project-option';
+            if (currentProjects[category] === projectName) {
+                projectDiv.classList.add('selected-project');
+            }
             projectDiv.innerHTML = `
                 <h4>${projectName}</h4>
                 <p>Labor: ${formatMoney(projectData.labor)}</p>
                 <p>Duration: ${projectData.days} days | Crew: ${projectData.crew}</p>
-                <button class="button button-primary select-project" data-category="${category}" data-project="${projectName}">
+                <button class="button button-primary select-project ${currentProjects[category] === projectName ? 'selected' : ''}" 
+                    data-category="${category}" data-project="${projectName}">
                     ${currentProjects[category] === projectName ? 'Selected' : 'Select'}
                 </button>
             `;
             projectSelection.appendChild(projectDiv);
+
+            // Make entire project div clickable
+            projectDiv.addEventListener('click', (e) => {
+                // Don't trigger if clicking on the button itself
+                if (e.target.tagName === 'BUTTON') return;
+                
+                const category = projectDiv.querySelector('button').dataset.category;
+                const project = projectDiv.querySelector('button').dataset.project;
+                const button = projectDiv.querySelector('button');
+                
+                if (currentProjects[category] === project) {
+                    delete currentProjects[category];
+                    button.textContent = 'Select';
+                    button.classList.remove('selected');
+                    projectDiv.classList.remove('selected-project');
+                } else {
+                    currentProjects[category] = project;
+                    button.textContent = 'Selected';
+                    button.classList.add('selected');
+                    projectDiv.classList.add('selected-project');
+                }
+                
+                // Show materials when project is selected
+                if (Object.keys(currentProjects).length > 0) {
+                    showMaterials();
+                }
+            });
         }
     });
 
+    // Keep the button click functionality too
     document.querySelectorAll('.select-project').forEach(button => {
         button.addEventListener('click', (e) => {
+            e.stopPropagation();
             const category = e.target.dataset.category;
             const project = e.target.dataset.project;
+            const projectDiv = e.target.closest('.project-option');
             
             if (currentProjects[category] === project) {
                 delete currentProjects[category];
                 e.target.textContent = 'Select';
+                e.target.classList.remove('selected');
+                projectDiv.classList.remove('selected-project');
             } else {
                 currentProjects[category] = project;
                 e.target.textContent = 'Selected';
+                e.target.classList.add('selected');
+                projectDiv.classList.add('selected-project');
             }
             
             // Show materials when project is selected
@@ -731,6 +771,33 @@ function showProjects() {
     });
 }
 
+    // Keep the button click functionality too
+    document.querySelectorAll('.select-project').forEach(button => {
+        button.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const category = e.target.dataset.category;
+            const project = e.target.dataset.project;
+            const projectDiv = e.target.closest('.project-option');
+            
+            if (currentProjects[category] === project) {
+                delete currentProjects[category];
+                e.target.textContent = 'Select';
+                e.target.classList.remove('selected');
+                projectDiv.classList.remove('selected-project');
+            } else {
+                currentProjects[category] = project;
+                e.target.textContent = 'Selected';
+                e.target.classList.add('selected');
+                projectDiv.classList.add('selected-project');
+            }
+            
+            // Show materials when project is selected
+            if (Object.keys(currentProjects).length > 0) {
+                showMaterials();
+            }
+        });
+    });
+}
 // Show materials for selected projects
 function showMaterials() {
     materialSelection.innerHTML = '<h3>Select Materials</h3>';
@@ -843,7 +910,14 @@ function saveEstimate() {
     });
 
     // Get project data
-    let totalLabor = 0;
+ let totalLabor = parseFloat(document.getElementById('edit-labor-cost')?.value) || 0;
+if (!totalLabor) {
+    // Fallback to calculated labor if edit field wasn't shown
+    Object.entries(currentProjects).forEach(([category, projectName]) => {
+        const projectData = pricingData[category].projects[projectName];
+        totalLabor += projectData.labor;
+    });
+};
     let totalDays = 0;
     let totalWorkers = 0;
     
@@ -953,6 +1027,8 @@ function formatMoney(num) {
 }
 
 // Edit estimate
+// Replace the entire editEstimate function with this:
+// Replace the entire editEstimate function with this:
 window.editEstimate = function(index) {
     const estimate = estimates[index];
     
@@ -996,6 +1072,15 @@ window.editEstimate = function(index) {
             }
         });
     }
+    
+    // Add labor cost editing field
+    const laborField = document.createElement('div');
+    laborField.className = 'form-group';
+    laborField.innerHTML = `
+        <label><i class="fas fa-dollar-sign"></i> Labor Cost</label>
+        <input type="number" id="edit-labor-cost" min="0" step="0.01" value="${estimate.laborCost || 0}">
+    `;
+    document.getElementById('step-4').insertBefore(laborField, document.getElementById('step-4').firstChild);
     
     // Open modal and show materials step
     estimateModal.classList.add('active');
