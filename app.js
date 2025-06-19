@@ -687,10 +687,9 @@ function validateStep(nextStep) {
 }
 
 // Show projects for selected categories
+// Replace the entire showProjects function with this:
 function showProjects() {
     projectSelection.innerHTML = '<h3>Select Project Types</h3>';
-    materialSelection.innerHTML = '';
-    selectedMaterials = {};
     
     currentCategories.forEach(category => {
         const categoryHeader = document.createElement('h4');
@@ -706,6 +705,7 @@ function showProjects() {
             if (currentProjects[category] === projectName) {
                 projectDiv.classList.add('selected-project');
             }
+            
             projectDiv.innerHTML = `
                 <h4>${projectName}</h4>
                 <p>Labor: ${formatMoney(projectData.labor)}</p>
@@ -717,24 +717,22 @@ function showProjects() {
             `;
             projectSelection.appendChild(projectDiv);
 
-            // Make entire project div clickable
-            projectDiv.addEventListener('click', (e) => {
-                // Don't trigger if clicking on the button itself
-                if (e.target.tagName === 'BUTTON') return;
-                
-                const category = projectDiv.querySelector('button').dataset.category;
-                const project = projectDiv.querySelector('button').dataset.project;
-                const button = projectDiv.querySelector('button');
+            // Add click handler for the button
+            const button = projectDiv.querySelector('.select-project');
+            button.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const category = e.target.dataset.category;
+                const project = e.target.dataset.project;
                 
                 if (currentProjects[category] === project) {
                     delete currentProjects[category];
-                    button.textContent = 'Select';
-                    button.classList.remove('selected');
+                    e.target.textContent = 'Select';
+                    e.target.classList.remove('selected');
                     projectDiv.classList.remove('selected-project');
                 } else {
                     currentProjects[category] = project;
-                    button.textContent = 'Selected';
-                    button.classList.add('selected');
+                    e.target.textContent = 'Selected';
+                    e.target.classList.add('selected');
                     projectDiv.classList.add('selected-project');
                 }
                 
@@ -744,33 +742,6 @@ function showProjects() {
                 }
             });
         }
-    });
-
-    // Keep the button click functionality too
-    document.querySelectorAll('.select-project').forEach(button => {
-        button.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const category = e.target.dataset.category;
-            const project = e.target.dataset.project;
-            const projectDiv = e.target.closest('.project-option');
-            
-            if (currentProjects[category] === project) {
-                delete currentProjects[category];
-                e.target.textContent = 'Select';
-                e.target.classList.remove('selected');
-                projectDiv.classList.remove('selected-project');
-            } else {
-                currentProjects[category] = project;
-                e.target.textContent = 'Selected';
-                e.target.classList.add('selected');
-                projectDiv.classList.add('selected-project');
-            }
-            
-            // Show materials when project is selected
-            if (Object.keys(currentProjects).length > 0) {
-                showMaterials();
-            }
-        });
     });
 }
 
@@ -1085,143 +1056,136 @@ window.deleteEstimate = function(index) {
 
 // Generate PDF
 window.generatePDF = function(index) {
-   const materialsTotal = calculateMaterialsTotal(newEstimate.materials);
-    const labor = newEstimate.laborCost || 0;
+    const estimate = filteredEstimates[index] || estimates[index];
+    if (!estimate) return;
+
+    const materialsTotal = calculateMaterialsTotal(estimate.materials);
+    const labor = estimate.laborCost || 0;
     const subtotal = materialsTotal + labor;
-    const totalWithFees = subtotal + (newEstimate.fees || 0);
-    const discountAmount = (newEstimate.discount || 0) * totalWithFees / 100;
-    newEstimate.total = totalWithFees - discountAmount;
+    const totalWithFees = subtotal + (estimate.fees || 0);
+    const discountAmount = (estimate.discount || 0) * totalWithFees / 100;
+    const finalTotal = totalWithFees - discountAmount;
+
+    // Create a temporary div for PDF generation
+    const pdfContainer = document.createElement('div');
+    pdfContainer.style.position = 'absolute';
+    pdfContainer.style.left = '-9999px';
+    pdfContainer.style.width = '800px';
+    pdfContainer.style.padding = '20px';
+    pdfContainer.style.fontFamily = 'Arial, sans-serif';
     
-    const htmlContent = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Estimate #${index}</title>
-            <style>
-                @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap');
-                body { font-family: 'Roboto', sans-serif; padding: 25px; color: #333; line-height: 1.6; }
-                .header { display: flex; justify-content: space-between; margin-bottom: 20px; }
-                .company { color: #B7410E; font-size: 24px; font-weight: 500; }
-                .address { font-size: 14px; color: #666; margin-top: 5px; }
-                .title { font-size: 28px; color: #B7410E; margin: 25px 0; border-bottom: 2px solid #FF7F50; padding-bottom: 10px; }
-                .client-info { margin-bottom: 30px; }
-                .client-info p { margin: 8px 0; }
-                .section-title { background: #FF7F50; color: white; padding: 10px 15px; margin: 25px 0 15px; border-radius: 4px; }
-                table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-                th { background: #f5f5f5; text-align: left; padding: 12px; font-weight: 500; }
-                td { padding: 12px; border-bottom: 1px solid #eee; }
-                .total-row { font-weight: bold; font-size: 1.1em; }
-                .job-details { display: flex; gap: 20px; margin-top: 30px; }
-                .detail-box { border: 1px solid #ddd; padding: 15px; border-radius: 6px; flex: 1; text-align: center; }
-                .footer { margin-top: 50px; font-size: 14px; text-align: center; color: #777; border-top: 1px solid #eee; padding-top: 20px; }
-                .text-center { text-align: center; }
-                .material-name { width: 40%; }
-                .material-numbers { width: 20%; text-align: right; }
-            </style>
-        </head>
-        <body>
-            <div class="header">
-                <div>
-                    <div class="company">ACE Handyman Services</div>
-                    <div class="address">207 N. Harlem Ave., Oak Park IL., 60302</div>
-                </div>
-                <div>Estimate #${index}</div>
-            </div>
-            
-            <h1 class="title">Project Estimate</h1>
-            
-            <div class="client-info">
-                <p><strong>Client:</strong> ${estimate.clientName || "Not specified"}</p>
-                <p><strong>Project:</strong> ${estimate.projectName || "General work"}</p>
-                <p><strong>Location:</strong> ${estimate.clientLocation || "Not specified"}</p>
-                ${estimate.clientEmail ? `<p><strong>Email:</strong> ${estimate.clientEmail}</p>` : ''}
-                ${estimate.clientPhone ? `<p><strong>Phone:</strong> ${formatPhoneNumber(estimate.clientPhone)}</p>` : ''}
-                <p><strong>Date:</strong> ${new Date(estimate.timestamp).toLocaleDateString()}</p>
-            </div>
-            
-            <div class="section-title">Materials</div>
-            <table>
-                <thead>
+    pdfContainer.innerHTML = `
+        <div style="margin-bottom: 20px;">
+            <div style="font-size: 24px; font-weight: bold; color: #B7410E;">ACE Handyman Services</div>
+            <div style="font-size: 14px; color: #666; margin-top: 5px;">207 N. Harlem Ave., Oak Park IL., 60302</div>
+            <div style="margin-top: 15px; font-size: 14px;">Estimate #${index + 1}</div>
+        </div>
+        
+        <h1 style="font-size: 28px; color: #B7410E; margin: 25px 0; border-bottom: 2px solid #FF7F50; padding-bottom: 10px;">Project Estimate</h1>
+        
+        <div style="margin-bottom: 30px;">
+            <p><strong>Client:</strong> ${estimate.clientName || "Not specified"}</p>
+            <p><strong>Project:</strong> ${estimate.projectName || "General work"}</p>
+            <p><strong>Location:</strong> ${estimate.clientLocation || "Not specified"}</p>
+            ${estimate.clientEmail ? `<p><strong>Email:</strong> ${estimate.clientEmail}</p>` : ''}
+            ${estimate.clientPhone ? `<p><strong>Phone:</strong> ${formatPhoneNumber(estimate.clientPhone)}</p>` : ''}
+            <p><strong>Date:</strong> ${new Date(estimate.timestamp).toLocaleDateString()}</p>
+        </div>
+        
+        <h3 style="background: #FF7F50; color: white; padding: 10px 15px; margin: 25px 0 15px; border-radius: 4px;">Materials</h3>
+        <table style="width: 100%; border-collapse: collapse; margin: 15px 0;">
+            <thead>
+                <tr style="background: #f5f5f5;">
+                    <th style="text-align: left; padding: 12px; font-weight: 500; width: 40%;">Item</th>
+                    <th style="text-align: right; padding: 12px; font-weight: 500; width: 15%;">Qty</th>
+                    <th style="text-align: right; padding: 12px; font-weight: 500; width: 20%;">Unit Price</th>
+                    <th style="text-align: right; padding: 12px; font-weight: 500; width: 25%;">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${estimate.materials ? Object.entries(estimate.materials).map(([name, item]) => `
                     <tr>
-                        <th class="material-name">Item</th>
-                        <th class="material-numbers">Qty</th>
-                        <th class="material-numbers">Unit Price</th>
-                        <th class="material-numbers">Total</th>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee;">${name}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">${item.quantity}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">${formatMoney(item.price)}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">${formatMoney(item.price * item.quantity)}</td>
                     </tr>
-                </thead>
-                <tbody>
-                    ${estimate.materials ? Object.entries(estimate.materials).map(([name, item]) => `
-                        <tr>
-                            <td>${name}</td>
-                            <td class="material-numbers">${item.quantity}</td>
-                            <td class="material-numbers">${formatMoney(item.price)}</td>
-                            <td class="material-numbers">${formatMoney(item.price * item.quantity)}</td>
-                        </tr>
-                    `).join('') : '<tr><td colspan="4" class="text-center">No materials specified</td></tr>'}
-                </tbody>
-            </table>
-            
-            <div class="section-title">Summary</div>
-            <table>
-                <tr>
-                    <td>Materials Subtotal</td>
-                    <td class="material-numbers">${formatMoney(materialsTotal)}</td>
-                </tr>
-                <tr>
-                    <td>Labor</td>
-                    <td class="material-numbers">${formatMoney(labor)}</td>
-                </tr>
-                ${estimate.discount ? `
-                <tr>
-                    <td>Discount (${estimate.discount}%)</td>
-                    <td class="material-numbers">-${formatMoney(discountAmount)}</td>
-                </tr>` : ''}
-                ${estimate.fees ? `
-                <tr>
-                    <td>Fees</td>
-                    <td class="material-numbers">+${formatMoney(estimate.fees)}</td>
-                </tr>` : ''}
-                <tr class="total-row">
-                    <td>TOTAL ESTIMATE</td>
-                    <td class="material-numbers">${formatMoney(finalTotal)}</td>
-                </tr>
-            </table>
-            
-            <div class="job-details">
-                <div class="detail-box">
-                    <strong>Estimated Duration</strong><br>
-                    ${estimate.days || 1} day${estimate.days !== 1 ? 's' : ''}
-                </div>
-                <div class="detail-box">
-                    <strong>Workers Required</strong><br>
-                    ${estimate.workers || 1}
-                </div>
+                `).join('') : '<tr><td colspan="4" style="text-align: center; padding: 12px;">No materials specified</td></tr>'}
+            </tbody>
+        </table>
+        
+        <h3 style="background: #FF7F50; color: white; padding: 10px 15px; margin: 25px 0 15px; border-radius: 4px;">Summary</h3>
+        <table style="width: 100%; border-collapse: collapse; margin: 15px 0;">
+            <tr>
+                <td style="padding: 12px; border-bottom: 1px solid #eee;">Materials Subtotal</td>
+                <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">${formatMoney(materialsTotal)}</td>
+            </tr>
+            <tr>
+                <td style="padding: 12px; border-bottom: 1px solid #eee;">Labor</td>
+                <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">${formatMoney(labor)}</td>
+            </tr>
+            ${estimate.discount ? `
+            <tr>
+                <td style="padding: 12px; border-bottom: 1px solid #eee;">Discount (${estimate.discount}%)</td>
+                <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right; color: #c0392b;">-${formatMoney(discountAmount)}</td>
+            </tr>` : ''}
+            ${estimate.fees ? `
+            <tr>
+                <td style="padding: 12px; border-bottom: 1px solid #eee;">Fees</td>
+                <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right; color: #27ae60;">+${formatMoney(estimate.fees)}</td>
+            </tr>` : ''}
+            <tr style="font-weight: bold; font-size: 1.1em;">
+                <td style="padding: 12px; border-top: 1px solid #eee;">TOTAL ESTIMATE</td>
+                <td style="padding: 12px; border-top: 1px solid #eee; text-align: right;">${formatMoney(finalTotal)}</td>
+            </tr>
+        </table>
+        
+        <div style="display: flex; gap: 20px; margin-top: 30px;">
+            <div style="border: 1px solid #ddd; padding: 15px; border-radius: 6px; flex: 1; text-align: center;">
+                <strong>Estimated Duration</strong><br>
+                ${estimate.days || 1} day${estimate.days !== 1 ? 's' : ''}
             </div>
-            
-            <div class="footer">
-                <p>Thank you for choosing ACE Handyman Services!</p>
-                <p>Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
+            <div style="border: 1px solid #ddd; padding: 15px; border-radius: 6px; flex: 1; text-align: center;">
+                <strong>Workers Required</strong><br>
+                ${estimate.workers || 1}
             </div>
-        </body>
-        </html>
+        </div>
+        
+        <div style="margin-top: 50px; font-size: 14px; text-align: center; color: #777; border-top: 1px solid #eee; padding-top: 20px;">
+            <p>Thank you for choosing ACE Handyman Services!</p>
+            <p>Generated on ${new Date().toLocaleDateString()}</p>
+        </div>
     `;
 
-    // Create a Blob with the HTML content
-  const blob = new Blob([htmlContent], { type: 'text/html' });
-  const url = URL.createObjectURL(blob);
-  
-  // Create a download link and trigger it
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `ACE_Estimate_${index}.html`;
-  document.body.appendChild(a);
-  a.click();
-  
-  // Clean up
-  setTimeout(() => {
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }, 100);
+    document.body.appendChild(pdfContainer);
+
+    // Generate PDF
+    html2canvas(pdfContainer).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jspdf.jsPDF({
+            orientation: 'portrait',
+            unit: 'mm'
+        });
+        
+        const imgWidth = 210; // A4 width in mm
+        const pageHeight = 295; // A4 height in mm
+        const imgHeight = canvas.height * imgWidth / canvas.width;
+        let heightLeft = imgHeight;
+        let position = 0;
+        
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+        
+        while (heightLeft >= 0) {
+            position = heightLeft - imgHeight;
+            pdf.addPage();
+            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+        }
+        
+        pdf.save(`ACE_Estimate_${index + 1}.pdf`);
+        document.body.removeChild(pdfContainer);
+    });
 };
 
 // Initialize the app
