@@ -200,6 +200,34 @@ const pricingData = {
             "Full Bath Fixtures": { price: 9000, unit: "each" }
         }
     },
+
+aircon: {
+    projects: {
+        "AC Unit Installation": {
+            labor: 3000,
+            days: "1-2",
+            crew: 2
+        },
+        "AC Unit Replacement": {
+            labor: 2500,
+            days: "1",
+            crew: 2
+        },
+        "AC Maintenance": {
+            labor: 1500,
+            days: "1",
+            crew: 1
+        }
+    },
+    materials: {
+        "Central AC Unit": { price: 3500, unit: "each" },
+        "Window AC Unit": { price: 500, unit: "each" },
+        "Ductwork Installation": { price: 15, unit: "linear foot" },
+        "Thermostat": { price: 200, unit: "each" },
+        "Refrigerant": { price: 120, unit: "lb" }
+    }
+},
+
     glass: {
         projects: {
             "Window Replacement": {
@@ -711,6 +739,9 @@ function showProjects() {
     projectSelection.innerHTML = '<h3>Select Project Types</h3>';
     
     currentCategories.forEach(category => {
+        // Skip if category doesn't exist in pricingData
+        if (!pricingData[category]) return;
+        
         const categoryHeader = document.createElement('h4');
         categoryHeader.textContent = category.charAt(0).toUpperCase() + category.slice(1);
         categoryHeader.style.marginTop = '20px';
