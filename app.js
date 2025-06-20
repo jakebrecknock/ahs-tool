@@ -15,6 +15,9 @@ const editEstimateBtn = document.getElementById('editEstimateBtn');
 const deleteEstimateBtn = document.getElementById('deleteEstimateBtn');
 const exportEstimateBtn = document.getElementById('exportEstimateBtn');
 const modalContent = document.getElementById('modalContent');
+const editFieldsContainer = document.getElementById('editFieldsContainer');
+const saveChangesBtn = document.getElementById('saveChangesBtn');
+let isEditing = false;
 
 const firebaseConfig = {
     apiKey: "AIzaSyC37V1uqBjG4kEyH81vzNQ-eGfTz5XZrc8",
@@ -292,7 +295,50 @@ function setupEventListeners() {
     // Navigation buttons
     dashboardBtn.addEventListener('click', showDashboard);
     newEstimateBtn.addEventListener('click', showNewEstimate);
+    saveChangesBtn.addEventListener('click', saveEstimateChanges);
+
+function saveEstimateChanges() {
+    // Update customer info from edit fields
+    currentEstimate.customer = {
+        name: document.getElementById('editCustomerName').value,
+        email: document.getElementById('editCustomerEmail').value,
+        phone: document.getElementById('editCustomerPhone').value,
+        location: document.getElementById('editJobLocation').value
+    };
     
+    // Update discount
+    currentEstimate.discountPercentage = parseFloat(document.getElementById('editDiscountPercentage').value) || 0;
+    
+    // Recalculate total
+    const laborTotal = currentEstimate.jobs.reduce((sum, job) => sum + job.labor, 0);
+    const materialsTotal = currentEstimate.materials.reduce((sum, mat) => sum + mat.total, 0);
+    const customMaterialsTotal = currentEstimate.customMaterials.reduce((sum, mat) => sum + mat.total, 0);
+    const feesTotal = currentEstimate.fees?.reduce((sum, fee) => sum + fee.amount, 0) || 0;
+    const subtotal = laborTotal + materialsTotal + customMaterialsTotal + feesTotal;
+    const discount = currentEstimate.discountPercentage ? (subtotal * currentEstimate.discountPercentage / 100) : 0;
+    currentEstimate.total = subtotal - discount;
+    
+    // Update timestamp
+    currentEstimate.updatedAt = new Date().toISOString();
+    
+    // Save to Firestore
+    db.collection("estimates").doc(currentEstimate.id).update(currentEstimate)
+        .then(() => {
+            alert('Changes saved successfully!');
+            isEditing = false;
+            editFieldsContainer.style.display = 'none';
+            editEstimateBtn.style.display = 'inline-block';
+            saveChangesBtn.style.display = 'none';
+            exportEstimateBtn.style.display = 'inline-block';
+            deleteEstimateBtn.style.display = 'inline-block';
+            loadEstimates();
+        })
+        .catch(error => {
+            console.error('Error saving changes:', error);
+            alert('Error saving changes. Please try again.');
+        });
+}
+
     // Search functionality
     searchInput.addEventListener('keyup', function(e) {
         if (e.key === 'Enter') {
@@ -400,8 +446,13 @@ function initCategorySelection() {
         categoryCard.className = 'category-card';
         categoryCard.setAttribute('data-category', categoryId);
         categoryCard.innerHTML = `
-            <h3>${category.name}</h3>
-            <p>Click to select</p>
+            <div class="category-icon">
+                ${getCategoryIcon(categoryId)}
+            </div>
+            <div class="category-info">
+                <h3>${category.name}</h3>
+                <p>Click to select</p>
+            </div>
         `;
         
         categoryCard.addEventListener('click', function() {
@@ -411,6 +462,23 @@ function initCategorySelection() {
         
         categorySelection.appendChild(categoryCard);
     }
+}
+
+function getCategoryIcon(categoryId) {
+    const icons = {
+        bathroom: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8 14c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm5.91-8.24c.25-.61-.21-1.24-.83-1.24-.37 0-.72.22-.83.56-.25.61.21 1.24.83 1.24.38 0 .72-.22.83-.56zM19 5h-1c0-2.76-2.24-5-5-5S8 2.24 8 5H7c-1.1 0-2 .9-2 2v1c0 2.76 2.24 5 5 5v1H8c-.55 0-1 .45-1 1s.45 1 1 1h3v3c0 .55.45 1 1 1s1-.45 1-1v-3h3c.55 0 1-.45 1-1s-.45-1-1-1h-1v-1c2.76 0 5-2.24 5-5V7c0-1.1-.9-2-2-2z"/></svg>`,
+        kitchen: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 2.01L6 2a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.11-.9-1.99-2-1.99zM18 20H6v-9.02h12V20zm0-11H6V4h12v5zM8 5h2v3H8zm0 7h2v5H8z"/></svg>`,
+        bedroom: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 5.5c-3.89 0-6.95-.84-8.69-1.43A.993.993 0 0 0 2 5.02V19c0 .68.47 1.25 1.1 1.4l8.9 2.5c.21.06.44.06.65 0l8.9-2.5c.63-.15 1.1-.72 1.1-1.4V5.02c0-.68-.47-1.25-1.1-1.4C18.95 4.66 15.89 5.5 12 5.5zm0 13.5c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/><path d="M12 15c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>`,
+        decking: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 9V6h-2v3h-3v2h3v3h2v-3h3V9zM4 6h4v12H4zm10 0h4v12h-4z"/></svg>`,
+        garage: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM8 20H5v-2h3v2zm0-4H5v-2h3v2zm0-4H5v-2h3v2zm6 8h-3v-2h3v2zm0-4h-3v-2h3v2zm0-4h-3v-2h3v2zm5 8h-3v-2h3v2zm0-4h-3v-2h3v2zm0-4h-3v-2h3v2z"/></svg>`,
+        basement: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 15v2H5v-2h14m2-10H3v2h18V5zm0 4H3v2h18V9zm0 4H3v6h18v-6z"/></svg>`,
+        flooring: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 4h16v2H4zm0 4h16v2H4zm0 4h16v2H4z"/></svg>`,
+        concrete: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 15h18v2H3zm0 4h18v2H3zm0-8h18v2H3zm0-4h18v2H3zm0-4h18v2H3z"/></svg>`,
+        glass: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 5h2v14H3zm4 0h2v14H7zm4 0h2v14h-2zm4 0h2v14h-2zm4 0h2v14h-2z"/></svg>`,
+        repairs: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19.79 15.12c-1.21.54-2.05 1.71-2.05 3 0 1.93 1.57 3.5 3.5 3.5s3.5-1.57 3.5-3.5c0-1.04-.46-1.97-1.18-2.61l-3.06-2.88-1.06 1.06 2.48 2.34c.15.14.23.34.23.54 0 .41-.34.75-.75.75s-.75-.34-.75-.75c0-.2.08-.39.22-.53l2.22-2.22-5.25-5.25-2.22 2.22c-.14.14-.33.22-.53.22-.41 0-.75-.34-.75-.75s.34-.75.75-.75c.2 0 .39.08.53.22l2.22 2.22 1.06-1.06-2.22-2.22c-.14-.14-.22-.33-.22-.53 0-.41.34-.75.75-.75s.75.34.75.75c0 .2-.08.39-.22.53l-2.22 2.22 5.25 5.25 2.34-2.34 1.06 1.06-2.88 3.06zM12 8.19L7 3.19 3.19 7 8.19 12l-5 5L7 20.81l5-5 5 5L20.81 17l-5-5z"/></svg>`
+    };
+    
+    return icons[categoryId] || '';
 }
 
 function showJobDetails(categoryId) {
@@ -1144,81 +1212,269 @@ function editEstimate() {
         .then(doc => {
             if (doc.exists) {
                 currentEstimate = doc.data();
-                currentEstimate.id = doc.id;  // Preserve the ID
+                currentEstimate.id = doc.id;
                 
-                // Populate customer info
-                document.getElementById('customerName').value = currentEstimate.customer.name;
-                document.getElementById('customerEmail').value = currentEstimate.customer.email;
-                document.getElementById('customerPhone').value = currentEstimate.customer.phone;
-                document.getElementById('jobLocation').value = currentEstimate.customer.location;
+                // Show edit fields
+                showEditFields(currentEstimate);
+                isEditing = true;
                 
-                // Show the estimate form
-                showNewEstimate();
-                
-                // Skip to job selection step
-                nextStep(2);
-                
-                // Select the categories that have jobs
-                currentEstimate.jobs.forEach(job => {
-                    const categoryCards = document.querySelectorAll('.category-card');
-                    categoryCards.forEach(card => {
-                        if (card.querySelector('h3').textContent === priceSheet.categories[job.category].name) {
-                            card.classList.add('selected');
-                        }
-                    });
-                });
-                
-                // Update job selection UI
-                currentEstimate.jobs.forEach(job => {
-                    const category = job.category;
-                    const jobIndex = priceSheet.categories[category].jobs.findIndex(j => j.name === job.name);
-                    if (jobIndex >= 0) {
-                        // This will trigger the job selection logic
-                        updateSelectedJob(category, jobIndex);
-                        // Check the radio button
-                        const radioInput = document.querySelector(`input[name="${category}"][value="${jobIndex}"]`);
-                        if (radioInput) {
-                            radioInput.checked = true;
-                        }
-                    }
-                });
-                
-                // Skip to materials step
-                nextStep(3);
-                
-                // Update materials quantities
-                currentEstimate.materials.forEach(mat => {
-                    const input = document.getElementById(`qty-${mat.name.replace(/\s+/g, '-')}`);
-                    if (input) {
-                        input.value = mat.quantity;
-                        updateMaterialQty(mat.name, mat.quantity);
-                    }
-                });
-                
-                // Update custom materials
-                currentEstimate.customMaterials.forEach(mat => {
-                    // In a real implementation, you might want to display these
-                });
-                
-                // Update fees
-                if (currentEstimate.fees) {
-                    currentEstimate.fees.forEach(fee => {
-                        // Add to fees list
-                    });
-                    updateFeesList();
-                    document.getElementById('discountPercentage').value = currentEstimate.discountPercentage || 0;
-                }
-                
-                // Skip to review step
-                nextStep(4);
-                
-                closeEstimateModal();
+                // Update button visibility
+                editEstimateBtn.style.display = 'none';
+                saveChangesBtn.style.display = 'inline-block';
+                exportEstimateBtn.style.display = 'none';
+                deleteEstimateBtn.style.display = 'none';
             }
         })
         .catch(error => {
             console.error('Error loading estimate:', error);
             alert('Error loading estimate for editing');
         });
+}
+
+function showEditFields(estimate) {
+    editFieldsContainer.style.display = 'block';
+    editFieldsContainer.innerHTML = `
+        <div class="estimate-section">
+            <h3>Edit Customer Information</h3>
+            <div class="form-group">
+                <label>Name:</label>
+                <input type="text" class="editable-field" id="editCustomerName" value="${estimate.customer.name || ''}">
+            </div>
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" class="editable-field" id="editCustomerEmail" value="${estimate.customer.email || ''}">
+            </div>
+            <div class="form-group">
+                <label>Phone:</label>
+                <input type="tel" class="editable-field" id="editCustomerPhone" value="${estimate.customer.phone || ''}">
+            </div>
+            <div class="form-group">
+                <label>Job Location:</label>
+                <input type="text" class="editable-field" id="editJobLocation" value="${estimate.customer.location || ''}">
+            </div>
+        </div>
+        
+        <div class="estimate-section">
+            <h3>Edit Jobs</h3>
+            <div id="editJobsContainer"></div>
+        </div>
+        
+        <div class="estimate-section">
+            <h3>Edit Materials</h3>
+            <div id="editMaterialsContainer"></div>
+        </div>
+        
+        <div class="estimate-section">
+            <h3>Edit Fees & Discount</h3>
+            <div class="form-group">
+                <label>Discount Percentage:</label>
+                <input type="number" class="editable-field" id="editDiscountPercentage" 
+                    min="0" max="100" value="${estimate.discountPercentage || 0}">
+            </div>
+            <div id="editFeesContainer"></div>
+            <button type="button" class="btn-next" onclick="addNewFeeField()">Add New Fee</button>
+        </div>
+    `;
+    
+    // Populate jobs
+    const jobsContainer = document.getElementById('editJobsContainer');
+    estimate.jobs.forEach((job, index) => {
+        const categoryName = priceSheet.categories[job.category].name;
+        const jobOptions = priceSheet.categories[job.category].jobs.map((j, i) => 
+            `<option value="${i}" ${i === index ? 'selected' : ''}>${j.name}</option>`
+        ).join('');
+        
+        jobsContainer.innerHTML += `
+            <div class="job-edit-section">
+                <h4>${categoryName}</h4>
+                <div class="form-group">
+                    <label>Job Type:</label>
+                    <select class="editable-select" onchange="updateJobSelection('${job.category}', ${index}, this.value)">
+                        ${jobOptions}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Days:</label>
+                    <input type="text" class="editable-field" value="${job.days}" 
+                        onchange="updateJobField('${job.category}', ${index}, 'days', this.value)">
+                </div>
+                <div class="form-group">
+                    <label>Labor Cost ($):</label>
+                    <input type="number" class="editable-field" value="${job.labor}" 
+                        onchange="updateJobField('${job.category}', ${index}, 'labor', this.value)">
+                </div>
+                <div class="form-group">
+                    <label>Scope of Work:</label>
+                    <textarea class="editable-field" style="width: 100%; min-height: 80px;"
+                        onchange="updateJobField('${job.category}', ${index}, 'name', this.value)">${job.name}</textarea>
+                </div>
+            </div>
+        `;
+    });
+    
+    // Populate materials
+    const materialsContainer = document.getElementById('editMaterialsContainer');
+    materialsContainer.innerHTML = `
+        <h4>Standard Materials</h4>
+        <div class="edit-materials-list" id="editStandardMaterials"></div>
+        <h4>Custom Materials</h4>
+        <div class="edit-materials-list" id="editCustomMaterials"></div>
+        <button type="button" class="btn-next" onclick="addNewCustomMaterialField()">Add Custom Material</button>
+    `;
+    
+    // Standard materials
+    const standardMaterialsContainer = document.getElementById('editStandardMaterials');
+    estimate.materials.forEach((mat, index) => {
+        standardMaterialsContainer.innerHTML += `
+            <div class="edit-material-item">
+                <div style="flex: 1;">
+                    <div class="form-group">
+                        <label>Name:</label>
+                        <input type="text" class="editable-field" value="${mat.name}" 
+                            onchange="updateMaterialField(${index}, false, 'name', this.value)">
+                    </div>
+                </div>
+                <div style="margin-left: 15px;">
+                    <div class="form-group">
+                        <label>Price:</label>
+                        <input type="number" class="editable-field" value="${mat.price}" 
+                            onchange="updateMaterialField(${index}, false, 'price', this.value)">
+                    </div>
+                </div>
+                <div style="margin-left: 15px;">
+                    <div class="form-group">
+                        <label>Qty:</label>
+                        <input type="number" class="editable-field" value="${mat.quantity}" 
+                            onchange="updateMaterialField(${index}, false, 'quantity', this.value)">
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    // Custom materials
+    const customMaterialsContainer = document.getElementById('editCustomMaterials');
+    estimate.customMaterials.forEach((mat, index) => {
+        customMaterialsContainer.innerHTML += `
+            <div class="edit-material-item">
+                <div style="flex: 1;">
+                    <div class="form-group">
+                        <label>Name:</label>
+                        <input type="text" class="editable-field" value="${mat.name}" 
+                            onchange="updateMaterialField(${index}, true, 'name', this.value)">
+                    </div>
+                </div>
+                <div style="margin-left: 15px;">
+                    <div class="form-group">
+                        <label>Price:</label>
+                        <input type="number" class="editable-field" value="${mat.price}" 
+                            onchange="updateMaterialField(${index}, true, 'price', this.value)">
+                    </div>
+                </div>
+                <div style="margin-left: 15px;">
+                    <div class="form-group">
+                        <label>Qty:</label>
+                        <input type="number" class="editable-field" value="${mat.quantity}" 
+                            onchange="updateMaterialField(${index}, true, 'quantity', this.value)">
+                    </div>
+                </div>
+                <button class="qty-btn" onclick="removeMaterial(${index}, true)"><i class="fas fa-trash"></i></button>
+            </div>
+        `;
+    });
+    
+    // Fees
+    const feesContainer = document.getElementById('editFeesContainer');
+    estimate.fees?.forEach((fee, index) => {
+        feesContainer.innerHTML += `
+            <div class="edit-material-item">
+                <div style="flex: 1;">
+                    <div class="form-group">
+                        <label>Fee Name:</label>
+                        <input type="text" class="editable-field" value="${fee.name}" 
+                            onchange="updateFeeField(${index}, 'name', this.value)">
+                    </div>
+                </div>
+                <div style="margin-left: 15px;">
+                    <div class="form-group">
+                        <label>Amount:</label>
+                        <input type="number" class="editable-field" value="${fee.amount}" 
+                            onchange="updateFeeField(${index}, 'amount', this.value)">
+                    </div>
+                </div>
+                <button class="qty-btn" onclick="removeFee(${index})"><i class="fas fa-trash"></i></button>
+            </div>
+        `;
+    });
+}
+
+// Add these new functions for editing
+function updateJobSelection(categoryId, jobIndex, newJobIndex) {
+    newJobIndex = parseInt(newJobIndex);
+    const job = priceSheet.categories[categoryId].jobs[newJobIndex];
+    
+    // Update the job in currentEstimate
+    currentEstimate.jobs[jobIndex] = {
+        ...currentEstimate.jobs[jobIndex],
+        name: job.name,
+        days: job.days,
+        labor: parseFloat(job.labor.replace(/[^0-9.-]+/g,""))
+    };
+    
+    // Update the display
+    showEditFields(currentEstimate);
+}
+
+function updateJobField(categoryId, jobIndex, field, value) {
+    if (field === 'labor') value = parseFloat(value);
+    currentEstimate.jobs[jobIndex][field] = value;
+}
+
+function updateMaterialField(index, isCustom, field, value) {
+    if (field === 'price' || field === 'quantity') value = parseFloat(value);
+    
+    if (isCustom) {
+        currentEstimate.customMaterials[index][field] = value;
+        currentEstimate.customMaterials[index].total = 
+            currentEstimate.customMaterials[index].price * currentEstimate.customMaterials[index].quantity;
+    } else {
+        currentEstimate.materials[index][field] = value;
+        currentEstimate.materials[index].total = 
+            currentEstimate.materials[index].price * currentEstimate.materials[index].quantity;
+    }
+}
+
+function updateFeeField(index, field, value) {
+    if (field === 'amount') value = parseFloat(value);
+    currentEstimate.fees[index][field] = value;
+}
+
+function addNewFeeField() {
+    if (!currentEstimate.fees) currentEstimate.fees = [];
+    currentEstimate.fees.push({
+        name: "New Fee",
+        amount: 0
+    });
+    showEditFields(currentEstimate);
+}
+
+function addNewCustomMaterialField() {
+    currentEstimate.customMaterials.push({
+        name: "New Material",
+        price: 0,
+        quantity: 1,
+        total: 0
+    });
+    showEditFields(currentEstimate);
+}
+
+function removeMaterial(index, isCustom) {
+    if (isCustom) {
+        currentEstimate.customMaterials.splice(index, 1);
+    } else {
+        currentEstimate.materials.splice(index, 1);
+    }
+    showEditFields(currentEstimate);
 }
 
 function deleteEstimate() {
