@@ -259,9 +259,9 @@ const priceSheet = {
         repairs: {
             name: "Misc. Repairs",
             jobs: [
-                { name: "Door replacement", days: "0.5-1", labor: "$400" },
+                { name: "Door replacement", days: "0.5", labor: "$400" },
                 { name: "Trim/baseboard install", days: "1-2", labor: "$2,440-$4,880" },
-                { name: "Drywall patch/paint", days: "0.25-1", labor: "$225-$1,220" }
+                { name: "Drywall patch/paint", days: "0.5", labor: "$400" }
             ],
             materials: {
                 "Exterior Door (Steel)": 750,
