@@ -293,50 +293,46 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function setupEventListeners() {
     // Navigation buttons
-    dashboardBtn.addEventListener('click', showDashboard);
-    newEstimateBtn.addEventListener('click', showNewEstimate);
-    saveChangesBtn.addEventListener('click', saveEstimateChanges);
-}
-function saveEstimateChanges() {
-    // Update customer info from edit fields
-    currentEstimate.customer = {
-        name: document.getElementById('editCustomerName').value,
-        email: document.getElementById('editCustomerEmail').value,
-        phone: document.getElementById('editCustomerPhone').value,
-        location: document.getElementById('editJobLocation').value
-    };
+    if (dashboardBtn) dashboardBtn.addEventListener('click', showDashboard);
+    if (newEstimateBtn) newEstimateBtn.addEventListener('click', showNewEstimate);
+    if (saveChangesBtn) saveChangesBtn.addEventListener('click', saveEstimateChanges);
     
-    // Update discount
-    currentEstimate.discountPercentage = parseFloat(document.getElementById('editDiscountPercentage').value) || 0;
-    
-    // Recalculate total
-    const laborTotal = currentEstimate.jobs.reduce((sum, job) => sum + job.labor, 0);
-    const materialsTotal = currentEstimate.materials.reduce((sum, mat) => sum + mat.total, 0);
-    const customMaterialsTotal = currentEstimate.customMaterials.reduce((sum, mat) => sum + mat.total, 0);
-    const feesTotal = currentEstimate.fees?.reduce((sum, fee) => sum + fee.amount, 0) || 0;
-    const subtotal = laborTotal + materialsTotal + customMaterialsTotal + feesTotal;
-    const discount = currentEstimate.discountPercentage ? (subtotal * currentEstimate.discountPercentage / 100) : 0;
-    currentEstimate.total = subtotal - discount;
-    
-    // Update timestamp
-    currentEstimate.updatedAt = new Date().toISOString();
-    
-    // Save to Firestore
-    db.collection("estimates").doc(currentEstimate.id).update(currentEstimate)
-        .then(() => {
-            alert('Changes saved successfully!');
-            isEditing = false;
-            editFieldsContainer.style.display = 'none';
-            editEstimateBtn.style.display = 'inline-block';
-            saveChangesBtn.style.display = 'none';
-            exportEstimateBtn.style.display = 'inline-block';
-            deleteEstimateBtn.style.display = 'inline-block';
-            loadEstimates();
-        })
-        .catch(error => {
-            console.error('Error saving changes:', error);
-            alert('Error saving changes. Please try again.');
+    // Search functionality
+    if (searchInput) {
+        searchInput.addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') {
+                searchEstimates();
+            }
         });
+    }
+    if (searchBtn) searchBtn.addEventListener('click', searchEstimates);
+    
+    // Time filter
+    if (timeFilter) {
+        timeFilter.addEventListener('change', function() {
+            if (this.value === 'month') {
+                if (monthFilter) monthFilter.style.display = 'inline-block';
+                if (yearFilter) yearFilter.style.display = 'inline-block';
+            } else {
+                if (monthFilter) monthFilter.style.display = 'none';
+                if (yearFilter) yearFilter.style.display = 'none';
+                loadEstimates();
+            }
+        });
+    }
+    
+    if (monthFilter) monthFilter.addEventListener('change', filterByDate);
+    if (yearFilter) yearFilter.addEventListener('change', filterByDate);
+    
+    // Modal buttons
+    if (closeModal) closeModal.addEventListener('click', closeEstimateModal);
+    if (editEstimateBtn) editEstimateBtn.addEventListener('click', editEstimate);
+    if (deleteEstimateBtn) deleteEstimateBtn.addEventListener('click', deleteEstimate);
+    if (exportEstimateBtn) exportEstimateBtn.addEventListener('click', exportEstimateToWord);
+    
+    // Estimate form buttons
+    if (addCustomMaterial) addCustomMaterial.addEventListener('click', addCustomMaterialToEstimate);
+    if (saveEstimateBtn) saveEstimateBtn.addEventListener('click', saveEstimate);
 }
 
     // Search functionality
