@@ -20,35 +20,34 @@
 
         <main>
             <!-- Dashboard View -->
-            <div id="dashboardView" class="view active-view">
-                <div class="dashboard-controls">    
-                    <div class="estimates-counter">
-                      <span id="estimatesCount">0</span> estimates totaling $<span id="estimatesTotal">0.00</span>
-                    </div>
-                    <div class="search-container">
-                    <div class="search-container">
-                        <input type="text" id="searchInput" placeholder="Search by customer name...">
-                        <button id="searchBtn"><i class="fas fa-search"></i></button>
-                    </div>
-                    <div class="filter-container">
-                        <select id="timeFilter">
-                            <option value="all">All Time</option>
-                            <option value="month">Select Month</option>
-                        </select>
-                        <select id="monthFilter" style="display: none;">
-                            <option value="">Select Month</option>
-                            <!-- Months will be populated by JS -->
-                        </select>
-                        <select id="yearFilter" style="display: none;">
-                            <option value="">Select Year</option>
-                            <!-- Years will be populated by JS -->
-                        </select>
-                    </div>
-                </div>
-                <div id="estimatesList" class="estimates-grid">
-                    <!-- Estimates will be loaded here -->
-                </div>
+<div id="dashboardView" class="view active-view">
+    <div class="dashboard-header">
+        <div class="estimates-counter">
+            <span id="estimatesCount">0</span> estimates totaling $<span id="estimatesTotal">0.00</span>
+        </div>
+        <div class="dashboard-controls">
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Search by customer name...">
+                <button id="searchBtn"><i class="fas fa-search"></i></button>
             </div>
+            <div class="filter-container">
+                <select id="timeFilter">
+                    <option value="all">All Time</option>
+                    <option value="month">Select Month</option>
+                </select>
+                <select id="monthFilter" style="display: none;">
+                    <option value="">Select Month</option>
+                </select>
+                <select id="yearFilter" style="display: none;">
+                    <option value="">Select Year</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div id="estimatesList" class="estimates-grid">
+        <!-- Estimates will be loaded here -->
+    </div>
+</div>
 
             <!-- New Estimate View -->
             <div id="newEstimateView" class="view">

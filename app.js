@@ -1110,7 +1110,7 @@ function displayEstimates(estimates) {
     document.getElementById('estimatesTotal').textContent = totalAmount.toFixed(2);
     
     if (estimates.length === 0) {
-        estimatesList.innerHTML = '<p>No estimates found</p>';
+        estimatesList.innerHTML = '<p class="no-estimates">No estimates found</p>';
         return;
     }
     
@@ -1128,11 +1128,13 @@ function displayEstimates(estimates) {
         const estimateCard = document.createElement('div');
         estimateCard.className = 'estimate-card';
         estimateCard.innerHTML = `
-            <h3>${estimate.customer.name}</h3>
-            <p>${estimate.customer.location}</p>
-            <p>${formattedDate}</p>
-            <p>${estimate.jobs.map(job => job.name).join(', ')}</p>
-            <p class="estimate-total">Total: $${estimate.total.toFixed(2)}</p>
+            <div class="estimate-header">
+                <h3>${estimate.customer.name}</h3>
+                <span class="estimate-date">${formattedDate}</span>
+            </div>
+            <p class="estimate-location"><i class="fas fa-map-marker-alt"></i> ${estimate.customer.location}</p>
+            <p class="estimate-jobs"><i class="fas fa-tools"></i> ${estimate.jobs.map(job => job.name).join(', ')}</p>
+            <p class="estimate-total">$${estimate.total.toFixed(2)}</p>
         `;
         
         estimateCard.addEventListener('click', () => openEstimateModal(estimate));
