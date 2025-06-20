@@ -1291,8 +1291,11 @@ function editEstimate() {
     db.collection("estimates").doc(estimateId).get()
         .then(doc => {
             if (doc.exists) {
-                currentEstimate = doc.data();
-                currentEstimate.id = doc.id;
+                // Create a new object that combines the document data with the ID
+                currentEstimate = {
+                    id: doc.id,
+                    ...doc.data()
+                };
                 
                 // Show edit fields
                 showEditFields(currentEstimate);
@@ -1303,6 +1306,8 @@ function editEstimate() {
                 saveChangesBtn.style.display = 'inline-block';
                 exportEstimateBtn.style.display = 'none';
                 deleteEstimateBtn.style.display = 'none';
+            } else {
+                alert('Estimate not found');
             }
         })
         .catch(error => {
