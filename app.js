@@ -296,7 +296,7 @@ function setupEventListeners() {
     dashboardBtn.addEventListener('click', showDashboard);
     newEstimateBtn.addEventListener('click', showNewEstimate);
     saveChangesBtn.addEventListener('click', saveEstimateChanges);
-
+}
 function saveEstimateChanges() {
     // Update customer info from edit fields
     currentEstimate.customer = {
@@ -371,7 +371,7 @@ function saveEstimateChanges() {
     // Estimate form buttons
     addCustomMaterial.addEventListener('click', addCustomMaterialToEstimate);
     saveEstimateBtn.addEventListener('click', saveEstimate);
-}
+
 
 function showDashboard() {
     dashboardView.classList.add('active-view');
