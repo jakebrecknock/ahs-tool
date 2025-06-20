@@ -18,6 +18,11 @@ const modalContent = document.getElementById('modalContent');
 const editFieldsContainer = document.getElementById('editFieldsContainer');
 const saveChangesBtn = document.getElementById('saveChangesBtn');
 let isEditing = false;
+const PASSWORD = "AHS"; // Change at some point
+const passwordModal = document.getElementById('passwordModal');
+const passwordInput = document.getElementById('passwordInput');
+const passwordError = document.getElementById('passwordError');
+const submitPassword = document.getElementById('submitPassword');
 
 const firebaseConfig = {
     apiKey: "AIzaSyC37V1uqBjG4kEyH81vzNQ-eGfTz5XZrc8",
@@ -368,6 +373,35 @@ function setupEventListeners() {
     addCustomMaterial.addEventListener('click', addCustomMaterialToEstimate);
     saveEstimateBtn.addEventListener('click', saveEstimate);
 
+function checkPassword() {
+    if (localStorage.getItem('authenticated')) {
+        passwordModal.style.display = 'none';
+        return;
+    }
+
+    submitPassword.addEventListener('click', function() {
+        if (passwordInput.value === PASSWORD) {
+            localStorage.setItem('authenticated', 'true');
+            passwordModal.style.display = 'none';
+        } else {
+            passwordError.style.display = 'block';
+            passwordInput.value = '';
+        }
+    });
+
+    // Also allow Enter key to submit
+    passwordInput.addEventListener('keyup', function(e) {
+        if (e.key === 'Enter') {
+            if (passwordInput.value === PASSWORD) {
+                localStorage.setItem('authenticated', 'true');
+                passwordModal.style.display = 'none';
+            } else {
+                passwordError.style.display = 'block';
+                passwordInput.value = '';
+            }
+        }
+    });
+}
 
 function showDashboard() {
     dashboardView.classList.add('active-view');

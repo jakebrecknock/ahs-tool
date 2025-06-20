@@ -522,6 +522,37 @@ nav button:hover {
     border-bottom: none;
 }
 
+#passwordModal .modal-content {
+    text-align: center;
+}
+
+#passwordInput {
+    width: 100%;
+    padding: 12px;
+    margin: 15px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+#passwordModal .modal-actions {
+    justify-content: center;
+}
+
+#passwordModal button {
+    padding: 10px 25px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+#passwordModal button:hover {
+    background-color: var(--primary-dark);
+}
+
 /* Fees Section */
 .fees-section {
     background-color: white;
