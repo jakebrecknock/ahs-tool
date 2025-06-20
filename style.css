@@ -523,7 +523,7 @@ nav button:hover {
 }
 
 #passwordModal {
-    background-color: rgba(0, 0, 0, 0.9); /* Darker background */
+    background-color: rgba(0, 0, 0, 0.95); /* Darker background */
     display: flex;
     align-items: center;
     justify-content: center;

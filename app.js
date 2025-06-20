@@ -280,6 +280,9 @@ const priceSheet = {
 
 // Initialize the app
 document.addEventListener('DOMContentLoaded', function() {
+    // Check password
+    checkPassword();
+
     // Set up event listeners
     setupEventListeners();
     
@@ -375,13 +378,14 @@ function setupEventListeners() {
 
 function checkPassword() {
     // Check if already authenticated
-    if (localStorage.getItem('authenticated') === 'true') {
+    if (localStorage.getItem('authenticated')) {
         passwordModal.style.display = 'none';
         return;
     }
 
-    // Show the modal initially
-    passwordModal.style.display = 'flex'; // Changed from 'block' to 'flex'
+    // Show the modal initially (with full coverage)
+    passwordModal.style.display = 'flex';
+    document.body.style.overflow = 'hidden'; // Prevent scrolling
 
     // Handle password submission
     function verifyPassword() {
@@ -389,6 +393,7 @@ function checkPassword() {
             localStorage.setItem('authenticated', 'true');
             passwordModal.style.display = 'none';
             passwordError.style.display = 'none';
+            document.body.style.overflow = ''; // Re-enable scrolling
         } else {
             passwordError.style.display = 'block';
             passwordInput.value = '';
