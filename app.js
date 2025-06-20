@@ -343,14 +343,6 @@ function setupEventListeners() {
     if (saveEstimateBtn) saveEstimateBtn.addEventListener('click', saveEstimate);
 }
 
-    // Search functionality
-    searchInput.addEventListener('keyup', function(e) {
-        if (e.key === 'Enter') {
-            searchEstimates();
-        }
-    });
-    searchBtn.addEventListener('click', searchEstimates);
-
 function checkPassword() {
     // Check if already authenticated
     if (localStorage.getItem('authenticated')) {
@@ -1298,15 +1290,30 @@ function editEstimate() {
         ...estimateData
     };
     
-    // Show edit fields
-    showEditFields(currentEstimate);
-    isEditing = true;
-    
-    // Update button visibility
-    editEstimateBtn.style.display = 'none';
-    saveChangesBtn.style.display = 'inline-block';
-    exportEstimateBtn.style.display = 'none';
-    deleteEstimateBtn.style.display = 'none';
+    // Ensure we have the latest data
+    db.collection("estimates").doc(estimateId).get()
+        .then(doc => {
+            if (doc.exists) {
+                currentEstimate = {
+                    id: doc.id,
+                    ...doc.data()
+                };
+                
+                // Show edit fields
+                showEditFields(currentEstimate);
+                isEditing = true;
+                
+                // Update button visibility
+                editEstimateBtn.style.display = 'none';
+                saveChangesBtn.style.display = 'inline-block';
+                exportEstimateBtn.style.display = 'none';
+                deleteEstimateBtn.style.display = 'none';
+            }
+        })
+        .catch(error => {
+            console.error('Error loading estimate for editing:', error);
+            alert('Error loading estimate for editing');
+        });
 }
 
 function showEditFields(estimate) {
@@ -2034,6 +2041,13 @@ function filterByDate() {
 }
 
 // Make functions available globally for HTML event handlers
+window.updateJobSelection = updateJobSelection;
+window.updateJobField = updateJobField;
+window.updateMaterialField = updateMaterialField;
+window.updateFeeField = updateFeeField;
+window.addNewFeeField = addNewFeeField;
+window.addNewCustomMaterialField = addNewCustomMaterialField;
+window.removeMaterial = removeMaterial;
 window.nextStep = nextStep;
 window.prevStep = prevStep;
 window.updateSelectedJob = updateSelectedJob;
