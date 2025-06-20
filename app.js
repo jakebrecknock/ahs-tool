@@ -1043,7 +1043,7 @@ function saveEstimateChanges() {
     // Update timestamp
     currentEstimate.updatedAt = new Date().toISOString();
 
-    // Save to Firestore
+    // Save to Firestore - make sure we're using currentEstimate.id
     db.collection("estimates").doc(currentEstimate.id).update(currentEstimate)
         .then(() => {
             alert('Estimate updated successfully!');
