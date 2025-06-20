@@ -523,7 +523,7 @@ nav button:hover {
 }
 
 #passwordModal {
-    background-color: rgba(0, 0, 0, 0.95); /* Darker background */
+    background-color: rgba(0, 0, 0, 1); /* Darker background */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -732,6 +732,19 @@ nav button:hover {
     border-radius: 4px;
     cursor: pointer;
     font-weight: 500;
+}
+
+.estimates-counter {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 4px;
+    font-weight: 500;
+    margin-right: 15px;
+}
+
+.estimates-counter span {
+    font-weight: bold;
 }
 
 #editEstimateBtn {

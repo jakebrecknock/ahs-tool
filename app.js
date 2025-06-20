@@ -1101,6 +1101,13 @@ function loadEstimates() {
 
 function displayEstimates(estimates) {
     estimatesList.innerHTML = '';
+    // Calculate totals
+    const totalCount = estimates.length;
+    const totalAmount = estimates.reduce((sum, estimate) => sum + estimate.total, 0);
+    
+    // Update counter display
+    document.getElementById('estimatesCount').textContent = totalCount;
+    document.getElementById('estimatesTotal').textContent = totalAmount.toFixed(2);
     
     if (estimates.length === 0) {
         estimatesList.innerHTML = '<p>No estimates found</p>';
@@ -1935,16 +1942,19 @@ function searchEstimates() {
     }
     
     db.collection("estimates")
-        .where("customer.name", ">=", searchTerm)
-        .where("customer.name", "<=", searchTerm + '\uf8ff')
+        .orderBy("createdAt", "desc")
         .get()
         .then(querySnapshot => {
             const estimates = [];
             querySnapshot.forEach(doc => {
-                estimates.push({
-                    id: doc.id,
-                    ...doc.data()
-                });
+                const estimate = doc.data();
+                // Check if customer name contains search term (case insensitive)
+                if (estimate.customer.name.toLowerCase().includes(searchTerm)) {
+                    estimates.push({
+                        id: doc.id,
+                        ...estimate
+                    });
+                }
             });
             displayEstimates(estimates);
         })
@@ -1977,7 +1987,10 @@ function filterByDate() {
     const month = monthFilter.value;
     const year = yearFilter.value;
     
-    if (!month || !year) return;
+    if (!month || !year) {
+        loadEstimates();
+        return;
+    }
     
     const startDate = new Date(year, month - 1, 1);
     const endDate = new Date(year, month, 1);
@@ -1985,6 +1998,7 @@ function filterByDate() {
     db.collection("estimates")
         .where("createdAt", ">=", startDate.toISOString())
         .where("createdAt", "<", endDate.toISOString())
+        .orderBy("createdAt", "desc")
         .get()
         .then(querySnapshot => {
             const estimates = [];
