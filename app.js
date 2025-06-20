@@ -350,31 +350,6 @@ function setupEventListeners() {
         }
     });
     searchBtn.addEventListener('click', searchEstimates);
-    
-    // Time filter
-    timeFilter.addEventListener('change', function() {
-        if (this.value === 'month') {
-            monthFilter.style.display = 'inline-block';
-            yearFilter.style.display = 'inline-block';
-        } else {
-            monthFilter.style.display = 'none';
-            yearFilter.style.display = 'none';
-            loadEstimates();
-        }
-    });
-    
-    monthFilter.addEventListener('change', filterByDate);
-    yearFilter.addEventListener('change', filterByDate);
-    
-    // Modal buttons
-    closeModal.addEventListener('click', closeEstimateModal);
-    editEstimateBtn.addEventListener('click', editEstimate);
-    deleteEstimateBtn.addEventListener('click', deleteEstimate);
-    exportEstimateBtn.addEventListener('click', exportEstimateToWord);
-    
-    // Estimate form buttons
-    addCustomMaterial.addEventListener('click', addCustomMaterialToEstimate);
-    saveEstimateBtn.addEventListener('click', saveEstimate);
 
 function checkPassword() {
     // Check if already authenticated
