@@ -594,9 +594,13 @@ function updateSelectedJob(categoryId, jobIndex) {
         
         // Calculate cost based on days (simple linear interpolation)
         const [minDays, maxDays] = job.days.split('-').map(Number);
-        laborCost = min + ((max - min) * ((days - minDays) / (maxDays - minDays)));
+        const ratio = (days - minDays) / (maxDays - minDays);
+        laborCost = min + ((max - min) * ratio);
+        
+        // Ensure labor cost is never negative
+        laborCost = Math.max(0, laborCost);
     } else {
-        laborCost = parseFloat(job.labor.replace(/[$,]/g, ''));
+        laborCost = Math.max(0, parseFloat(job.labor.replace(/[$,]/g, '')));
     }
     
     // Add the new job
@@ -610,6 +614,15 @@ function updateSelectedJob(categoryId, jobIndex) {
     });
     
     updateEstimatePreview();
+}
+
+function updateJobField(categoryId, jobIndex, field, value) {
+    if (field === 'labor') {
+        value = Math.max(0, parseFloat(value));
+    } else if (field === 'days') {
+        value = Math.max(0, parseFloat(value));
+    }
+    currentEstimate.jobs[jobIndex][field] = value;
 }
 
 function updateJobDays(categoryId, jobIndex, days) {
@@ -1523,7 +1536,9 @@ function updateJobField(categoryId, jobIndex, field, value) {
 }
 
 function updateMaterialField(index, isCustom, field, value) {
-    if (field === 'price' || field === 'quantity') value = parseFloat(value);
+    if (field === 'price' || field === 'quantity') {
+        value = Math.max(0, parseFloat(value));
+    }
     
     if (isCustom) {
         currentEstimate.customMaterials[index][field] = value;
@@ -1536,8 +1551,36 @@ function updateMaterialField(index, isCustom, field, value) {
     }
 }
 
+function addCustomMaterialToEstimate() {
+    const name = document.getElementById('customMaterialName').value.trim();
+    const price = Math.max(0, parseFloat(document.getElementById('customMaterialPrice').value));
+    const qty = Math.max(1, parseInt(document.getElementById('customMaterialQty').value));
+    
+    if (!name || isNaN(price) || isNaN(qty)) {
+        alert('Please enter valid material details');
+        return;
+    }
+    
+    // Add custom material
+    currentEstimate.customMaterials.push({
+        name: name,
+        price: price,
+        quantity: qty,
+        total: price * qty
+    });
+    
+    // Clear form
+    document.getElementById('customMaterialName').value = '';
+    document.getElementById('customMaterialPrice').value = '';
+    document.getElementById('customMaterialQty').value = '1';
+    
+    updateEstimatePreview();
+}
+
 function updateFeeField(index, field, value) {
-    if (field === 'amount') value = parseFloat(value);
+    if (field === 'amount') {
+        value = Math.max(0, parseFloat(value));
+    }
     currentEstimate.fees[index][field] = value;
 }
 
