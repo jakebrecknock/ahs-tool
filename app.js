@@ -1043,6 +1043,7 @@ function saveEstimateChanges() {
             // Reset editing state
             isEditing = false;
             editFieldsContainer.style.display = 'none';
+            modalContent.style.display = 'block';
             
             // Update button visibility
             editEstimateBtn.style.display = 'inline-block';
@@ -1302,6 +1303,10 @@ function editEstimate() {
                 // Show edit fields
                 showEditFields(currentEstimate);
                 isEditing = true;
+                
+                // Hide the static view and show edit fields
+                modalContent.style.display = 'none';
+                editFieldsContainer.style.display = 'block';
                 
                 // Update button visibility
                 editEstimateBtn.style.display = 'none';
