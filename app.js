@@ -47,6 +47,8 @@ let currentEstimate = {
     jobs: [],
     materials: [],
     customMaterials: [],
+    fees: [],
+    discountPercentage: 0,
     total: 0
 };
 
@@ -348,6 +350,8 @@ function resetEstimateForm() {
         jobs: [],
         materials: [],
         customMaterials: [],
+        fees: [],
+        discountPercentage: 0,
         total: 0
     };
     
@@ -365,6 +369,8 @@ function resetEstimateForm() {
     
     // Reset form inputs
     customerInfoForm.reset();
+    document.getElementById('discountPercentage').value = 0;
+    document.getElementById('feesList').innerHTML = '';
 }
 
 function initPhoneNumberFormatting() {
@@ -392,6 +398,7 @@ function initCategorySelection() {
         
         const categoryCard = document.createElement('div');
         categoryCard.className = 'category-card';
+        categoryCard.setAttribute('data-category', categoryId);
         categoryCard.innerHTML = `
             <h3>${category.name}</h3>
             <p>Click to select</p>
@@ -692,12 +699,77 @@ function addCustomMaterialToEstimate() {
     updateEstimatePreview();
 }
 
+function addFee() {
+    const name = document.getElementById('feeName').value.trim();
+    const amount = parseFloat(document.getElementById('feeAmount').value);
+    
+    if (!name || isNaN(amount)) {
+        alert('Please enter valid fee details');
+        return;
+    }
+    
+    if (!currentEstimate.fees) {
+        currentEstimate.fees = [];
+    }
+    
+    currentEstimate.fees.push({
+        name: name,
+        amount: amount
+    });
+    
+    document.getElementById('feeName').value = '';
+    document.getElementById('feeAmount').value = '';
+    
+    updateFeesList();
+    updateEstimatePreview();
+}
+
+function updateFeesList() {
+    const feesList = document.getElementById('feesList');
+    feesList.innerHTML = '';
+    
+    if (!currentEstimate.fees || currentEstimate.fees.length === 0) {
+        return;
+    }
+    
+    currentEstimate.fees.forEach((fee, index) => {
+        const feeItem = document.createElement('div');
+        feeItem.className = 'fee-row';
+        feeItem.innerHTML = `
+            <span>${fee.name}</span>
+            <span>$${fee.amount.toFixed(2)}</span>
+            <button onclick="removeFee(${index})"><i class="fas fa-times"></i></button>
+        `;
+        feesList.appendChild(feeItem);
+    });
+}
+
+function removeFee(index) {
+    currentEstimate.fees.splice(index, 1);
+    updateFeesList();
+    updateEstimatePreview();
+}
+
+function updateDiscount() {
+    currentEstimate.discountPercentage = parseFloat(document.getElementById('discountPercentage').value) || 0;
+    updateEstimatePreview();
+}
+
 function updateEstimatePreview() {
-    // Calculate totals
+    // Calculate subtotals
     const laborTotal = currentEstimate.jobs.reduce((sum, job) => sum + job.labor, 0);
     const materialsTotal = currentEstimate.materials.reduce((sum, mat) => sum + mat.total, 0);
     const customMaterialsTotal = currentEstimate.customMaterials.reduce((sum, mat) => sum + mat.total, 0);
-    const total = laborTotal + materialsTotal + customMaterialsTotal;
+    
+    // Calculate fees total
+    const feesTotal = currentEstimate.fees ? currentEstimate.fees.reduce((sum, fee) => sum + fee.amount, 0) : 0;
+    
+    // Calculate subtotal before discount
+    const subtotal = laborTotal + materialsTotal + customMaterialsTotal + feesTotal;
+    
+    // Apply discount
+    const discount = currentEstimate.discountPercentage ? (subtotal * currentEstimate.discountPercentage / 100) : 0;
+    const total = subtotal - discount;
     
     currentEstimate.total = total;
     
@@ -772,18 +844,58 @@ function updateEstimatePreview() {
                 </div>
             `;
         });
-        
-        html += `
+    }
+    
+    html += `
             <div class="estimate-row estimate-total-row">
                 <span>Total Materials:</span>
                 <span>$${(materialsTotal + customMaterialsTotal).toFixed(2)}</span>
+            </div>
+        </div>
+    `;
+    
+    // Add fees section if any fees exist
+    if (currentEstimate.fees && currentEstimate.fees.length > 0) {
+        html += `
+            <div class="estimate-section">
+                <h3>Fees</h3>
+        `;
+        
+        currentEstimate.fees.forEach(fee => {
+            html += `
+                <div class="estimate-row">
+                    <span>${fee.name}</span>
+                    <span>$${fee.amount.toFixed(2)}</span>
+                </div>
+            `;
+        });
+        
+        html += `
+                <div class="estimate-row estimate-total-row">
+                    <span>Total Fees:</span>
+                    <span>$${feesTotal.toFixed(2)}</span>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Add subtotal and discount if discount exists
+    if (currentEstimate.discountPercentage > 0) {
+        html += `
+            <div class="estimate-section">
+                <div class="estimate-row">
+                    <span>Subtotal:</span>
+                    <span>$${subtotal.toFixed(2)}</span>
+                </div>
+                <div class="estimate-row">
+                    <span>Discount (${currentEstimate.discountPercentage}%):</span>
+                    <span>-$${discount.toFixed(2)}</span>
+                </div>
             </div>
         `;
     }
     
     html += `
-        </div>
-        
         <div class="estimate-section">
             <div class="estimate-row estimate-total-row">
                 <span>Total Estimate:</span>
@@ -801,8 +913,8 @@ function saveEstimate() {
         return;
     }
 
-    // Add timestamp (Firestore handles this automatically)
-    currentEstimate.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+    // Add timestamp with proper date formatting
+    currentEstimate.createdAt = new Date().toISOString();
     currentEstimate.updatedAt = currentEstimate.createdAt;
 
     // Save to Firestore (automatically generates ID)
@@ -835,6 +947,7 @@ function loadEstimates() {
             console.error('Error loading estimates:', error);
         });
 }
+
 function displayEstimates(estimates) {
     estimatesList.innerHTML = '';
     
@@ -950,25 +1063,65 @@ function openEstimateModal(estimate) {
                 </div>
             `;
         });
+    }
+    
+    // Add fees section if any fees exist
+    if (estimate.fees && estimate.fees.length > 0) {
+        html += `
+            <div class="estimate-section">
+                <h3>Fees</h3>
+        `;
         
-        const materialsTotal = estimate.materials.reduce((sum, mat) => sum + mat.total, 0) + 
-                             estimate.customMaterials.reduce((sum, mat) => sum + mat.total, 0);
+        estimate.fees.forEach(fee => {
+            html += `
+                <div class="estimate-row">
+                    <span>${fee.name}</span>
+                    <span>$${fee.amount.toFixed(2)}</span>
+                </div>
+            `;
+        });
+        
+        const feesTotal = estimate.fees.reduce((sum, fee) => sum + fee.amount, 0);
         
         html += `
-            <div class="estimate-row estimate-total-row">
-                <span>Total Materials:</span>
-                <span>$${materialsTotal.toFixed(2)}</span>
+                <div class="estimate-row estimate-total-row">
+                    <span>Total Fees:</span>
+                    <span>$${feesTotal.toFixed(2)}</span>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Calculate totals
+    const laborTotal = estimate.jobs.reduce((sum, job) => sum + job.labor, 0);
+    const materialsTotal = estimate.materials.reduce((sum, mat) => sum + mat.total, 0);
+    const customMaterialsTotal = estimate.customMaterials.reduce((sum, mat) => sum + mat.total, 0);
+    const feesTotal = estimate.fees ? estimate.fees.reduce((sum, fee) => sum + fee.amount, 0) : 0;
+    const subtotal = laborTotal + materialsTotal + customMaterialsTotal + feesTotal;
+    const discount = estimate.discountPercentage ? (subtotal * estimate.discountPercentage / 100) : 0;
+    const total = subtotal - discount;
+    
+    // Add subtotal and discount if discount exists
+    if (estimate.discountPercentage > 0) {
+        html += `
+            <div class="estimate-section">
+                <div class="estimate-row">
+                    <span>Subtotal:</span>
+                    <span>$${subtotal.toFixed(2)}</span>
+                </div>
+                <div class="estimate-row">
+                    <span>Discount (${estimate.discountPercentage}%):</span>
+                    <span>-$${discount.toFixed(2)}</span>
+                </div>
             </div>
         `;
     }
     
     html += `
-        </div>
-        
         <div class="estimate-section">
             <div class="estimate-row estimate-total-row">
                 <span>Total Estimate:</span>
-                <span>$${estimate.total.toFixed(2)}</span>
+                <span>$${total.toFixed(2)}</span>
             </div>
         </div>
     `;
@@ -999,8 +1152,66 @@ function editEstimate() {
                 document.getElementById('customerPhone').value = currentEstimate.customer.phone;
                 document.getElementById('jobLocation').value = currentEstimate.customer.location;
                 
+                // Show the estimate form
                 showNewEstimate();
-                nextStep(2);  // Skip to job selection
+                
+                // Skip to job selection step
+                nextStep(2);
+                
+                // Select the categories that have jobs
+                currentEstimate.jobs.forEach(job => {
+                    const categoryCards = document.querySelectorAll('.category-card');
+                    categoryCards.forEach(card => {
+                        if (card.querySelector('h3').textContent === priceSheet.categories[job.category].name) {
+                            card.classList.add('selected');
+                        }
+                    });
+                });
+                
+                // Update job selection UI
+                currentEstimate.jobs.forEach(job => {
+                    const category = job.category;
+                    const jobIndex = priceSheet.categories[category].jobs.findIndex(j => j.name === job.name);
+                    if (jobIndex >= 0) {
+                        // This will trigger the job selection logic
+                        updateSelectedJob(category, jobIndex);
+                        // Check the radio button
+                        const radioInput = document.querySelector(`input[name="${category}"][value="${jobIndex}"]`);
+                        if (radioInput) {
+                            radioInput.checked = true;
+                        }
+                    }
+                });
+                
+                // Skip to materials step
+                nextStep(3);
+                
+                // Update materials quantities
+                currentEstimate.materials.forEach(mat => {
+                    const input = document.getElementById(`qty-${mat.name.replace(/\s+/g, '-')}`);
+                    if (input) {
+                        input.value = mat.quantity;
+                        updateMaterialQty(mat.name, mat.quantity);
+                    }
+                });
+                
+                // Update custom materials
+                currentEstimate.customMaterials.forEach(mat => {
+                    // In a real implementation, you might want to display these
+                });
+                
+                // Update fees
+                if (currentEstimate.fees) {
+                    currentEstimate.fees.forEach(fee => {
+                        // Add to fees list
+                    });
+                    updateFeesList();
+                    document.getElementById('discountPercentage').value = currentEstimate.discountPercentage || 0;
+                }
+                
+                // Skip to review step
+                nextStep(4);
+                
                 closeEstimateModal();
             }
         })
@@ -1027,6 +1238,13 @@ function deleteEstimate() {
     }
 }
 
+function cancelEstimate() {
+    if (confirm('Are you sure you want to cancel this estimate? All progress will be lost.')) {
+        resetEstimateForm();
+        showDashboard();
+    }
+}
+
 function exportEstimateToWord() {
     const estimateId = modalContent.dataset.estimateId;
     
@@ -1045,12 +1263,6 @@ function exportEstimateToWord() {
 }
 
 function exportEstimate(estimate) {
-    // This is a simplified version - in a real implementation, you would:
-    // 1. Create a proper Word document using a library like docx
-    // 2. Format it professionally with your company logo, etc.
-    // 3. Provide a download link
-    
-    // For this example, we'll just create a simple HTML representation
     const date = new Date(estimate.createdAt);
     const formattedDate = date.toLocaleDateString('en-US', {
         year: 'numeric', 
@@ -1058,6 +1270,15 @@ function exportEstimate(estimate) {
         day: 'numeric'
     });
     
+    // Calculate totals
+    const laborTotal = estimate.jobs.reduce((sum, job) => sum + job.labor, 0);
+    const materialsTotal = estimate.materials.reduce((sum, mat) => sum + mat.total, 0);
+    const customMaterialsTotal = estimate.customMaterials.reduce((sum, mat) => sum + mat.total, 0);
+    const feesTotal = estimate.fees ? estimate.fees.reduce((sum, fee) => sum + fee.amount, 0) : 0;
+    const subtotal = laborTotal + materialsTotal + customMaterialsTotal + feesTotal;
+    const discount = estimate.discountPercentage ? (subtotal * estimate.discountPercentage / 100) : 0;
+    const total = subtotal - discount;
+
     let html = `
         <!DOCTYPE html>
         <html>
@@ -1065,124 +1286,154 @@ function exportEstimate(estimate) {
             <title>Estimate for ${estimate.customer.name}</title>
             <style>
                 body { font-family: Arial, sans-serif; margin: 40px; }
-                h1 { color: #e63946; }
                 .header { text-align: center; margin-bottom: 30px; }
+                .address { margin-bottom: 20px; }
+                .client-info { display: flex; justify-content: space-between; margin-bottom: 20px; }
                 .section { margin-bottom: 20px; }
+                .section-title { font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid #ccc; }
                 .row { display: flex; justify-content: space-between; margin-bottom: 5px; }
                 .total-row { font-weight: bold; margin-top: 10px; border-top: 1px solid #ccc; padding-top: 5px; }
+                .signature { margin-top: 50px; }
+                .terms { margin-top: 30px; font-size: 0.9em; }
+                table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+                th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
+                th { background-color: #f2f2f2; }
             </style>
         </head>
         <body>
             <div class="header">
-                <h1>AHS Handyman Services</h1>
-                <h2>Estimate</h2>
+                <h1>ACE HANDYMAN SERVICES</h1>
+                <h2>Ace Handyman Services Oak Park River Forest</h2>
+                <p>207 N Harlem Ave. Oak Park, IL 60302</p>
+                <p>(708) 773-0218</p>
+                <h3>ESTIMATE: Home Repair Projects</h3>
                 <p>Date: ${formattedDate}</p>
             </div>
             
-            <div class="section">
-                <h3>Customer Information</h3>
-                <div class="row">
-                    <span>Name:</span>
-                    <span>${estimate.customer.name}</span>
+            <div class="client-info">
+                <div>
+                    <p><strong>Bill To:</strong></p>
+                    <p>${estimate.customer.name}</p>
+                    <p>${estimate.customer.location}</p>
+                    <p>${estimate.customer.email}</p>
+                    <p>${estimate.customer.phone}</p>
                 </div>
-                <div class="row">
-                    <span>Email:</span>
-                    <span>${estimate.customer.email}</span>
-                </div>
-                <div class="row">
-                    <span>Phone:</span>
-                    <span>${estimate.customer.phone}</span>
-                </div>
-                <div class="row">
-                    <span>Job Location:</span>
-                    <span>${estimate.customer.location}</span>
+                <div>
+                    <p><strong>Service Address:</strong></p>
+                    <p>${estimate.customer.name}</p>
+                    <p>${estimate.customer.location}</p>
+                    <p>${estimate.customer.email}</p>
+                    <p>${estimate.customer.phone}</p>
                 </div>
             </div>
             
+            <p>Dear ${estimate.customer.name.split(' ')[0]},</p>
+            <p>Thank you for considering Ace Handyman Services for your repair needs. Based on our assessment, we are pleased to provide the following estimate for the project(s) at ${estimate.customer.location}.</p>
+            
+            ${estimate.jobs.map((job, index) => {
+                const categoryName = priceSheet.categories[job.category].name;
+                return `
+                    <div class="section">
+                        <div class="section-title">${index + 1}. Scope of Work</div>
+                        <p><strong>Area:</strong> ${categoryName}</p>
+                        <p><strong>Repair Work:</strong></p>
+                        <ul>
+                            ${job.name.split(',').map(item => `<li>${item.trim()}</li>`).join('')}
+                        </ul>
+                        <p><strong>Materials:</strong></p>
+                        <ul>
+                            ${estimate.materials
+                                .filter(mat => priceSheet.categories[job.category].materials[mat.name] !== undefined)
+                                .map(mat => `<li>${mat.name}</li>`).join('')}
+                            ${estimate.customMaterials.map(mat => `<li>${mat.name} (Custom)</li>`).join('')}
+                        </ul>
+                        <table>
+                            <tr>
+                                <th>Description</th>
+                                <th>Task</th>
+                                <th>Quantity</th>
+                                <th>Total Cost</th>
+                            </tr>
+                            <tr>
+                                <td>area labor</td>
+                                <td>${job.days}-hour package</td>
+                                <td>${Math.ceil(job.labor / 225)}</td>
+                                <td>$${job.labor.toFixed(2)}</td>
+                            </tr>
+                            ${estimate.materials
+                                .filter(mat => priceSheet.categories[job.category].materials[mat.name] !== undefined)
+                                .map(mat => `
+                                <tr>
+                                    <td>material cost</td>
+                                    <td>${mat.name}</td>
+                                    <td>${mat.quantity}</td>
+                                    <td>$${mat.total.toFixed(2)}</td>
+                                </tr>
+                                `).join('')}
+                            ${estimate.fees && estimate.fees.length > 0 ? estimate.fees.map(fee => `
+                                <tr>
+                                    <td>${fee.name}</td>
+                                    <td></td>
+                                    <td>1</td>
+                                    <td>$${fee.amount.toFixed(2)}</td>
+                                </tr>
+                            `).join('') : ''}
+                            <tr class="total-row">
+                                <td colspan="3" style="text-align: right;">Subtotal:</td>
+                                <td>$${(job.labor + 
+                                    estimate.materials
+                                        .filter(mat => priceSheet.categories[job.category].materials[mat.name] !== undefined)
+                                        .reduce((sum, mat) => sum + mat.total, 0) +
+                                    (estimate.fees ? estimate.fees.reduce((sum, fee) => sum + fee.amount, 0) : 0)).toFixed(2)}</td>
+                            </tr>
+                        </table>
+                    </div>
+                `;
+            }).join('')}
+            
             <div class="section">
-                <h3>Jobs</h3>
-    `;
-    
-    estimate.jobs.forEach(job => {
-        const categoryName = priceSheet.categories[job.category].name;
-        html += `
-            <div class="row">
-                <span>${categoryName} - ${job.name} (${job.days} days)</span>
-                <span>$${job.labor.toFixed(2)}</span>
+                <div class="section-title">Terms and Conditions</div>
+                <ul>
+                    <li><strong>Validity:</strong> this estimate is valid until ${new Date(date.setDate(date.getDate() + 30)).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</li>
+                    <li><strong>Payment Terms:</strong> invoiced for time and material daily</li>
+                    <li><strong>Project Timeline:</strong> to be determined between owner and Ace Handyman Services</li>
+                    <li><strong>Warranty:</strong> 12 Months: labor and materials provided by Ace Handyman Services</li>
+                    <li><strong>Disclosure:</strong> Ace Handyman Services operates on a time and materials model. The above estimate is subject to change.</li>
+                </ul>
             </div>
-        `;
-    });
-    
-    html += `
-            <div class="row total-row">
-                <span>Total Labor:</span>
-                <span>$${estimate.jobs.reduce((sum, job) => sum + job.labor, 0).toFixed(2)}</span>
+            
+            <div class="section">
+                <div class="section-title">Additional Notes</div>
+                <p>We look forward to the opportunity to work with you.</p>
+                <p>Please review this estimate and let us know if you have any questions or require any modifications.</p>
+                <p>To accept this estimate, please sign and return a copy or contact us to confirm your acceptance.</p>
+                <p>Thank you for your consideration.</p>
             </div>
-        </div>
-        
-        <div class="section">
-            <h3>Materials</h3>
-    `;
-    
-    if (estimate.materials.length === 0 && estimate.customMaterials.length === 0) {
-        html += `<p>No materials selected</p>`;
-    } else {
-        estimate.materials.forEach(mat => {
-            html += `
-                <div class="row">
-                    <span>${mat.name} (${mat.quantity} @ $${mat.price.toFixed(2)})</span>
-                    <span>$${mat.total.toFixed(2)}</span>
-                </div>
-            `;
-        });
-        
-        estimate.customMaterials.forEach(mat => {
-            html += `
-                <div class="row">
-                    <span>${mat.name} (Custom) (${mat.quantity} @ $${mat.price.toFixed(2)})</span>
-                    <span>$${mat.total.toFixed(2)}</span>
-                </div>
-            `;
-        });
-        
-        const materialsTotal = estimate.materials.reduce((sum, mat) => sum + mat.total, 0) + 
-                             estimate.customMaterials.reduce((sum, mat) => sum + mat.total, 0);
-        
-        html += `
-            <div class="row total-row">
-                <span>Total Materials:</span>
-                <span>$${materialsTotal.toFixed(2)}</span>
+            
+            <div class="signature">
+                <p>Sincerely,</p>
+                <p><strong>Samuel Cundari</strong><br>
+                Operations Manager<br>
+                Ace Handyman Services Oak Park River Forest<br>
+                scund@acehandymanservices.com<br>
+                O: 708-773-0218</p>
             </div>
-        `;
-    }
-    
-    html += `
-        </div>
-        
-        <div class="section">
-            <div class="row total-row">
-                <span>Total Estimate:</span>
-                <span>$${estimate.total.toFixed(2)}</span>
+            
+            <div class="terms">
+                <p><strong>Client Acceptance</strong></p>
+                <p>I, ____________________, accept the terms and scope of the estimate provided above.</p>
+                <p>Signature: ____________________</p>
+                <p>Date: ____________________</p>
             </div>
-        </div>
-        
-        <div class="section">
-            <p>Thank you for considering AHS Handyman Services for your project. This estimate is valid for 30 days from the date above.</p>
-            <p>Please contact us to schedule your project or if you have any questions.</p>
-        </div>
         </body>
         </html>
     `;
     
-    // Create a Blob with the HTML content
+    // Create and download the Word document
     const blob = new Blob([html], { type: 'application/msword' });
-    
-    // Create a download link
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = `AHS_Estimate_${estimate.customer.name.replace(/\s+/g, '_')}.doc`;
-    
-    // Trigger the download
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -1196,16 +1447,18 @@ function searchEstimates() {
         return;
     }
     
-    database.ref('estimates').once('value')
-        .then(snapshot => {
+    db.collection("estimates")
+        .where("customer.name", ">=", searchTerm)
+        .where("customer.name", "<=", searchTerm + '\uf8ff')
+        .get()
+        .then(querySnapshot => {
             const estimates = [];
-            snapshot.forEach(childSnapshot => {
-                const estimate = childSnapshot.val();
-                if (estimate.customer.name.toLowerCase().includes(searchTerm)) {
-                    estimates.push(estimate);
-                }
+            querySnapshot.forEach(doc => {
+                estimates.push({
+                    id: doc.id,
+                    ...doc.data()
+                });
             });
-            
             displayEstimates(estimates);
         })
         .catch(error => {
@@ -1243,8 +1496,8 @@ function filterByDate() {
     const endDate = new Date(year, month, 1);
     
     db.collection("estimates")
-        .where("createdAt", ">=", startDate)
-        .where("createdAt", "<", endDate)
+        .where("createdAt", ">=", startDate.toISOString())
+        .where("createdAt", "<", endDate.toISOString())
         .get()
         .then(querySnapshot => {
             const estimates = [];
@@ -1268,3 +1521,7 @@ window.updateSelectedJob = updateSelectedJob;
 window.updateJobDays = updateJobDays;
 window.adjustMaterialQty = adjustMaterialQty;
 window.updateMaterialQty = updateMaterialQty;
+window.addFee = addFee;
+window.removeFee = removeFee;
+window.updateDiscount = updateDiscount;
+window.cancelEstimate = cancelEstimate;
