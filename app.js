@@ -374,31 +374,34 @@ function setupEventListeners() {
     saveEstimateBtn.addEventListener('click', saveEstimate);
 
 function checkPassword() {
-    if (localStorage.getItem('authenticated')) {
+    // Check if already authenticated
+    if (localStorage.getItem('authenticated') === 'true') {
         passwordModal.style.display = 'none';
         return;
     }
 
-    submitPassword.addEventListener('click', function() {
+    // Show the modal initially
+    passwordModal.style.display = 'flex'; // Changed from 'block' to 'flex'
+
+    // Handle password submission
+    function verifyPassword() {
         if (passwordInput.value === PASSWORD) {
             localStorage.setItem('authenticated', 'true');
             passwordModal.style.display = 'none';
+            passwordError.style.display = 'none';
         } else {
             passwordError.style.display = 'block';
             passwordInput.value = '';
         }
-    });
+    }
 
-    // Also allow Enter key to submit
+    // Click event
+    submitPassword.addEventListener('click', verifyPassword);
+
+    // Enter key event
     passwordInput.addEventListener('keyup', function(e) {
         if (e.key === 'Enter') {
-            if (passwordInput.value === PASSWORD) {
-                localStorage.setItem('authenticated', 'true');
-                passwordModal.style.display = 'none';
-            } else {
-                passwordError.style.display = 'block';
-                passwordInput.value = '';
-            }
+            verifyPassword();
         }
     });
 }
