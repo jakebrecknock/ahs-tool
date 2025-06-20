@@ -462,16 +462,59 @@ function initCategorySelection() {
 
 function getCategoryIcon(categoryId) {
     const icons = {
-        bathroom: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 2h14v2H5V2zm2 2h10v3h1v5l-1 6H7l-1-6V7h1V4zm2 2v3h6V6H9zm-.5 5h7l.5 3h-8l.5-3z"/></svg>`,
-        kitchen: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 2h2v3h1V2h2v3h1V2h2v3h1V2h2v3h1V2h2v20H3V2h2zm16 18V10H5v10h16zM7 12h2v2H7v-2zm4 0h2v2h-2v-2zm4 0h2v2h-2v-2zM7 15h2v2H7v-2zm4 0h2v2h-2v-2zm4 0h2v2h-2v-2zM7 18h2v2H7v-2zm4 0h2v2h-2v-2zm4 0h2v2h-2v-2z"/></svg>`,
-        bedroom: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M2 5v14h20V5H2zm18 12h-4v-2h4v2zm0-4h-4v-2h4v2zm0-4h-4V7h4v2zM4 7h6v10H4V7z"/></svg>`,
-        decking: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 3h18v18H3V3zm2 2v14h14V5H5zm2 2h2v2H7V7zm4 0h2v2h-2V7zm4 0h2v2h-2V7zM7 11h2v2H7v-2zm4 0h2v2h-2v-2zm4 0h2v2h-2v-2zM7 15h2v2H7v-2zm4 0h2v2h-2v-2zm4 0h2v2h-2v-2zM7 19h2v2H7v-2zm4 0h2v2h-2v-2zm4 0h2v2h-2v-2z"/></svg>`,
-        garage: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 3h18v18H3V3zm2 2v14h14V5H5zm2 2h10v4H7V7zm0 6h2v4H7v-4zm6 0h2v4h-2v-4z"/></svg>`,
-        basement: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 3h18v18H3V3zm2 2v14h14V5H5zm2 2h10v2H7V7zm0 4h10v2H7v-2zm0 4h10v2H7v-2z"/></svg>`,
-        flooring: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 3h18v18H3V3zm2 2v14h14V5H5zm2 2h2v2H7V7zm4 0h2v2h-2V7zm4 0h2v2h-2V7zM7 11h2v2H7v-2zm4 0h2v2h-2v-2zm4 0h2v2h-2v-2zM7 15h2v2H7v-2zm4 0h2v2h-2v-2zm4 0h2v2h-2v-2z"/></svg>`,
-        concrete: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 3h18v18H3V3zm2 2v14h14V5H5zm2 2h10v2H7V7zm0 4h10v2H7v-2zm0 4h10v2H7v-2z"/></svg>`,
-        glass: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 3h18v18H3V3zm2 2v14h14V5H5zm2 2h10v2H7V7zm0 4h10v2H7v-2zm0 4h10v2H7v-2z"/></svg>`,
-        repairs: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 3h18v18H3V3zm2 2v14h14V5H5zm2 2h2v2H7V7zm4 0h2v2h-2V7zm4 0h2v2h-2V7zM7 11h2v2H7v-2zm4 0h2v2h-2v-2zm4 0h2v2h-2v-2zM7 15h2v2H7v-2zm4 0h2v2h-2v-2zm4 0h2v2h-2v-2z"/></svg>`
+        bathroom: `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M5 3h14v2H5V3zm2 2h10v3h1v5l-1 6H7l-1-6V7h1V5zm2 2v3h6V7H9zm-.5 5h7l.5 3h-8l.5-3z"/>
+                <path d="M10 15h4v2h-4z"/>
+            </svg>`,
+        kitchen: `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M3 3h18v18H3V3zm16 16V7H5v12h14zM7 9h4v4H7V9zm6 0h4v2h-4V9zm0 4h2v2h-2v-2z"/>
+                <circle cx="9" cy="6" r="1"/>
+                <circle cx="13" cy="6" r="1"/>
+                <circle cx="17" cy="6" r="1"/>
+            </svg>`,
+        bedroom: `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M2 5h20v14H2V5zm18 12V7H4v10h16z"/>
+                <path d="M6 10h12v2H6z"/>
+                <path d="M8 13h8v2H8z"/>
+            </svg>`,
+        decking: `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M3 3h18v18H3V3zm2 2v14h14V5H5zm2 2h10v2H7V7zm0 4h10v2H7v-2zm0 4h10v2H7v-2z"/>
+                <path d="M7 7h2v10H7zM11 7h2v10h-2zM15 7h2v10h-2z"/>
+            </svg>`,
+        garage: `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M3 3h18v18H3V3zm2 2v14h14V5H5zm2 2h10v4H7V7zm0 6h2v4H7v-4zm6 0h2v4h-2v-4z"/>
+                <path d="M9 9h6v2H9z"/>
+            </svg>`,
+        basement: `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M3 3h18v18H3V3zm2 2v14h14V5H5zm2 2h10v2H7V7zm0 4h10v2H7v-2zm0 4h10v2H7v-2z"/>
+                <path d="M9 9h2v2H9zM13 9h2v2h-2zM17 9h2v2h-2zM9 13h2v2H9zM13 13h2v2h-2zM17 13h2v2h-2z"/>
+            </svg>`,
+        flooring: `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M3 3h18v18H3V3zm2 2v14h14V5H5zm2 2h2v2H7V7zm4 0h2v2h-2V7zm4 0h2v2h-2V7zM7 11h2v2H7v-2zm4 0h2v2h-2v-2zm4 0h2v2h-2v-2zM7 15h2v2H7v-2zm4 0h2v2h-2v-2zm4 0h2v2h-2v-2z"/>
+                <path d="M7 7h2v10H7zM11 7h2v10h-2zM15 7h2v10h-2z"/>
+            </svg>`,
+        concrete: `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M3 3h18v18H3V3zm2 2v14h14V5H5zm2 2h10v2H7V7zm0 4h10v2H7v-2zm0 4h10v2H7v-2z"/>
+                <path d="M9 9h2v2H9zM13 9h2v2h-2zM17 9h2v2h-2zM9 13h2v2H9zM13 13h2v2h-2zM17 13h2v2h-2z"/>
+            </svg>`,
+        glass: `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M3 3h18v18H3V3zm2 2v14h14V5H5zm2 2h10v2H7V7zm0 4h10v2H7v-2zm0 4h10v2H7v-2z"/>
+                <path d="M9 9h2v2H9zM13 9h2v2h-2zM17 9h2v2h-2zM9 13h2v2H9zM13 13h2v2h-2zM17 13h2v2h-2z"/>
+            </svg>`,
+        repairs: `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M3 3h18v18H3V3zm2 2v14h14V5H5zm8 2h-2v2H9v2h2v2h2v-2h2V9h-2V7zm-4 6h2v2H9v-2zm4 0h2v2h-2v-2z"/>
+                <path d="M11 9h2v2h-2z"/>
+            </svg>`
     };
     
     return icons[categoryId] || '';
