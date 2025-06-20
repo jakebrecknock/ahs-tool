@@ -295,26 +295,20 @@ nav button:hover {
 }
 
 .category-card.selected .category-icon {
-    background-color: rgba(230, 57, 70, 0.2);
+    color: white;
+    background-color: var(--primary-color);
+    border-radius: 50%;
 }
 
 .category-icon {
-    width: 60px;
-    height: 60px;
-    margin-right: 15px;
-    flex-shrink: 0;
+    font-size: 24px;
+    width: 50px;
+    height: 50px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: rgba(230, 57, 70, 0.1);
-    border-radius: 8px;
-    padding: 10px;
-}
-
-.category-icon svg {
-    width: 100%;
-    height: 100%;
-    fill: var(--primary-color);
+    color: var(--primary-color);
+    margin-right: 15px;
 }
 
 .category-info {
