@@ -1030,10 +1030,13 @@ function deleteEstimate() {
 function exportEstimateToWord() {
     const estimateId = modalContent.dataset.estimateId;
     
-    database.ref('estimates/' + estimateId).once('value')
-        .then(snapshot => {
-            const estimate = snapshot.val();
-            exportEstimate(estimate);
+    db.collection("estimates").doc(estimateId).get()
+        .then(doc => {
+            if (doc.exists) {
+                exportEstimate(doc.data());
+            } else {
+                alert('Estimate not found');
+            }
         })
         .catch(error => {
             console.error('Error loading estimate for export:', error);
