@@ -993,6 +993,51 @@ function saveEstimate() {
         });
 }
 
+function saveEstimateChanges() {
+    if (!currentEstimate.customer.name || currentEstimate.jobs.length === 0) {
+        alert('Please complete all required fields and select at least one job');
+        return;
+    }
+
+    // Update customer info from edit fields
+    currentEstimate.customer = {
+        name: document.getElementById('editCustomerName').value,
+        email: document.getElementById('editCustomerEmail').value,
+        phone: document.getElementById('editCustomerPhone').value,
+        location: document.getElementById('editJobLocation').value
+    };
+
+    // Update discount percentage
+    currentEstimate.discountPercentage = parseFloat(document.getElementById('editDiscountPercentage').value) || 0;
+
+    // Update timestamp
+    currentEstimate.updatedAt = new Date().toISOString();
+
+    // Save to Firestore
+    db.collection("estimates").doc(currentEstimate.id).update(currentEstimate)
+        .then(() => {
+            alert('Estimate updated successfully!');
+            
+            // Reset editing state
+            isEditing = false;
+            editFieldsContainer.style.display = 'none';
+            
+            // Update button visibility
+            editEstimateBtn.style.display = 'inline-block';
+            saveChangesBtn.style.display = 'none';
+            exportEstimateBtn.style.display = 'inline-block';
+            deleteEstimateBtn.style.display = 'inline-block';
+            
+            // Reload the estimate to show changes
+            openEstimateModal(currentEstimate);
+            loadEstimates();
+        })
+        .catch(error => {
+            console.error('Error updating estimate:', error);
+            alert('Error updating estimate. Please try again.');
+        });
+}
+
 function loadEstimates() {
     db.collection("estimates")
         .orderBy("createdAt", "desc")  // Newest first
