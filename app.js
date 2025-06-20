@@ -16,6 +16,20 @@ const deleteEstimateBtn = document.getElementById('deleteEstimateBtn');
 const exportEstimateBtn = document.getElementById('exportEstimateBtn');
 const modalContent = document.getElementById('modalContent');
 
+const firebaseConfig = {
+    apiKey: "AIzaSyC37V1uqBjG4kEyH81vzNQ-eGfTz5XZrc8",
+    authDomain: "ahs-tool.firebaseapp.com",
+    projectId: "ahs-tool",
+    storageBucket: "ahs-tool.appspot.com",
+    messagingSenderId: "613725752549",
+    appId: "1:613725752549:web:6fcdb627422efbc68b580c",
+    measurementId: "G-X90TBYBYWD"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
 // Estimate form elements
 const customerInfoForm = document.getElementById('customerInfoForm');
 const customerPhone = document.getElementById('customerPhone');
@@ -49,13 +63,13 @@ const priceSheet = {
             materials: {
                 "Vents (8x8 with light)": 100,
                 "Vents (8x8 no light)": 75,
-                "Herringbone tile": 18,
-                "Glazed wall tile": 6,
-                "Floor tile": 4,
+                "Herringbone tile (per sqft)": 18,
+                "Glazed wall tile (per sqft)": 6,
+                "Floor tile (per sqft)": 4,
                 "Single vanity": 300,
                 "Double vanity": 2000,
                 "Faucet": 100,
-                "Can lighting": 100,
+                "Can lighting (per 4 lights)": 100,
                 "Heated floor (per sqft)": 9.5,
                 "Supply lines (per ft)": 7,
                 "GFCI outlets": 75,
@@ -76,13 +90,13 @@ const priceSheet = {
             materials: {
                 "Stock cabinets (per ft)": 300,
                 "Custom cabinets (per ft)": 900,
-                "Laminate countertops": 45,
-                "Quartz countertops": 120,
-                "Granite countertops": 110,
-                "Butcher block countertops": 80,
-                "Subway tile backsplash": 15,
-                "Glass tile backsplash": 22,
-                "Mosaic backsplash": 28,
+                "Laminate countertops (per sqft)": 45,
+                "Quartz countertops (per sqft)": 120,
+                "Granite countertops (per sqft)": 110,
+                "Butcher block countertops (per sqft)": 80,
+                "Subway tile backsplash (per sqft)": 15,
+                "Glass tile backsplash (per sqft)": 22,
+                "Mosaic backsplash (per sqft)": 28,
                 "Range (Electric/Gas)": 1000,
                 "Refrigerator (Standard)": 1500,
                 "Dishwasher": 800,
@@ -92,7 +106,7 @@ const priceSheet = {
                 "Farmhouse Sink": 600,
                 "Kitchen Faucet": 180,
                 "Pendant Lights (each)": 120,
-                "Recessed/Can Lights (each)": 100,
+                "Recessed/Can Lights (peer 4 lights)": 100,
                 "Under Cabinet Lighting (per foot)": 35,
                 "GFCI Outlets": 75,
                 "Switches/Dimmers": 60
@@ -786,17 +800,13 @@ function saveEstimate() {
         alert('Please complete all required fields and select at least one job');
         return;
     }
-    
-    // Add timestamp
-    currentEstimate.createdAt = new Date().toISOString();
+
+    // Add timestamp (Firestore handles this automatically)
+    currentEstimate.createdAt = firebase.firestore.FieldValue.serverTimestamp();
     currentEstimate.updatedAt = currentEstimate.createdAt;
-    
-    // Generate a unique ID
-    const estimateId = database.ref().child('estimates').push().key;
-    currentEstimate.id = estimateId;
-    
-    // Save to Firebase
-    database.ref('estimates/' + estimateId).set(currentEstimate)
+
+    // Save to Firestore (automatically generates ID)
+    db.collection("estimates").add(currentEstimate)
         .then(() => {
             alert('Estimate saved successfully!');
             showDashboard();
@@ -808,20 +818,23 @@ function saveEstimate() {
 }
 
 function loadEstimates() {
-    database.ref('estimates').once('value')
-        .then(snapshot => {
+    db.collection("estimates")
+        .orderBy("createdAt", "desc")  // Newest first
+        .get()
+        .then(querySnapshot => {
             const estimates = [];
-            snapshot.forEach(childSnapshot => {
-                estimates.push(childSnapshot.val());
+            querySnapshot.forEach(doc => {
+                estimates.push({
+                    id: doc.id,       // Include Firestore document ID
+                    ...doc.data()     // Spread all estimate data
+                });
             });
-            
             displayEstimates(estimates);
         })
         .catch(error => {
             console.error('Error loading estimates:', error);
         });
 }
-
 function displayEstimates(estimates) {
     estimatesList.innerHTML = '';
     
@@ -974,28 +987,25 @@ function closeEstimateModal() {
 function editEstimate() {
     const estimateId = modalContent.dataset.estimateId;
     
-    database.ref('estimates/' + estimateId).once('value')
-        .then(snapshot => {
-            currentEstimate = snapshot.val();
-            
-            // Show the new estimate form with this data
-            showNewEstimate();
-            
-            // Populate customer info
-            document.getElementById('customerName').value = currentEstimate.customer.name;
-            document.getElementById('customerEmail').value = currentEstimate.customer.email;
-            document.getElementById('customerPhone').value = currentEstimate.customer.phone;
-            document.getElementById('jobLocation').value = currentEstimate.customer.location;
-            
-            // Need to implement populating the rest of the form (jobs, materials, etc.)
-            // This would require more complex logic to select the appropriate radio buttons, etc.
-            // For now, we'll just proceed to step 2
-            nextStep(2);
-            
-            closeEstimateModal();
+    db.collection("estimates").doc(estimateId).get()
+        .then(doc => {
+            if (doc.exists) {
+                currentEstimate = doc.data();
+                currentEstimate.id = doc.id;  // Preserve the ID
+                
+                // Populate customer info
+                document.getElementById('customerName').value = currentEstimate.customer.name;
+                document.getElementById('customerEmail').value = currentEstimate.customer.email;
+                document.getElementById('customerPhone').value = currentEstimate.customer.phone;
+                document.getElementById('jobLocation').value = currentEstimate.customer.location;
+                
+                showNewEstimate();
+                nextStep(2);  // Skip to job selection
+                closeEstimateModal();
+            }
         })
         .catch(error => {
-            console.error('Error loading estimate for editing:', error);
+            console.error('Error loading estimate:', error);
             alert('Error loading estimate for editing');
         });
 }
@@ -1004,7 +1014,7 @@ function deleteEstimate() {
     if (confirm('Are you sure you want to delete this estimate?')) {
         const estimateId = modalContent.dataset.estimateId;
         
-        database.ref('estimates/' + estimateId).remove()
+        db.collection("estimates").doc(estimateId).delete()
             .then(() => {
                 alert('Estimate deleted successfully');
                 closeEstimateModal();
@@ -1226,22 +1236,25 @@ function filterByDate() {
     
     if (!month || !year) return;
     
-    database.ref('estimates').once('value')
-        .then(snapshot => {
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 1);
+    
+    db.collection("estimates")
+        .where("createdAt", ">=", startDate)
+        .where("createdAt", "<", endDate)
+        .get()
+        .then(querySnapshot => {
             const estimates = [];
-            snapshot.forEach(childSnapshot => {
-                const estimate = childSnapshot.val();
-                const date = new Date(estimate.createdAt);
-                
-                if (date.getMonth() + 1 == month && date.getFullYear() == year) {
-                    estimates.push(estimate);
-                }
+            querySnapshot.forEach(doc => {
+                estimates.push({
+                    id: doc.id,
+                    ...doc.data()
+                });
             });
-            
             displayEstimates(estimates);
         })
         .catch(error => {
-            console.error('Error filtering estimates by date:', error);
+            console.error('Error filtering estimates:', error);
         });
 }
 
