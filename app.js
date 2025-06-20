@@ -1566,6 +1566,11 @@ function exportEstimate(estimate) {
         month: 'long', 
         day: 'numeric'
     });
+    const validUntilDate = new Date(date.setDate(date.getDate() + 30)).toLocaleDateString('en-US', {
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric'
+    });
     
     // Calculate totals
     const laborTotal = estimate.jobs.reduce((sum, job) => sum + job.labor, 0);
@@ -1582,41 +1587,131 @@ function exportEstimate(estimate) {
         <head>
             <title>Estimate for ${estimate.customer.name}</title>
             <style>
-                body { font-family: Arial, sans-serif; margin: 40px; }
-                .header { text-align: center; margin-bottom: 30px; }
-                .address { margin-bottom: 20px; }
-                .client-info { display: flex; justify-content: space-between; margin-bottom: 20px; }
-                .section { margin-bottom: 20px; }
-                .section-title { font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid #ccc; }
-                .row { display: flex; justify-content: space-between; margin-bottom: 5px; }
-                .total-row { font-weight: bold; margin-top: 10px; border-top: 1px solid #ccc; padding-top: 5px; }
-                .signature { margin-top: 50px; }
-                .terms { margin-top: 30px; font-size: 0.9em; }
-                table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
-                th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
-                th { background-color: #f2f2f2; }
+                @page {
+                    size: letter;
+                    margin: 1in;
+                }
+                body {
+                    font-family: 'Arial', sans-serif;
+                    color: #333;
+                    line-height: 1.6;
+                    margin: 0;
+                    padding: 0;
+                }
+                .header {
+                    text-align: center;
+                    margin-bottom: 30px;
+                    border-bottom: 2px solid #e63946;
+                    padding-bottom: 20px;
+                }
+                .header h1 {
+                    color: #e63946;
+                    font-size: 28px;
+                    margin-bottom: 5px;
+                }
+                .header h2 {
+                    color: #333;
+                    font-size: 18px;
+                    margin-top: 0;
+                    margin-bottom: 10px;
+                }
+                .header p {
+                    margin: 5px 0;
+                    color: #666;
+                }
+                .client-info {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 30px;
+                }
+                .info-block {
+                    width: 48%;
+                }
+                .info-block h3 {
+                    border-bottom: 1px solid #ddd;
+                    padding-bottom: 5px;
+                    color: #e63946;
+                    font-size: 16px;
+                }
+                .section {
+                    margin-bottom: 30px;
+                    page-break-inside: avoid;
+                }
+                .section-title {
+                    color: #e63946;
+                    font-size: 18px;
+                    border-bottom: 1px solid #ddd;
+                    padding-bottom: 5px;
+                    margin-bottom: 15px;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-bottom: 20px;
+                }
+                th {
+                    background-color: #e63946;
+                    color: white;
+                    text-align: left;
+                    padding: 8px;
+                }
+                td {
+                    padding: 8px;
+                    border-bottom: 1px solid #ddd;
+                }
+                .total-row {
+                    font-weight: bold;
+                    background-color: #f8f9fa;
+                }
+                .highlight-green {
+                    background-color: #d4edda;
+                }
+                .signature-section {
+                    margin-top: 50px;
+                    page-break-inside: avoid;
+                }
+                .signature-line {
+                    border-top: 1px solid #333;
+                    width: 300px;
+                    margin-top: 30px;
+                    padding-top: 5px;
+                }
+                .terms {
+                    font-size: 0.9em;
+                    margin-top: 30px;
+                }
+                .footer {
+                    text-align: center;
+                    margin-top: 30px;
+                    font-size: 0.8em;
+                    color: #666;
+                    border-top: 1px solid #ddd;
+                    padding-top: 10px;
+                }
+                .page-break {
+                    page-break-after: always;
+                }
             </style>
         </head>
         <body>
             <div class="header">
                 <h1>ACE HANDYMAN SERVICES</h1>
                 <h2>Ace Handyman Services Oak Park River Forest</h2>
-                <p>207 N Harlem Ave. Oak Park, IL 60302</p>
-                <p>(708) 773-0218</p>
+                <p>207 N Harlem Ave. Oak Park, IL 60302 | (708) 773-0218</p>
                 <h3>ESTIMATE: Home Repair Projects</h3>
                 <p>Date: ${formattedDate}</p>
             </div>
             
             <div class="client-info">
-                <div>
-                    <p><strong>Bill To:</strong></p>
+                <div class="info-block">
+                    <h3>Bill To:</h3>
                     <p>${estimate.customer.name}</p>
                     <p>${estimate.customer.location}</p>
                     <p>${estimate.customer.email}</p>
                     <p>${estimate.customer.phone}</p>
                 </div>
-                <div>
-                    <p><strong>Service Address:</strong></p>
+                <div class="info-block">
+                    <h3>Service Address:</h3>
                     <p>${estimate.customer.name}</p>
                     <p>${estimate.customer.location}</p>
                     <p>${estimate.customer.email}</p>
@@ -1641,46 +1736,60 @@ function exportEstimate(estimate) {
                         <ul>
                             ${estimate.materials
                                 .filter(mat => priceSheet.categories[job.category].materials[mat.name] !== undefined)
-                                .map(mat => `<li>${mat.name}</li>`).join('')}
-                            ${estimate.customMaterials.map(mat => `<li>${mat.name} (Custom)</li>`).join('')}
+                                .map(mat => `<li>${mat.name} (${mat.quantity} @ $${mat.price.toFixed(2)})</li>`).join('')}
+                            ${estimate.customMaterials.map(mat => `<li>${mat.name} (Custom) (${mat.quantity} @ $${mat.price.toFixed(2)})</li>`).join('')}
                         </ul>
                         <table>
                             <tr>
                                 <th>Description</th>
-                                <th>Task</th>
+                                <th>Details</th>
                                 <th>Quantity</th>
-                                <th>Total Cost</th>
+                                <th>Unit Price</th>
+                                <th>Total</th>
                             </tr>
                             <tr>
-                                <td>area labor</td>
-                                <td>${job.days}-hour package</td>
-                                <td>${Math.ceil(job.labor / 225)}</td>
+                                <td>Labor</td>
+                                <td>${job.name} (${job.days} days)</td>
+                                <td>1</td>
+                                <td>$${job.labor.toFixed(2)}</td>
                                 <td>$${job.labor.toFixed(2)}</td>
                             </tr>
                             ${estimate.materials
                                 .filter(mat => priceSheet.categories[job.category].materials[mat.name] !== undefined)
                                 .map(mat => `
                                 <tr>
-                                    <td>material cost</td>
+                                    <td>Material</td>
                                     <td>${mat.name}</td>
                                     <td>${mat.quantity}</td>
+                                    <td>$${mat.price.toFixed(2)}</td>
                                     <td>$${mat.total.toFixed(2)}</td>
                                 </tr>
                                 `).join('')}
+                            ${estimate.customMaterials.map(mat => `
+                                <tr>
+                                    <td>Material</td>
+                                    <td>${mat.name} (Custom)</td>
+                                    <td>${mat.quantity}</td>
+                                    <td>$${mat.price.toFixed(2)}</td>
+                                    <td>$${mat.total.toFixed(2)}</td>
+                                </tr>
+                            `).join('')}
                             ${estimate.fees && estimate.fees.length > 0 ? estimate.fees.map(fee => `
                                 <tr>
+                                    <td>Fee</td>
                                     <td>${fee.name}</td>
-                                    <td></td>
                                     <td>1</td>
+                                    <td>$${fee.amount.toFixed(2)}</td>
                                     <td>$${fee.amount.toFixed(2)}</td>
                                 </tr>
                             `).join('') : ''}
                             <tr class="total-row">
-                                <td colspan="3" style="text-align: right;">Subtotal:</td>
+                                <td colspan="4" style="text-align: right;">Subtotal:</td>
                                 <td>$${(job.labor + 
                                     estimate.materials
                                         .filter(mat => priceSheet.categories[job.category].materials[mat.name] !== undefined)
                                         .reduce((sum, mat) => sum + mat.total, 0) +
+                                    estimate.customMaterials.reduce((sum, mat) => sum + mat.total, 0) +
                                     (estimate.fees ? estimate.fees.reduce((sum, fee) => sum + fee.amount, 0) : 0)).toFixed(2)}</td>
                             </tr>
                         </table>
@@ -1689,9 +1798,42 @@ function exportEstimate(estimate) {
             }).join('')}
             
             <div class="section">
+                <table>
+                    <tr>
+                        <td style="text-align: right; font-weight: bold;">Labor Total:</td>
+                        <td>$${laborTotal.toFixed(2)}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: right; font-weight: bold;">Materials Total:</td>
+                        <td>$${(materialsTotal + customMaterialsTotal).toFixed(2)}</td>
+                    </tr>
+                    ${estimate.fees && estimate.fees.length > 0 ? `
+                    <tr>
+                        <td style="text-align: right; font-weight: bold;">Fees Total:</td>
+                        <td>$${feesTotal.toFixed(2)}</td>
+                    </tr>
+                    ` : ''}
+                    <tr>
+                        <td style="text-align: right; font-weight: bold;">Subtotal:</td>
+                        <td>$${subtotal.toFixed(2)}</td>
+                    </tr>
+                    ${estimate.discountPercentage > 0 ? `
+                    <tr>
+                        <td style="text-align: right; font-weight: bold;">Discount (${estimate.discountPercentage}%):</td>
+                        <td>-$${discount.toFixed(2)}</td>
+                    </tr>
+                    ` : ''}
+                    <tr class="highlight-green">
+                        <td style="text-align: right; font-weight: bold; font-size: 1.1em;">Total Estimate:</td>
+                        <td style="font-weight: bold; font-size: 1.1em;">$${total.toFixed(2)}</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div class="section terms">
                 <div class="section-title">Terms and Conditions</div>
                 <ul>
-                    <li><strong>Validity:</strong> this estimate is valid until ${new Date(date.setDate(date.getDate() + 30)).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</li>
+                    <li><strong>Validity:</strong> this estimate is valid until ${validUntilDate}</li>
                     <li><strong>Payment Terms:</strong> invoiced for time and material daily</li>
                     <li><strong>Project Timeline:</strong> to be determined between owner and Ace Handyman Services</li>
                     <li><strong>Warranty:</strong> 12 Months: labor and materials provided by Ace Handyman Services</li>
@@ -1707,20 +1849,26 @@ function exportEstimate(estimate) {
                 <p>Thank you for your consideration.</p>
             </div>
             
-            <div class="signature">
+            <div class="signature-section">
                 <p>Sincerely,</p>
                 <p><strong>Samuel Cundari</strong><br>
                 Operations Manager<br>
                 Ace Handyman Services Oak Park River Forest<br>
                 scund@acehandymanservices.com<br>
                 O: 708-773-0218</p>
+                
+                <div style="margin-top: 50px;">
+                    <p><strong>Client Acceptance</strong></p>
+                    <p>I, ${estimate.customer.name}, accept the terms and scope of the estimate provided above.</p>
+                    <div style="margin-top: 30px;">
+                        <p>Signature: ___________________________________________</p>
+                        <p>Date: ____________________</p>
+                    </div>
+                </div>
             </div>
             
-            <div class="terms">
-                <p><strong>Client Acceptance</strong></p>
-                <p>I, ____________________, accept the terms and scope of the estimate provided above.</p>
-                <p>Signature: ____________________</p>
-                <p>Date: ____________________</p>
+            <div class="footer">
+                <p>207 N Harlem Ave Oak Park IL 60302 | AceHandymanServices.com | 708.773.0218 | OakParkRiverForest@AceHandymanServices.com</p>
             </div>
         </body>
         </html>
@@ -1730,7 +1878,7 @@ function exportEstimate(estimate) {
     const blob = new Blob([html], { type: 'application/msword' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = `AHS_Estimate_${estimate.customer.name.replace(/\s+/g, '_')}.doc`;
+    link.download = `AHS_Estimate_${estimate.customer.name.replace(/\s+/g, '_')}_${formattedDate.replace(/\s+/g, '_')}.doc`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
