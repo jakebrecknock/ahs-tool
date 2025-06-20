@@ -1043,7 +1043,7 @@ function saveEstimateChanges() {
     // Update timestamp
     currentEstimate.updatedAt = new Date().toISOString();
 
-    // Save to Firestore - make sure we're using currentEstimate.id
+    // Save to Firestore
     db.collection("estimates").doc(currentEstimate.id).update(currentEstimate)
         .then(() => {
             alert('Estimate updated successfully!');
@@ -1140,6 +1140,9 @@ function openEstimateModal(estimate) {
         minute: '2-digit'
     });
     
+    modalContent.dataset.estimateId = estimate.id;
+    modalContent.dataset.estimateData = JSON.stringify(estimate);
+
     let html = `
         <div class="estimate-section">
             <h2>Estimate for ${estimate.customer.name}</h2>
@@ -1287,33 +1290,23 @@ function closeEstimateModal() {
 
 function editEstimate() {
     const estimateId = modalContent.dataset.estimateId;
+    const estimateData = JSON.parse(modalContent.dataset.estimateData);
     
-    db.collection("estimates").doc(estimateId).get()
-        .then(doc => {
-            if (doc.exists) {
-                // Create a new object that combines the document data with the ID
-                currentEstimate = {
-                    id: doc.id,
-                    ...doc.data()
-                };
-                
-                // Show edit fields
-                showEditFields(currentEstimate);
-                isEditing = true;
-                
-                // Update button visibility
-                editEstimateBtn.style.display = 'none';
-                saveChangesBtn.style.display = 'inline-block';
-                exportEstimateBtn.style.display = 'none';
-                deleteEstimateBtn.style.display = 'none';
-            } else {
-                alert('Estimate not found');
-            }
-        })
-        .catch(error => {
-            console.error('Error loading estimate:', error);
-            alert('Error loading estimate for editing');
-        });
+    // Create a new object that combines the document data with the ID
+    currentEstimate = {
+        id: estimateId,
+        ...estimateData
+    };
+    
+    // Show edit fields
+    showEditFields(currentEstimate);
+    isEditing = true;
+    
+    // Update button visibility
+    editEstimateBtn.style.display = 'none';
+    saveChangesBtn.style.display = 'inline-block';
+    exportEstimateBtn.style.display = 'none';
+    deleteEstimateBtn.style.display = 'none';
 }
 
 function showEditFields(estimate) {
