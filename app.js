@@ -1,5 +1,5 @@
 // DOM Elements
-const base64Image = "data:image/webp;base64,data:image/webp;base64,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"
+const base64Image = "https://raw.githubusercontent.com/jakebrecknock/ahs-tool/refs/heads/main/ace-handy-logos.webp"
 const dashboardView = document.getElementById('dashboardView');
 const newEstimateView = document.getElementById('newEstimateView');
 const dashboardBtn = document.getElementById('dashboardBtn');
@@ -24,6 +24,9 @@ const passwordModal = document.getElementById('passwordModal');
 const passwordInput = document.getElementById('passwordInput');
 const passwordError = document.getElementById('passwordError');
 const submitPassword = document.getElementById('submitPassword');
+function formatAccounting(num) {
+    return '$' + num.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+}
 
 const firebaseConfig = {
     apiKey: "AIzaSyC37V1uqBjG4kEyH81vzNQ-eGfTz5XZrc8",
@@ -754,7 +757,7 @@ function initMaterialsSelection() {
         materialItem.innerHTML = `
             <div class="material-info">
                 <h4>${materialName}</h4>
-                <p>$${price.toFixed(2)}</p>
+                <p>$${formatAccounting(price)}</p>
             </div>
             <div class="material-qty">
                 <button class="qty-btn minus" onclick="adjustMaterialQty('${materialName}', -1)">-</button>
@@ -879,7 +882,7 @@ function updateFeesList() {
         feeItem.className = 'fee-row';
         feeItem.innerHTML = `
             <span>${fee.name}</span>
-            <span>$${fee.amount.toFixed(2)}</span>
+            <span>$${formatAccounting(fee.amount)}</span>
             <button onclick="removeFee(${index})"><i class="fas fa-times"></i></button>
         `;
         feesList.appendChild(feeItem);
@@ -950,7 +953,7 @@ function updateEstimatePreview() {
             html += `
                 <div class="estimate-row">
                     <span>${categoryName} - ${job.name} (${job.days} days)</span>
-                    <span>$${job.labor.toFixed(2)}</span>
+                    <span>$${formatAccounting(job.labor)}</span>
                 </div>
             `;
         });
@@ -959,7 +962,7 @@ function updateEstimatePreview() {
     html += `
             <div class="estimate-row estimate-total-row">
                 <span>Total Labor:</span>
-                <span>$${laborTotal.toFixed(2)}</span>
+                <span>$${formatAccounting(laborTotal)}</span>
             </div>
         </div>
         
@@ -973,8 +976,8 @@ function updateEstimatePreview() {
         currentEstimate.materials.forEach(mat => {
             html += `
                 <div class="estimate-row">
-                    <span>${mat.name} (${mat.quantity} @ $${mat.price.toFixed(2)})</span>
-                    <span>$${mat.total.toFixed(2)}</span>
+                    <span>${mat.name} (${mat.quantity} @ $${formatAccounting(mat.price)})</span>
+                    <span>$${formatAccounting(mat.total)}</span>
                 </div>
             `;
         });
@@ -982,8 +985,8 @@ function updateEstimatePreview() {
         currentEstimate.customMaterials.forEach(mat => {
             html += `
                 <div class="estimate-row">
-                    <span>${mat.name} (Custom) (${mat.quantity} @ $${mat.price.toFixed(2)})</span>
-                    <span>$${mat.total.toFixed(2)}</span>
+                    <span>${mat.name} (Custom) (${mat.quantity} @ $${formatAccounting(mat.price)})</span>
+                    <span>$${formatAccounting(mat.total)}</span>
                 </div>
             `;
         });
@@ -992,7 +995,7 @@ function updateEstimatePreview() {
     html += `
             <div class="estimate-row estimate-total-row">
                 <span>Total Materials:</span>
-                <span>$${(materialsTotal + customMaterialsTotal).toFixed(2)}</span>
+                <span>$${(formatAccounting(materialsTotal + customMaterialsTotal))}</span>
             </div>
         </div>
     `;
@@ -1008,7 +1011,7 @@ function updateEstimatePreview() {
             html += `
                 <div class="estimate-row">
                     <span>${fee.name}</span>
-                    <span>$${fee.amount.toFixed(2)}</span>
+                    <span>$${formatAccounting(fee.amount)}</span>
                 </div>
             `;
         });
@@ -1016,7 +1019,7 @@ function updateEstimatePreview() {
         html += `
                 <div class="estimate-row estimate-total-row">
                     <span>Total Fees:</span>
-                    <span>$${feesTotal.toFixed(2)}</span>
+                    <span>$${formatAccounting(feesTotal)}</span>
                 </div>
             </div>
         `;
@@ -1028,11 +1031,11 @@ function updateEstimatePreview() {
             <div class="estimate-section">
                 <div class="estimate-row">
                     <span>Subtotal:</span>
-                    <span>$${subtotal.toFixed(2)}</span>
+                    <span>$${formatAccounting(subtotal)}</span>
                 </div>
                 <div class="estimate-row">
                     <span>Discount (${currentEstimate.discountPercentage}%):</span>
-                    <span>-$${discount.toFixed(2)}</span>
+                    <span>-$${formatAccounting(discount)}</span>
                 </div>
             </div>
         `;
@@ -1042,7 +1045,7 @@ function updateEstimatePreview() {
         <div class="estimate-section">
             <div class="estimate-row estimate-total-row">
                 <span>Total Estimate:</span>
-                <span>$${total.toFixed(2)}</span>
+                <span>$${formatAccounting(total)}</span>
             </div>
         </div>
     `;
@@ -1151,7 +1154,8 @@ function calculateEstimateTotal(estimate) {
     const materialsTotal = estimate.materials.reduce((sum, mat) => sum + (mat.total || 0), 0);
     const customMaterialsTotal = estimate.customMaterials.reduce((sum, mat) => sum + (mat.total || 0), 0);
     const feesTotal = estimate.fees ? estimate.fees.reduce((sum, fee) => sum + (fee.amount || 0), 0) : 0;
-    const estimateFee = document.getElementById('waiveEstimateFee')?.checked ? -75 : 0;
+    const waiveFee = document.getElementById('waiveEstimateFee')?.checked || false;
+    const estimateFee = waiveFee ? -75 : 0;
     const subtotal = laborTotal + materialsTotal + customMaterialsTotal + feesTotal + estimateFee;
     const discount = estimate.discountPercentage ? (subtotal * estimate.discountPercentage / 100) : 0;
     return subtotal - discount;
@@ -1165,7 +1169,7 @@ function displayEstimates(estimates) {
     
     // Update counter display
     document.getElementById('estimatesCount').textContent = totalCount;
-    document.getElementById('estimatesTotal').textContent = totalAmount.toFixed(2);
+    document.getElementById('estimatesTotal').textContent = formatAccounting(totalAmount);
     
     if (estimates.length === 0) {
         estimatesList.innerHTML = '<p class="no-estimates">No estimates found</p>';
@@ -1192,7 +1196,7 @@ function displayEstimates(estimates) {
             </div>
             <p class="estimate-location"><i class="fas fa-map-marker-alt"></i> ${estimate.customer.location}</p>
             <p class="estimate-jobs"><i class="fas fa-tools"></i> ${estimate.jobs.map(job => job.name).join(', ')}</p>
-            <p class="estimate-total">$${estimate.total.toFixed(2)}</p>
+            <p class="estimate-total">$${formatAccounting(estimate.total)}</p>
         `;
         
         estimateCard.addEventListener('click', () => openEstimateModal(estimate));
@@ -1248,7 +1252,7 @@ function openEstimateModal(estimate) {
         html += `
             <div class="estimate-row">
                 <span>${categoryName} - ${job.name} (${job.days} days)</span>
-                <span>$${job.labor.toFixed(2)}</span>
+                <span>$${formatAccounting(job.labor)}</span>
             </div>
         `;
     });
@@ -1256,7 +1260,7 @@ function openEstimateModal(estimate) {
     html += `
             <div class="estimate-row estimate-total-row">
                 <span>Total Labor:</span>
-                <span>$${estimate.jobs.reduce((sum, job) => sum + job.labor, 0).toFixed(2)}</span>
+                <span>$${formatAccounting(estimate.jobs.reduce((sum, job) => sum + job.labor, 0))}</span>
             </div>
         </div>
         
@@ -1270,8 +1274,8 @@ function openEstimateModal(estimate) {
         estimate.materials.forEach(mat => {
             html += `
                 <div class="estimate-row">
-                    <span>${mat.name} (${mat.quantity} @ $${mat.price.toFixed(2)})</span>
-                    <span>$${mat.total.toFixed(2)}</span>
+                    <span>${mat.name} (${mat.quantity} @ $${formatAccounting(mat.price)})</span>
+                    <span>$${formatAccounting(mat.total)}</span>
                 </div>
             `;
         });
@@ -1279,8 +1283,8 @@ function openEstimateModal(estimate) {
         estimate.customMaterials.forEach(mat => {
             html += `
                 <div class="estimate-row">
-                    <span>${mat.name} (Custom) (${mat.quantity} @ $${mat.price.toFixed(2)})</span>
-                    <span>$${mat.total.toFixed(2)}</span>
+                    <span>${mat.name} (Custom) (${mat.quantity} @ $${formatAccounting(mat.price)})</span>
+                    <span>$${formatAccounting(mat.total)}</span>
                 </div>
             `;
         });
@@ -1297,7 +1301,7 @@ function openEstimateModal(estimate) {
             html += `
                 <div class="estimate-row">
                     <span>${fee.name}</span>
-                    <span>$${fee.amount.toFixed(2)}</span>
+                    <span>$${formatAccounting(fee.amount)}</span>
                 </div>
             `;
         });
@@ -1307,7 +1311,7 @@ function openEstimateModal(estimate) {
         html += `
                 <div class="estimate-row estimate-total-row">
                     <span>Total Fees:</span>
-                    <span>$${feesTotal.toFixed(2)}</span>
+                    <span>$${formatAccounting(feesTotal)}</span>
                 </div>
             </div>
         `;
@@ -1328,11 +1332,11 @@ function openEstimateModal(estimate) {
             <div class="estimate-section">
                 <div class="estimate-row">
                     <span>Subtotal:</span>
-                    <span>$${subtotal.toFixed(2)}</span>
+                    <span>$${formatAccounting(subtotal)}</span>
                 </div>
                 <div class="estimate-row">
                     <span>Discount (${estimate.discountPercentage}%):</span>
-                    <span>-$${discount.toFixed(2)}</span>
+                    <span>-$${formatAccounting(discount)}</span>
                 </div>
             </div>
         `;
@@ -1342,7 +1346,7 @@ function openEstimateModal(estimate) {
         <div class="estimate-section">
             <div class="estimate-row estimate-total-row">
                 <span>Total Estimate:</span>
-                <span>$${total.toFixed(2)}</span>
+                <span>$${formatAccounting(total)}</span>
             </div>
         </div>
     `;
@@ -1908,8 +1912,8 @@ function exportEstimate(estimate) {
                         <ul>
                             ${estimate.materials
                                 .filter(mat => priceSheet.categories[job.category].materials[mat.name] !== undefined)
-                                .map(mat => `<li>${mat.name} (${mat.quantity} @ $${mat.price.toFixed(2)})</li>`).join('')}
-                            ${estimate.customMaterials.map(mat => `<li>${mat.name} (Custom) (${mat.quantity} @ $${mat.price.toFixed(2)})</li>`).join('')}
+                                .map(mat => `<li>${mat.name} (${mat.quantity} @ $${formatAccounting(mat.price)})</li>`).join('')}
+                            ${estimate.customMaterials.map(mat => `<li>${mat.name} (Custom) (${mat.quantity} @ $${formatAccounting(mat.price)})</li>`).join('')}
                         </ul>
                         <table>   
                         <tr>
@@ -1923,8 +1927,8 @@ function exportEstimate(estimate) {
                                 <td>Labor</td>
                                 <td>${job.name} (${job.days} days)</td>
                                 <td>1</td>
-                                <td>$${job.labor.toFixed(2)}</td>
-                                <td>$${job.labor.toFixed(2)}</td>
+                                <td>$${formatAccounting(job.labor)}</td>
+                                <td>$${formatAccounting(job.labor)}</td>
                             </tr>
                             ${estimate.materials
                                 .filter(mat => priceSheet.categories[job.category].materials[mat.name] !== undefined)
@@ -1933,8 +1937,8 @@ function exportEstimate(estimate) {
                                     <td>Material</td>
                                     <td>${mat.name}</td>
                                     <td>${mat.quantity}</td>
-                                    <td>$${mat.price.toFixed(2)}</td>
-                                    <td>$${mat.total.toFixed(2)}</td>
+                                    <td>$${formatAccounting(mat.price)}</td>
+                                    <td>$${formatAccounting(mat.total)}</td>
                                 </tr>
                                 `).join('')}
                             ${estimate.customMaterials.map(mat => `
@@ -1942,8 +1946,8 @@ function exportEstimate(estimate) {
                                     <td>Material</td>
                                     <td>${mat.name} (Custom)</td>
                                     <td>${mat.quantity}</td>
-                                    <td>$${mat.price.toFixed(2)}</td>
-                                    <td>$${mat.total.toFixed(2)}</td>
+                                    <td>$${formatAccounting(mat.price)}</td>
+                                    <td>$${formatAccounting(mat.total)}</td>
                                 </tr>
                             `).join('')}
                             ${estimate.fees && estimate.fees.length > 0 ? estimate.fees.map(fee => `
@@ -1951,18 +1955,18 @@ function exportEstimate(estimate) {
                                     <td>Fee</td>
                                     <td>${fee.name}</td>
                                     <td>1</td>
-                                    <td>$${fee.amount.toFixed(2)}</td>
-                                    <td>$${fee.amount.toFixed(2)}</td>
+                                    <td>$${formatAccounting(fee.amount)}</td>
+                                    <td>$${formatAccounting(fee.amount)}</td>
                                 </tr>
                             `).join('') : ''}
                             <tr class="total-row">
                                 <td colspan="4" style="text-align: right;">Subtotal:</td>
-                                <td>$${(job.labor + 
+                                <td>$${formatAccounting((job.labor + 
                                     estimate.materials
                                         .filter(mat => priceSheet.categories[job.category].materials[mat.name] !== undefined)
                                         .reduce((sum, mat) => sum + mat.total, 0) +
                                     estimate.customMaterials.reduce((sum, mat) => sum + mat.total, 0) +
-                                    (estimate.fees ? estimate.fees.reduce((sum, fee) => sum + fee.amount, 0) : 0)).toFixed(2)}</td>
+                                    (estimate.fees ? estimate.fees.reduce((sum, fee) => sum + fee.amount, 0) : 0)))}</td>
                             </tr>
                         </table>
                     </div>
@@ -1973,31 +1977,31 @@ function exportEstimate(estimate) {
                 <table>
                     <tr>
                         <td style="text-align: right; font-weight: bold;">Labor Total:</td>
-                        <td>$${laborTotal.toFixed(2)}</td>
+                        <td>$${formatAccounting(laborTotal)}</td>
                     </tr>
                     <tr>
                         <td style="text-align: right; font-weight: bold;">Materials Total:</td>
-                        <td>$${(materialsTotal + customMaterialsTotal).toFixed(2)}</td>
+                        <td>$${formatAccounting((materialsTotal + customMaterialsTotal))}</td>
                     </tr>
                     ${estimate.fees && estimate.fees.length > 0 ? `
                     <tr>
                         <td style="text-align: right; font-weight: bold;">Fees Total:</td>
-                        <td>$${feesTotal.toFixed(2)}</td>
+                        <td>$${formatAccounting(feesTotal)}</td>
                     </tr>
                     ` : ''}
                     <tr>
                         <td style="text-align: right; font-weight: bold;">Subtotal:</td>
-                        <td>$${subtotal.toFixed(2)}</td>
+                        <td>$${formatAccounting(subtotal)}</td>
                     </tr>
                     ${estimate.discountPercentage > 0 ? `
                     <tr>
                         <td style="text-align: right; font-weight: bold;">Discount (${estimate.discountPercentage}%):</td>
-                        <td>-$${discount.toFixed(2)}</td>
+                        <td>-$${formatAccounting(discount)}</td>
                     </tr>
                     ` : ''}
                     <tr class="highlight-green">
                         <td style="text-align: right; font-weight: bold; font-size: 1.1em;">Total Estimate:</td>
-                        <td style="font-weight: bold; font-size: 1.1em;">$${total.toFixed(2)}</td>
+                        <td style="font-weight: bold; font-size: 1.1em;">$${formatAccounting(total)}</td>
                     </tr>
                 </table>
             </div>
