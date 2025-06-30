@@ -916,16 +916,12 @@ function updateEstimatePreview() {
     const customMaterialsTotal = currentEstimate.customMaterials.reduce((sum, mat) => sum + mat.total, 0);
     
     // Calculate fees total including estimate fee if not waived
-    const waiveFee = document.getElementById('waiveEstimateFee')?.checked || false;
-    const estimateFee = waiveFee ? 0 : -75; // Changed to negative to show as deduction
-    const feesTotal = (currentEstimate.fees ? currentEstimate.fees.reduce((sum, fee) => sum + fee.amount, 0) : 0) + estimateFee;
-    
-    // Calculate subtotal before discount
-    const subtotal = laborTotal + materialsTotal + customMaterialsTotal + feesTotal;
-    
-    // Apply discount
-    const discount = currentEstimate.discountPercentage ? (subtotal * currentEstimate.discountPercentage / 100) : 0;
-    const total = subtotal - discount;
+        const waiveFee = document.getElementById('waiveEstimateFee')?.checked || false;
+        const estimateFee = waiveFee ? 0 : 75;
+        const feesTotal = (currentEstimate.fees ? currentEstimate.fees.reduce((sum, fee) => sum + fee.amount, 0) : 0);
+        const subtotal = laborTotal + materialsTotal + customMaterialsTotal + feesTotal;
+        const discount = currentEstimate.discountPercentage ? (subtotal * currentEstimate.discountPercentage / 100) : 0;
+        const total = subtotal - discount - estimateFee;
     
     currentEstimate.total = total;
     
@@ -1165,10 +1161,10 @@ function calculateEstimateTotal(estimate) {
     const customMaterialsTotal = estimate.customMaterials.reduce((sum, mat) => sum + (mat.total || 0), 0);
     const feesTotal = estimate.fees ? estimate.fees.reduce((sum, fee) => sum + (fee.amount || 0), 0) : 0;
     const waiveFee = document.getElementById('waiveEstimateFee')?.checked || false;
-    const estimateFee = waiveFee ? -75 : 0;
-    const subtotal = laborTotal + materialsTotal + customMaterialsTotal + feesTotal + estimateFee;
+    const estimateFee = waiveFee ? 0 : 75;
+    const subtotal = laborTotal + materialsTotal + customMaterialsTotal + feesTotal;
     const discount = estimate.discountPercentage ? (subtotal * estimate.discountPercentage / 100) : 0;
-    return subtotal - discount;
+    return subtotal - discount - estimateFee;
 }
 
 function displayEstimates(estimates) {
@@ -1753,321 +1749,330 @@ function exportEstimate(estimate) {
     const discount = estimate.discountPercentage ? (subtotal * estimate.discountPercentage / 100) : 0;
     const total = subtotal - discount;
 
-    let html = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Estimate for ${estimate.customer.name}</title>
-            <style>
-                @page {
-                    size: letter;
-                    margin: 1in;
-                }
-                body {
-                    font-family: 'Arial', sans-serif;
-                    color: #333;
-                    line-height: 1.6;
-                    margin: 0;
-                    padding: 0;
-                }
-                .header {
-                    text-align: center;
-                    margin-bottom: 30px;
-                    border-bottom: 2px solid #e63946;
-                    padding-bottom: 20px;
-                }
-                .header h1 {
-                    color: #e63946;
-                    font-size: 28px;
-                    margin-bottom: 5px;
-                }
-                .header h2 {
-                    color: #333;
-                    font-size: 18px;
-                    margin-top: 0;
-                    margin-bottom: 10px;
-                }
-                .header p {
-                    margin: 5px 0;
-                    color: #666;
-                }
-                .client-info {
-                    display: flex;
-                    justify-content: space-between;
-                    margin-bottom: 30px;
-                }
-                .info-block {
-                    width: 48%;
-                }
-                .info-block h3 {
-                    border-bottom: 1px solid #ddd;
-                    padding-bottom: 5px;
-                    color: #e63946;
-                    font-size: 16px;
-                }
-                .section {
-                    margin-bottom: 30px;
-                    page-break-inside: avoid;
-                }
-                .section-title {
-                    color: #e63946;
-                    font-size: 18px;
-                    border-bottom: 1px solid #ddd;
-                    padding-bottom: 5px;
-                    margin-bottom: 15px;
-                }
-                table {
-                    width: 100%;
-                    border-collapse: collapse;
-                    margin-bottom: 20px;
-                }
-                th {
-                    background-color: #e63946;
-                    color: white;
-                    text-align: left;
-                    padding: 8px;
-                }
-                td {
-                    padding: 8px;
-                    border-bottom: 1px solid #ddd;
-                }
-                .total-row {
-                    font-weight: bold;
-                    background-color: #f8f9fa;
-                }
-                .highlight-green {
-                    background-color: #d4edda;
-                }
-                .signature-section {
-                    margin-top: 50px;
-                    page-break-inside: avoid;
-                }
-                .signature-line {
-                    border-top: 1px solid #333;
-                    width: 300px;
-                    margin-top: 30px;
-                    padding-top: 5px;
-                }
-                .terms {
-                    font-size: 0.9em;
-                    margin-top: 30px;
-                }
-                .footer {
-                    text-align: center;
-                    margin-top: 30px;
-                    font-size: 0.8em;
-                    color: #666;
-                    border-top: 1px solid #ddd;
-                    padding-top: 10px;
-                }
-                .page-break {
-                    page-break-after: always;
-                }
-                     .logo {
-                    text-align: center;
-                    margin-bottom: 20px;
-                }
-                .logo img {
-                    max-width: 200px;
-                    height: auto;
-                }
-            </style>
-        </head>
-        <body>
-            <div class="logo">
-                <img src="https://raw.githubusercontent.com/jakebrecknock/ahs-tool/refs/heads/main/ace-handy-logos.webp" alt="Ace Handyman Services Logo">
-            </div>
-            </style>
-        </head>
-        <body>
-            <div class="header">
-                <h1>ACE HANDYMAN SERVICES</h1>
-                <h2>Ace Handyman Services Oak Park River Forest</h2>
-                <p>207 N Harlem Ave. Oak Park, IL 60302 | (708) 773-0218</p>
-                <h3>ESTIMATE: Home Repair Projects</h3>
-                <p>Date: ${formattedDate}</p>
-            </div>
-            
-            <div class="client-info">
-                <div class="info-block">
-                    <h3>Bill To:</h3>
-                    <p>${estimate.customer.name}</p>
-                    <p>${estimate.customer.location}</p>
-                    <p>${estimate.customer.email}</p>
-                    <p>${estimate.customer.phone}</p>
-                </div>
-                <div class="info-block">
-                    <h3>Service Address:</h3>
-                    <p>${estimate.customer.name}</p>
-                    <p>${estimate.customer.location}</p>
-                    <p>${estimate.customer.email}</p>
-                    <p>${estimate.customer.phone}</p>
-                </div>
-            </div>
-            
-            <p>Dear ${estimate.customer.name.split(' ')[0]},</p>
-            <p>Thank you for considering Ace Handyman Services for your repair needs. Based on our assessment, we are pleased to provide the following estimate for the project(s) at ${estimate.customer.location}.</p>
-            
-            ${estimate.jobs.map((job, index) => {
-                const categoryName = priceSheet.categories[job.category].name;
-                return `
-                    <div class="section">
-                        <div class="section-title">${index + 1}. Scope of Work</div>
-                        <p><strong>Area:</strong> ${categoryName}</p>
-                        <p><strong>Repair Work:</strong></p>
-                        <ul>
-                            ${job.name.split(',').map(item => `<li>${item.trim()}</li>`).join('')}
-                        </ul>
-                        <p><strong>Materials:</strong></p>
-                        <ul>
-                            ${estimate.materials
-                                .filter(mat => priceSheet.categories[job.category].materials[mat.name] !== undefined)
-                                .map(mat => `<li>${mat.name} (${mat.quantity} @ $${formatAccounting(mat.price)})</li>`).join('')}
-                            ${estimate.customMaterials.map(mat => `<li>${mat.name} (Custom) (${mat.quantity} @ $${formatAccounting(mat.price)})</li>`).join('')}
-                        </ul>
-                        <table>   
-                        <tr>
-                                <th>Description</th>
-                                <th>Details</th>
-                                <th>Quantity</th>
-                                <th>Unit Price</th>
-                                <th>Total</th>
-                            </tr>
-                            <tr>
-                                <td>Labor</td>
-                                <td>${job.name} (${job.days} days)</td>
-                                <td>1</td>
-                                <td>$${formatAccounting(job.labor)}</td>
-                                <td>$${formatAccounting(job.labor)}</td>
-                            </tr>
-                            ${estimate.materials
-                                .filter(mat => priceSheet.categories[job.category].materials[mat.name] !== undefined)
-                                .map(mat => `
-                                <tr>
-                                    <td>Material</td>
-                                    <td>${mat.name}</td>
-                                    <td>${mat.quantity}</td>
-                                    <td>$${formatAccounting(mat.price)}</td>
-                                    <td>$${formatAccounting(mat.total)}</td>
-                                </tr>
-                                `).join('')}
-                            ${estimate.customMaterials.map(mat => `
-                                <tr>
-                                    <td>Material</td>
-                                    <td>${mat.name} (Custom)</td>
-                                    <td>${mat.quantity}</td>
-                                    <td>$${formatAccounting(mat.price)}</td>
-                                    <td>$${formatAccounting(mat.total)}</td>
-                                </tr>
-                            `).join('')}
-                            ${estimate.fees && estimate.fees.length > 0 ? estimate.fees.map(fee => `
-                                <tr>
-                                    <td>Fee</td>
-                                    <td>${fee.name}</td>
-                                    <td>1</td>
-                                    <td>$${formatAccounting(fee.amount)}</td>
-                                    <td>$${formatAccounting(fee.amount)}</td>
-                                </tr>
-                            `).join('') : ''}
-                            ${!waiveFee ? `
-                                <tr>
-                                    <td>Fee</td>
-                                    <td>Estimate Fee</td>
-                                    <td>1</td>
-                                    <td>($75.00)</td>
-                                    <td>($75.00)</td>
-                                </tr>
-                            ` : ''}
-                            <tr class="total-row">
-                                <td colspan="4" style="text-align: right;">Subtotal:</td>
-                                <td>$${formatAccounting((job.labor + 
-                                    estimate.materials
-                                        .filter(mat => priceSheet.categories[job.category].materials[mat.name] !== undefined)
-                                        .reduce((sum, mat) => sum + mat.total, 0) +
-                                    estimate.customMaterials.reduce((sum, mat) => sum + mat.total, 0) +
-                                    (estimate.fees ? estimate.fees.reduce((sum, fee) => sum + fee.amount, 0) : 0)))}</td>
-                            </tr>
-                        </table>
-                    </div>
-                `;
-            }).join('')}
-            
+let html = `
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Estimate for ${estimate.customer.name}</title>
+    <style>
+        @page {
+            size: letter;
+            margin: 1in;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e63946;
+            padding-bottom: 20px;
+        }
+        .header h1 {
+            color: #e63946;
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+        .header h2 {
+            color: #333;
+            font-size: 18px;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+        .header p {
+            margin: 5px 0;
+            color: #666;
+        }
+        .client-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+        .info-block {
+            width: 48%;
+        }
+        .info-block h3 {
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+            color: #e63946;
+            font-size: 16px;
+        }
+        .section {
+            margin-bottom: 30px;
+            page-break-inside: avoid;
+        }
+        .section-title {
+            color: #e63946;
+            font-size: 18px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th {
+            background-color: #e63946;
+            color: white;
+            text-align: left;
+            padding: 8px;
+        }
+        td {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+        .total-row {
+            font-weight: bold;
+            background-color: #f8f9fa;
+        }
+        .highlight-green {
+            background-color: #d4edda;
+        }
+        .signature-section {
+            margin-top: 50px;
+            page-break-inside: avoid;
+        }
+        .signature-line {
+            border-top: 1px solid #333;
+            width: 300px;
+            margin-top: 30px;
+            padding-top: 5px;
+        }
+        .terms {
+            font-size: 0.9em;
+            margin-top: 30px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 0.8em;
+            color: #666;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+        }
+        .page-break {
+            page-break-after: always;
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .logo img {
+            max-width: 200px;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="logo">
+        <img src="https://raw.githubusercontent.com/jakebrecknock/ahs-tool/refs/heads/main/ace-handy-logos.webp" alt="Ace Handyman Services Logo">
+    </div>
+    <div class="header">
+        <h1>ACE HANDYMAN SERVICES</h1>
+        <h2>Ace Handyman Services Oak Park River Forest</h2>
+        <p>207 N Harlem Ave. Oak Park, IL 60302 | (708) 773-0218</p>
+        <h3>ESTIMATE: Home Repair Projects</h3>
+        <p>Date: ${formattedDate}</p>
+    </div>
+    
+    <div class="client-info">
+        <div class="info-block">
+            <h3>Bill To:</h3>
+            <p>${estimate.customer.name}</p>
+            <p>${estimate.customer.location}</p>
+            <p>${estimate.customer.email}</p>
+            <p>${estimate.customer.phone}</p>
+        </div>
+        <div class="info-block">
+            <h3>Service Address:</h3>
+            <p>${estimate.customer.name}</p>
+            <p>${estimate.customer.location}</p>
+            <p>${estimate.customer.email}</p>
+            <p>${estimate.customer.phone}</p>
+        </div>
+    </div>
+    
+    <p>Dear ${estimate.customer.name.split(' ')[0]},</p>
+    <p>Thank you for considering Ace Handyman Services for your repair needs. Based on our assessment, we are pleased to provide the following estimate for the project(s) at ${estimate.customer.location}.</p>
+    
+    ${estimate.jobs.map((job, index) => {
+        const categoryName = priceSheet.categories[job.category].name;
+        return `
             <div class="section">
-                <table>
+                <div class="section-title">${index + 1}. Scope of Work</div>
+                <p><strong>Area:</strong> ${categoryName}</p>
+                <p><strong>Repair Work:</strong></p>
+                <ul>
+                    ${job.name.split(',').map(item => `<li>${item.trim()}</li>`).join('')}
+                </ul>
+                <p><strong>Materials:</strong></p>
+                <ul>
+                    ${estimate.materials
+                        .filter(mat => priceSheet.categories[job.category].materials[mat.name] !== undefined)
+                        .map(mat => `<li>${mat.name} (${mat.quantity} @ $${formatAccounting(mat.price)})</li>`).join('')}
+                    ${estimate.customMaterials.map(mat => `<li>${mat.name} (Custom) (${mat.quantity} @ $${formatAccounting(mat.price)})</li>`).join('')}
+                </ul>
+                <table>   
                     <tr>
-                        <td style="text-align: right; font-weight: bold;">Labor Total:</td>
-                        <td>$${formatAccounting(laborTotal)}</td>
+                        <th>Description</th>
+                        <th>Details</th>
+                        <th>Quantity</th>
+                        <th>Unit Price</th>
+                        <th>Total</th>
                     </tr>
                     <tr>
-                        <td style="text-align: right; font-weight: bold;">Materials Total:</td>
-                        <td>$${formatAccounting((materialsTotal + customMaterialsTotal))}</td>
+                        <td>Labor</td>
+                        <td>${job.name} (${job.days} days)</td>
+                        <td>1</td>
+                        <td>$${formatAccounting(job.labor)}</td>
+                        <td>$${formatAccounting(job.labor)}</td>
                     </tr>
-                    ${estimate.fees && estimate.fees.length > 0 ? `
-                    <tr>
-                        <td style="text-align: right; font-weight: bold;">Fees Total:</td>
-                        <td>$${formatAccounting(feesTotal)}</td>
-                    </tr>
-                    ` : ''}
-                    <tr>
-                        <td style="text-align: right; font-weight: bold;">Subtotal:</td>
-                        <td>$${formatAccounting(subtotal)}</td>
-                    </tr>
-                    ${estimate.discountPercentage > 0 ? `
-                    <tr>
-                        <td style="text-align: right; font-weight: bold;">Discount (${estimate.discountPercentage}%):</td>
-                        <td>-$${formatAccounting(discount)}</td>
-                    </tr>
-                    ` : ''}
-                    <tr class="highlight-green">
-                        <td style="text-align: right; font-weight: bold; font-size: 1.1em;">Total Estimate:</td>
-                        <td style="font-weight: bold; font-size: 1.1em;">$${formatAccounting(total)}</td>
+                    ${estimate.materials
+                        .filter(mat => priceSheet.categories[job.category].materials[mat.name] !== undefined)
+                        .map(mat => `
+                        <tr>
+                            <td>Material</td>
+                            <td>${mat.name}</td>
+                            <td>${mat.quantity}</td>
+                            <td>$${formatAccounting(mat.price)}</td>
+                            <td>$${formatAccounting(mat.total)}</td>
+                        </tr>
+                        `).join('')}
+                    ${estimate.customMaterials.map(mat => `
+                        <tr>
+                            <td>Material</td>
+                            <td>${mat.name} (Custom)</td>
+                            <td>${mat.quantity}</td>
+                            <td>$${formatAccounting(mat.price)}</td>
+                            <td>$${formatAccounting(mat.total)}</td>
+                        </tr>
+                    `).join('')}
+                    ${estimate.fees && estimate.fees.length > 0 ? estimate.fees.map(fee => `
+                        <tr>
+                            <td>Fee</td>
+                            <td>${fee.name}</td>
+                            <td>1</td>
+                            <td>$${formatAccounting(fee.amount)}</td>
+                            <td>$${formatAccounting(fee.amount)}</td>
+                        </tr>
+                    `).join('') : ''}
+                    ${!waiveFee ? `
+                        <tr>
+                            <td>Fee</td>
+                            <td>Estimate Fee</td>
+                            <td>1</td>
+                            <td>$75.00</td>
+                            <td>$75.00</td>
+                        </tr>
+                    ` : `
+                        <tr>
+                            <td>Fee</td>
+                            <td>Estimate Fee Removed</td>
+                            <td>1</td>
+                            <td>($75.00)</td>
+                            <td>($75.00)</td>
+                        </tr>
+                    `}
+                    <tr class="total-row">
+                        <td colspan="4" style="text-align: right;">Subtotal:</td>
+                        <td>$${formatAccounting((job.labor + 
+                            estimate.materials
+                                .filter(mat => priceSheet.categories[job.category].materials[mat.name] !== undefined)
+                                .reduce((sum, mat) => sum + mat.total, 0) +
+                            estimate.customMaterials.reduce((sum, mat) => sum + mat.total, 0) +
+                            (estimate.fees ? estimate.fees.reduce((sum, fee) => sum + fee.amount, 0) : 0)))}</td>
                     </tr>
                 </table>
             </div>
-            
-            <div class="section terms">
-                <div class="section-title">Terms and Conditions</div>
-                <ul>
-                    <li><strong>Validity:</strong> this estimate is valid until ${validUntilDate}</li>
-                    <li><strong>Payment Terms:</strong> invoiced for time and material daily</li>
-                    <li><strong>Project Timeline:</strong> to be determined between owner and Ace Handyman Services</li>
-                    <li><strong>Warranty:</strong> 12 Months: labor and materials provided by Ace Handyman Services</li>
-                    <li><strong>Disclosure:</strong> Ace Handyman Services operates on a time and materials model. The above estimate is subject to change.</li>
-                </ul>
+        `;
+    }).join('')}
+    
+    <div class="section">
+        <table>
+            <tr>
+                <td style="text-align: right; font-weight: bold;">Labor Total:</td>
+                <td>$${formatAccounting(laborTotal)}</td>
+            </tr>
+            <tr>
+                <td style="text-align: right; font-weight: bold;">Materials Total:</td>
+                <td>$${formatAccounting(materialsTotal + customMaterialsTotal)}</td>
+            </tr>
+            ${estimate.fees && estimate.fees.length > 0 ? `
+            <tr>
+                <td style="text-align: right; font-weight: bold;">Fees Total:</td>
+                <td>$${formatAccounting(feesTotal)}</td>
+            </tr>
+            ` : ''}
+            <tr>
+                <td style="text-align: right; font-weight: bold;">Subtotal:</td>
+                <td>$${formatAccounting(subtotal)}</td>
+            </tr>
+            ${estimate.discountPercentage > 0 ? `
+            <tr>
+                <td style="text-align: right; font-weight: bold;">Discount (${estimate.discountPercentage}%):</td>
+                <td>-$${formatAccounting(discount)}</td>
+            </tr>
+            ` : ''}
+            <tr>
+                <td style="text-align: right; font-weight: bold;">Estimate Fee:</td>
+                <td>-$${formatAccounting(estimateFee)}</td>
+            </tr>
+            <tr class="highlight-green">
+                <td style="text-align: right; font-weight: bold; font-size: 1.1em;">Final Total:</td>
+                <td style="font-weight: bold; font-size: 1.1em;">$${formatAccounting(total)}</td>
+            </tr>
+        </table>
+    </div>
+    
+    <div class="section terms">
+        <div class="section-title">Terms and Conditions</div>
+        <ul>
+            <li><strong>Validity:</strong> this estimate is valid until ${validUntilDate}</li>
+            <li><strong>Payment Terms:</strong> invoiced for time and material daily</li>
+            <li><strong>Project Timeline:</strong> to be determined between owner and Ace Handyman Services</li>
+            <li><strong>Warranty:</strong> 12 Months: labor and materials provided by Ace Handyman Services</li>
+            <li><strong>Disclosure:</strong> Ace Handyman Services operates on a time and materials model. The above estimate is subject to change.</li>
+        </ul>
+    </div>
+    
+    <div class="section">
+        <div class="section-title">Additional Notes</div>
+        <p>We look forward to the opportunity to work with you.</p>
+        <p>Please review this estimate and let us know if you have any questions or require any modifications.</p>
+        <p>To accept this estimate, please sign and return a copy or contact us to confirm your acceptance.</p>
+        <p>Thank you for your consideration.</p>
+    </div>
+    
+    <div class="signature-section">
+        <p>Sincerely,</p>
+        <p><strong>Samuel Cundari</strong><br>
+        Operations Manager<br>
+        Ace Handyman Services Oak Park River Forest<br>
+        scund@acehandymanservices.com<br>
+        O: 708-773-0218</p>
+        
+        <div style="margin-top: 50px;">
+            <p><strong>Client Acceptance</strong></p>
+            <p>I, ${estimate.customer.name}, accept the terms and scope of the estimate provided above.</p>
+            <div style="margin-top: 30px;">
+                <p>Signature: ___________________________________________</p>
+                <p>Date: ____________________</p>
             </div>
-            
-            <div class="section">
-                <div class="section-title">Additional Notes</div>
-                <p>We look forward to the opportunity to work with you.</p>
-                <p>Please review this estimate and let us know if you have any questions or require any modifications.</p>
-                <p>To accept this estimate, please sign and return a copy or contact us to confirm your acceptance.</p>
-                <p>Thank you for your consideration.</p>
-            </div>
-            
-            <div class="signature-section">
-                <p>Sincerely,</p>
-                <p><strong>Samuel Cundari</strong><br>
-                Operations Manager<br>
-                Ace Handyman Services Oak Park River Forest<br>
-                scund@acehandymanservices.com<br>
-                O: 708-773-0218</p>
-                
-                <div style="margin-top: 50px;">
-                    <p><strong>Client Acceptance</strong></p>
-                    <p>I, ${estimate.customer.name}, accept the terms and scope of the estimate provided above.</p>
-                    <div style="margin-top: 30px;">
-                        <p>Signature: ___________________________________________</p>
-                        <p>Date: ____________________</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="footer">
-                <p>207 N Harlem Ave Oak Park IL 60302 | AceHandymanServices.com | 708.773.0218 | OakParkRiverForest@AceHandymanServices.com</p>
-            </div>
-        </body>
-        </html>
-    `;
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>207 N Harlem Ave Oak Park IL 60302 | AceHandymanServices.com | 708.773.0218 | OakParkRiverForest@AceHandymanServices.com</p>
+    </div>
+</body>
+</html>
+`;
     
     // Create and download the Word document
     const blob = new Blob([html], { type: 'application/msword' });
