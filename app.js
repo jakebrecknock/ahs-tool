@@ -352,6 +352,11 @@ function setupEventListeners() {
     // Estimate form buttons
     if (addCustomMaterial) addCustomMaterial.addEventListener('click', addCustomMaterialToEstimate);
     if (saveEstimateBtn) saveEstimateBtn.addEventListener('click', saveEstimate);
+
+    const waiveEstimateFeeCheckbox = document.getElementById('waiveEstimateFee');
+    if (waiveEstimateFeeCheckbox) {
+        waiveEstimateFeeCheckbox.addEventListener('change', updateEstimatePreview);
+    }
 }
 
 function checkPassword() {
@@ -915,13 +920,14 @@ function updateEstimatePreview() {
     const materialsTotal = currentEstimate.materials.reduce((sum, mat) => sum + mat.total, 0);
     const customMaterialsTotal = currentEstimate.customMaterials.reduce((sum, mat) => sum + mat.total, 0);
     
-    // Calculate fees total including estimate fee if not waived
-        const waiveFee = document.getElementById('waiveEstimateFee')?.checked || false;
-        const estimateFee = waiveFee ? 0 : 75;
-        const feesTotal = (currentEstimate.fees ? currentEstimate.fees.reduce((sum, fee) => sum + fee.amount, 0) : 0);
-        const subtotal = laborTotal + materialsTotal + customMaterialsTotal + feesTotal;
-        const discount = currentEstimate.discountPercentage ? (subtotal * currentEstimate.discountPercentage / 100) : 0;
-        const total = subtotal - discount - estimateFee;
+    // Get the current checkbox value
+    const waiveFee = document.getElementById('waiveEstimateFee').checked;
+    const estimateFee = waiveFee ? 0 : 75;
+    
+    const feesTotal = (currentEstimate.fees ? currentEstimate.fees.reduce((sum, fee) => sum + fee.amount, 0) : 0);
+    const subtotal = laborTotal + materialsTotal + customMaterialsTotal + feesTotal;
+    const discount = currentEstimate.discountPercentage ? (subtotal * currentEstimate.discountPercentage / 100) : 0;
+    const total = subtotal - discount - estimateFee;
     
     currentEstimate.total = total;
     
@@ -1065,6 +1071,9 @@ function saveEstimate() {
         return;
     }
 
+    // Add waiver status to the estimate
+    currentEstimate.waiveEstimateFee = document.getElementById('waiveEstimateFee').checked;
+    
     // Add timestamp with proper date formatting
     currentEstimate.createdAt = new Date().toISOString();
     currentEstimate.updatedAt = currentEstimate.createdAt;
@@ -1160,8 +1169,11 @@ function calculateEstimateTotal(estimate) {
     const materialsTotal = estimate.materials.reduce((sum, mat) => sum + (mat.total || 0), 0);
     const customMaterialsTotal = estimate.customMaterials.reduce((sum, mat) => sum + (mat.total || 0), 0);
     const feesTotal = estimate.fees ? estimate.fees.reduce((sum, fee) => sum + (fee.amount || 0), 0) : 0;
-    const waiveFee = document.getElementById('waiveEstimateFee')?.checked || false;
+    
+    // Check if the estimate fee is waived (default to false if not set)
+    const waiveFee = estimate.waiveEstimateFee || false;
     const estimateFee = waiveFee ? 0 : 75;
+    
     const subtotal = laborTotal + materialsTotal + customMaterialsTotal + feesTotal;
     const discount = estimate.discountPercentage ? (subtotal * estimate.discountPercentage / 100) : 0;
     return subtotal - discount - estimateFee;
@@ -1738,16 +1750,16 @@ function exportEstimate(estimate) {
         day: 'numeric'
     });
     
-    // Calculate totals
+    // Calculate totals using the stored waiver status
     const laborTotal = estimate.jobs.reduce((sum, job) => sum + job.labor, 0);
     const materialsTotal = estimate.materials.reduce((sum, mat) => sum + mat.total, 0);
     const customMaterialsTotal = estimate.customMaterials.reduce((sum, mat) => sum + mat.total, 0);
-    const waiveFee = document.getElementById('waiveEstimateFee')?.checked || false;
-    const estimateFee = waiveFee ? -75 : 0;
-    const feesTotal = (currentEstimate.fees ? currentEstimate.fees.reduce((sum, fee) => sum + fee.amount, 0) : 0) + estimateFee;
+    const feesTotal = (estimate.fees ? estimate.fees.reduce((sum, fee) => sum + fee.amount, 0) : 0);
+    const waiveFee = estimate.waiveEstimateFee || false;
+    const estimateFee = waiveFee ? 0 : 75;
     const subtotal = laborTotal + materialsTotal + customMaterialsTotal + feesTotal;
     const discount = estimate.discountPercentage ? (subtotal * estimate.discountPercentage / 100) : 0;
-    const total = subtotal - discount;
+    const total = subtotal - discount - estimateFee;
 
 let html = `
 <!DOCTYPE html>
