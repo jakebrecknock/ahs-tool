@@ -134,6 +134,14 @@
                             <input type="number" id="feeAmount" placeholder="Amount" min="0" step="0.01">
                             <button onclick="addFee()">Add Fee</button>
                         </div>
+                        if (waiveFee) {
+        html += `
+            <div class="estimate-row">
+                <span>Estimate Fee Waiver</span>
+                <span>(${formatCurrency(75)})</span>
+            </div>
+        `;
+    }
                         <div id="feesList"></div>
                         <div class="discount-item">
                             <label for="discountPercentage">Discount Percentage:</label>
@@ -148,6 +156,11 @@
                         <button type="button" class="btn-cancel" onclick="cancelEstimate()">Cancel</button>
                         <button type="button" id="saveEstimateBtn">Save Estimate</button>
                     </div>
+                    <div class="fee-waiver">
+    <label>
+        <input type="checkbox" id="waiveEstimateFee"> Waive $75 estimate fee?
+    </label>
+</div>
                 </div>
             </div>
 

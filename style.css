@@ -874,6 +874,25 @@ nav button:hover {
     grid-column: 1 / -1;
 }
 
+.fee-waiver {
+    margin: 15px 0;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+
+.fee-waiver label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.fee-waiver input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+}
+
 /* Responsive Styles */
 @media (max-width: 768px) {
     header {
