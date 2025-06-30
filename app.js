@@ -63,6 +63,13 @@ let currentEstimate = {
 // Price sheet data (from your PDF)
 const priceSheet = {
     categories: {
+         custom: {
+            name: "Custom",
+            jobs: [
+                { name: "Custom job", days: "1", labor: "$0" }
+            ],
+            materials: {}
+        },
         bathroom: {
             name: "Bathroom",
             jobs: [
@@ -461,8 +468,14 @@ function initCategorySelection() {
         `;
         
         categoryCard.addEventListener('click', function() {
-            this.classList.toggle('selected');
-            showJobDetails(categoryId);
+            // For custom category, don't toggle selection - just show job details
+            if (categoryId === 'custom') {
+                this.classList.add('selected');
+                showJobDetails(categoryId);
+            } else {
+                this.classList.toggle('selected');
+                showJobDetails(categoryId);
+            }
         });
         
         categorySelection.appendChild(categoryCard);
@@ -471,6 +484,7 @@ function initCategorySelection() {
 
 function getCategoryIcon(categoryId) {
     const icons = {
+        custom: '<i class="fas fa-pencil-alt"></i>',
         bathroom: '<i class="fas fa-bath"></i>',
         kitchen: '<i class="fas fa-utensils"></i>',
         bedroom: '<i class="fas fa-bed"></i>',
@@ -495,10 +509,7 @@ function showJobDetails(categoryId) {
         
         selectedCategories.forEach(card => {
             const categoryName = card.querySelector('h3').textContent;
-            const categoryId = Object.keys(priceSheet.categories).find(
-                key => priceSheet.categories[key].name === categoryName
-            );
-            
+            const categoryId = card.getAttribute('data-category');
             const category = priceSheet.categories[categoryId];
             
             const categorySection = document.createElement('div');
@@ -507,41 +518,85 @@ function showJobDetails(categoryId) {
                 <h4>${category.name}</h4>
             `;
             
-            category.jobs.forEach((job, index) => {
-                const jobId = `${categoryId}-job-${index}`;
-                
-                const jobOption = document.createElement('div');
-                jobOption.innerHTML = `
-                    <label>
-                        <input type="radio" name="${categoryId}" value="${index}" 
-                            onchange="updateSelectedJob('${categoryId}', ${index})">
-                        ${job.name} (${job.days} days) - ${job.labor}
-                    </label>
+            if (categoryId === 'custom') {
+                // Custom job input fields
+                categorySection.innerHTML += `
+                    <div class="form-group">
+                        <label>Job Description:</label>
+                        <input type="text" id="customJobName" placeholder="Describe the work">
+                    </div>
+                    <div class="form-group">
+                        <label>Estimated Days:</label>
+                        <input type="number" id="customJobDays" min="0" step="0.5" value="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Labor Cost ($):</label>
+                        <input type="number" id="customJobLabor" min="0" step="0.01" value="0">
+                    </div>
+                    <button onclick="addCustomJob('${categoryId}')">Add Custom Job</button>
                 `;
-                
-                // Add days selection if there's a range
-                if (job.days.includes('-')) {
-                    const [minDays, maxDays] = job.days.split('-').map(Number);
-                    const daysSelect = document.createElement('div');
-                    daysSelect.className = 'days-selection';
-                    daysSelect.innerHTML = `
-                        <label>Days:</label>
-                        <select id="${jobId}-days" onchange="updateJobDays('${categoryId}', ${index}, this.value)">
-                            ${Array.from({length: maxDays - minDays + 1}, (_, i) => 
-                                `<option value="${minDays + i}">${minDays + i}</option>`).join('')}
-                        </select>
+            } else {
+                // Existing job selection logic
+                category.jobs.forEach((job, index) => {
+                    const jobId = `${categoryId}-job-${index}`;
+                    
+                    const jobOption = document.createElement('div');
+                    jobOption.innerHTML = `
+                        <label>
+                            <input type="radio" name="${categoryId}" value="${index}" 
+                                onchange="updateSelectedJob('${categoryId}', ${index})">
+                            ${job.name} (${job.days} days) - ${job.labor}
+                        </label>
                     `;
-                    jobOption.appendChild(daysSelect);
-                }
-                
-                categorySection.appendChild(jobOption);
-            });
+                    
+                    if (job.days.includes('-')) {
+                        const [minDays, maxDays] = job.days.split('-').map(Number);
+                        const daysSelect = document.createElement('div');
+                        daysSelect.className = 'days-selection';
+                        daysSelect.innerHTML = `
+                            <label>Days:</label>
+                            <select id="${jobId}-days" onchange="updateJobDays('${categoryId}', ${index}, this.value)">
+                                ${Array.from({length: maxDays - minDays + 1}, (_, i) => 
+                                    `<option value="${minDays + i}">${minDays + i}</option>`).join('')}
+                            </select>
+                        `;
+                        jobOption.appendChild(daysSelect);
+                    }
+                    
+                    categorySection.appendChild(jobOption);
+                });
+            }
             
             jobDetailsContent.appendChild(categorySection);
         });
     } else {
         jobDetailsContainer.style.display = 'none';
     }
+}
+
+
+function addCustomJob(categoryId) {
+    const name = document.getElementById('customJobName').value.trim();
+    const days = parseFloat(document.getElementById('customJobDays').value) || 1;
+    const labor = parseFloat(document.getElementById('customJobLabor').value) || 0;
+    
+    if (!name) {
+        alert('Please enter a job description');
+        return;
+    }
+    
+    // Remove any existing job for this category
+    currentEstimate.jobs = currentEstimate.jobs.filter(j => j.category !== categoryId);
+    
+    // Add the new custom job
+    currentEstimate.jobs.push({
+        category: categoryId,
+        name: name,
+        days: days,
+        labor: labor
+    });
+    
+    updateEstimatePreview();
 }
 
 function updateSelectedJob(categoryId, jobIndex) {
@@ -1032,6 +1087,9 @@ function saveEstimateChanges() {
     // Update discount percentage
     currentEstimate.discountPercentage = parseFloat(document.getElementById('editDiscountPercentage').value) || 0;
 
+    // Recalculate total
+    currentEstimate.total = calculateEstimateTotal(currentEstimate);
+
     // Update timestamp
     currentEstimate.updatedAt = new Date().toISOString();
 
@@ -1052,8 +1110,8 @@ function saveEstimateChanges() {
             deleteEstimateBtn.style.display = 'inline-block';
             
             // Reload the estimate to show changes
+            loadEstimates(); // This will refresh the dashboard
             openEstimateModal(currentEstimate);
-            loadEstimates();
         })
         .catch(error => {
             console.error('Error updating estimate:', error);
@@ -1063,14 +1121,19 @@ function saveEstimateChanges() {
 
 function loadEstimates() {
     db.collection("estimates")
-        .orderBy("createdAt", "desc")  // Newest first
+        .orderBy("createdAt", "desc")
         .get()
         .then(querySnapshot => {
             const estimates = [];
             querySnapshot.forEach(doc => {
+                const estimateData = doc.data();
+                // Ensure total is calculated if missing
+                if (typeof estimateData.total === 'undefined') {
+                    estimateData.total = calculateEstimateTotal(estimateData);
+                }
                 estimates.push({
-                    id: doc.id,       // Include Firestore document ID
-                    ...doc.data()     // Spread all estimate data
+                    id: doc.id,
+                    ...estimateData
                 });
             });
             displayEstimates(estimates);
@@ -1078,6 +1141,17 @@ function loadEstimates() {
         .catch(error => {
             console.error('Error loading estimates:', error);
         });
+}
+
+// Helper function
+function calculateEstimateTotal(estimate) {
+    const laborTotal = estimate.jobs.reduce((sum, job) => sum + (job.labor || 0), 0);
+    const materialsTotal = estimate.materials.reduce((sum, mat) => sum + (mat.total || 0), 0);
+    const customMaterialsTotal = estimate.customMaterials.reduce((sum, mat) => sum + (mat.total || 0), 0);
+    const feesTotal = estimate.fees ? estimate.fees.reduce((sum, fee) => sum + (fee.amount || 0), 0) : 0;
+    const subtotal = laborTotal + materialsTotal + customMaterialsTotal + feesTotal;
+    const discount = estimate.discountPercentage ? (subtotal * estimate.discountPercentage / 100) : 0;
+    return subtotal - discount;
 }
 
 function displayEstimates(estimates) {
