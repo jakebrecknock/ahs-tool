@@ -25,7 +25,7 @@ const passwordInput = document.getElementById('passwordInput');
 const passwordError = document.getElementById('passwordError');
 const submitPassword = document.getElementById('submitPassword');
 function formatAccounting(num) {
-    return '$' + num.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+    return num.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
 }
 
 const firebaseConfig = {
@@ -600,6 +600,15 @@ function addCustomJob(categoryId) {
         labor: labor
     });
     
+    // Show feedback
+    const feedback = document.createElement('div');
+    feedback.className = 'feedback-message';
+    feedback.innerHTML = `✔ Added custom job: ${name}`;
+    document.querySelector(`[data-category="${categoryId}"]`).appendChild(feedback);
+    
+    // Remove feedback after 3 seconds
+    setTimeout(() => feedback.remove(), 3000);
+    
     updateEstimatePreview();
 }
 
@@ -905,9 +914,10 @@ function updateEstimatePreview() {
     const laborTotal = currentEstimate.jobs.reduce((sum, job) => sum + job.labor, 0);
     const materialsTotal = currentEstimate.materials.reduce((sum, mat) => sum + mat.total, 0);
     const customMaterialsTotal = currentEstimate.customMaterials.reduce((sum, mat) => sum + mat.total, 0);
+    
+    // Calculate fees total including estimate fee if not waived
     const waiveFee = document.getElementById('waiveEstimateFee')?.checked || false;
-    const estimateFee = waiveFee ? -75 : 0;
-    // Calculate fees total
+    const estimateFee = waiveFee ? 0 : -75; // Changed to negative to show as deduction
     const feesTotal = (currentEstimate.fees ? currentEstimate.fees.reduce((sum, fee) => sum + fee.amount, 0) : 0) + estimateFee;
     
     // Calculate subtotal before discount
@@ -1865,7 +1875,7 @@ function exportEstimate(estimate) {
         </head>
         <body>
             <div class="logo">
-                <img src="data:image/webp;base64,${base64Image}" alt="Ace Handyman Services Logo">
+                <img src="https://raw.githubusercontent.com/jakebrecknock/ahs-tool/refs/heads/main/ace-handy-logos.webp" alt="Ace Handyman Services Logo">
             </div>
             </style>
         </head>
@@ -1959,6 +1969,15 @@ function exportEstimate(estimate) {
                                     <td>$${formatAccounting(fee.amount)}</td>
                                 </tr>
                             `).join('') : ''}
+                            ${!waiveFee ? `
+                                <tr>
+                                    <td>Fee</td>
+                                    <td>Estimate Fee</td>
+                                    <td>1</td>
+                                    <td>($75.00)</td>
+                                    <td>($75.00)</td>
+                                </tr>
+                            ` : ''}
                             <tr class="total-row">
                                 <td colspan="4" style="text-align: right;">Subtotal:</td>
                                 <td>$${formatAccounting((job.labor + 

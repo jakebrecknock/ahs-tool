@@ -892,8 +892,19 @@ nav button:hover {
     width: auto;
     margin: 0;
 }
+.feedback-message {
+    color: #28a745;
+    font-size: 0.8em;
+    margin-top: 5px;
+    animation: fadeIn 0.3s;
+}
 
 /* Responsive Styles */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
 @media (max-width: 768px) {
     header {
         flex-direction: column;
