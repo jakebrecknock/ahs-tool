@@ -1819,7 +1819,7 @@ function exportEstimate(estimate) {
     const laborTotal = estimate.jobs.reduce((sum, job) => sum + job.labor, 0);
     const materialsTotal = estimate.materials.reduce((sum, mat) => sum + mat.total, 0);
     const customMaterialsTotal = estimate.customMaterials.reduce((sum, mat) => sum + mat.total, 0);
-    const feesTotal = (estimate.fees ? estimate.fees.reduce((sum, fee) => sum + fee.amount, 0) : 0);
+    const feesTotal = estimate.fees ? estimate.fees.reduce((sum, fee) => sum + fee.amount, 0) : 0;
     const waiveFee = estimate.waiveEstimateFee || false;
     const estimateFee = waiveFee ? -75:75;
     const subtotal = laborTotal + materialsTotal + customMaterialsTotal + feesTotal;
