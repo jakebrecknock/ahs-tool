@@ -998,12 +998,6 @@ nav button:hover {
     cursor: pointer;
     margin-left: 10px;
 }
-.feedback-message {
-    color: #28a745;
-    font-size: 0.8em;
-    margin-top: 5px;
-    animation: fadeIn 0.3s;
-}
 
 /* Responsive Styles */
 

@@ -620,8 +620,16 @@ function addCustomJob(categoryId) {
     feedback.className = 'feedback-message success';
     feedback.innerHTML = `<i class="fas fa-check-circle"></i> Custom job added: ${name}`;
     
-    const customJobSection = document.querySelector(`[data-category="${categoryId}"]`);
-    customJobSection.appendChild(feedback);
+    // Find the custom job section and append feedback
+    const customJobSection = document.querySelector('.job-option');
+    if (customJobSection) {
+        // Remove any existing feedback first
+        const existingFeedback = customJobSection.querySelector('.feedback-message');
+        if (existingFeedback) {
+            existingFeedback.remove();
+        }
+        customJobSection.appendChild(feedback);
+    }
     
     // Remove feedback after 3 seconds
     setTimeout(() => {
@@ -1089,18 +1097,23 @@ function saveEstimate() {
         return;
     }
 
-    // Add waiver status to the estimate
-    currentEstimate.waiveEstimateFee = document.getElementById('waiveEstimateFee').checked;
+    // Get the current waiver status from the button state
+    const waiveFeeBtn = document.getElementById('waiveEstimateFeeBtn');
+    currentEstimate.waiveEstimateFee = waiveFeeBtn.classList.contains('active');
     
     // Add timestamp with proper date formatting
     currentEstimate.createdAt = new Date().toISOString();
     currentEstimate.updatedAt = currentEstimate.createdAt;
+
+    // Calculate total before saving
+    currentEstimate.total = calculateEstimateTotal(currentEstimate);
 
     // Save to Firestore (automatically generates ID)
     db.collection("estimates").add(currentEstimate)
         .then(() => {
             alert('Estimate saved successfully!');
             showDashboard();
+            loadEstimates(); // Explicitly reload estimates to show the new one
         })
         .catch(error => {
             console.error('Error saving estimate:', error);
