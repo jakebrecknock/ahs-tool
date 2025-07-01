@@ -429,7 +429,8 @@ function resetEstimateForm() {
         customMaterials: [],
         fees: [],
         discountPercentage: 0,
-        total: 0
+        total: 0,
+        waiveEstimateFee: false
     };
     
     // Reset form steps
@@ -444,10 +445,13 @@ function resetEstimateForm() {
     });
     document.querySelector('.progress-step[data-step="1"]').classList.add('active');
     
+       
     // Reset form inputs
     customerInfoForm.reset();
     document.getElementById('discountPercentage').value = 0;
     document.getElementById('feesList').innerHTML = '';
+    document.getElementById('customMaterialsList').innerHTML = '<p class="no-materials">No custom materials added yet</p>';
+
 }
 
 function initPhoneNumberFormatting() {
@@ -720,6 +724,7 @@ function nextStep(step) {
     // If moving to materials step, initialize materials
     if (step === 3) {
         initMaterialsSelection();
+        updateCustomMaterialsList(); // Add this line
     }
     
     // If moving to review step, update preview
@@ -946,8 +951,8 @@ function updateEstimatePreview() {
     const materialsTotal = currentEstimate.materials.reduce((sum, mat) => sum + mat.total, 0);
     const customMaterialsTotal = currentEstimate.customMaterials.reduce((sum, mat) => sum + mat.total, 0);
     
-    // Get the current checkbox value
-    const waiveFee = document.getElementById('waiveEstimateFee').checked;
+    // Get the current waiver status
+    const waiveFee = currentEstimate.waiveEstimateFee || false;
     const estimateFee = waiveFee ? 0 : 75;
     
     const feesTotal = (currentEstimate.fees ? currentEstimate.fees.reduce((sum, fee) => sum + fee.amount, 0) : 0);
@@ -956,9 +961,9 @@ function updateEstimatePreview() {
     const total = subtotal - discount - estimateFee;
     
     currentEstimate.total = total;
-    
+}
     // Generate preview HTML
-    let html = `
+ let html = `
         <div class="estimate-section">
             <h3>Customer Information</h3>
             <div class="estimate-row">
@@ -1040,32 +1045,38 @@ function updateEstimatePreview() {
     
     // Add fees section if any fees exist
     if (currentEstimate.fees && currentEstimate.fees.length > 0) {
-        html += `
-            <div class="estimate-section">
-                <h3>Fees</h3>
-        `;
-        
-        currentEstimate.fees.forEach(fee => {
-            html += `
-                <div class="estimate-row">
-                    <span>${fee.name}</span>
-                    <span>$${formatAccounting(fee.amount)}</span>
-                </div>
-            `;
-        });
-        
-        html += `
-                <div class="estimate-row estimate-total-row">
-                    <span>Total Fees:</span>
-                    <span>$${formatAccounting(feesTotal)}</span>
-                </div>
+           let html = `
+        <div class="estimate-section">
+            <h3>Customer Information</h3>
+            <div class="estimate-row">
+                <span>Name:</span>
+                <span>${currentEstimate.customer.name || 'Not provided'}</span>
             </div>
-        `;
-    }
-    
-    // Add subtotal and discount if discount exists
-    if (currentEstimate.discountPercentage > 0) {
-        html += `
+            <!-- ... rest of customer info ... -->
+        </div>
+        
+        <!-- ... jobs and materials sections ... -->
+        
+        <div class="estimate-section">
+            <h3>Fees</h3>
+            ${currentEstimate.fees && currentEstimate.fees.length > 0 ? 
+                currentEstimate.fees.map(fee => `
+                    <div class="estimate-row">
+                        <span>${fee.name}</span>
+                        <span>$${formatAccounting(fee.amount)}</span>
+                    </div>
+                `).join('') : '<p>No fees added</p>'}
+            <div class="estimate-row">
+                <span>Estimate Fee:</span>
+                <span>${waiveFee ? 'Waived (-$75.00)' : '$75.00'}</span>
+            </div>
+            <div class="estimate-row estimate-total-row">
+                <span>Total Fees:</span>
+                <span>$${formatAccounting(feesTotal + (waiveFee ? 0 : 75))}</span>
+            </div>
+        </div>
+        
+        ${currentEstimate.discountPercentage > 0 ? `
             <div class="estimate-section">
                 <div class="estimate-row">
                     <span>Subtotal:</span>
@@ -1076,10 +1087,8 @@ function updateEstimatePreview() {
                     <span>-$${formatAccounting(discount)}</span>
                 </div>
             </div>
-        `;
-    }
-    
-    html += `
+        ` : ''}
+        
         <div class="estimate-section">
             <div class="estimate-row estimate-total-row">
                 <span>Total Estimate:</span>
@@ -1695,10 +1704,10 @@ function updateMaterialField(index, isCustom, field, value) {
 
 function addCustomMaterialToEstimate() {
     const name = document.getElementById('customMaterialName').value.trim();
-    const price = Math.max(0, parseFloat(document.getElementById('customMaterialPrice').value));
-    const qty = Math.max(1, parseInt(document.getElementById('customMaterialQty').value));
+    const price = parseFloat(document.getElementById('customMaterialPrice').value);
+    const qty = parseInt(document.getElementById('customMaterialQty').value);
     
-    if (!name || isNaN(price) || isNaN(qty)) {
+    if (!name || isNaN(price) || price <= 0 || isNaN(qty) || qty <= 0) {
         alert('Please enter valid material details');
         return;
     }
@@ -1711,6 +1720,9 @@ function addCustomMaterialToEstimate() {
         total: price * qty
     });
     
+    // Update custom materials list display
+    updateCustomMaterialsList();
+    
     // Clear form
     document.getElementById('customMaterialName').value = '';
     document.getElementById('customMaterialPrice').value = '';
@@ -1718,6 +1730,7 @@ function addCustomMaterialToEstimate() {
     
     updateEstimatePreview();
 }
+
 function updateCustomMaterialsList() {
     const container = document.getElementById('customMaterialsList');
     container.innerHTML = '';
