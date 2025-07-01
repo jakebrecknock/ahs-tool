@@ -950,102 +950,20 @@ function updateEstimatePreview() {
     const laborTotal = currentEstimate.jobs.reduce((sum, job) => sum + job.labor, 0);
     const materialsTotal = currentEstimate.materials.reduce((sum, mat) => sum + mat.total, 0);
     const customMaterialsTotal = currentEstimate.customMaterials.reduce((sum, mat) => sum + mat.total, 0);
+    const feesTotal = (currentEstimate.fees ? currentEstimate.fees.reduce((sum, fee) => sum + fee.amount, 0) : 0);
     
     // Get the current waiver status
     const waiveFee = currentEstimate.waiveEstimateFee || false;
     const estimateFee = waiveFee ? 0 : 75;
     
-    const feesTotal = (currentEstimate.fees ? currentEstimate.fees.reduce((sum, fee) => sum + fee.amount, 0) : 0);
     const subtotal = laborTotal + materialsTotal + customMaterialsTotal + feesTotal;
     const discount = currentEstimate.discountPercentage ? (subtotal * currentEstimate.discountPercentage / 100) : 0;
-    const total = subtotal - discount - estimateFee;
+    const total = subtotal - discount + estimateFee; // Changed this line
     
     currentEstimate.total = total;
-}
+    
     // Generate preview HTML
- let html = `
-        <div class="estimate-section">
-            <h3>Customer Information</h3>
-            <div class="estimate-row">
-                <span>Name:</span>
-                <span>${currentEstimate.customer.name || 'Not provided'}</span>
-            </div>
-            <div class="estimate-row">
-                <span>Email:</span>
-                <span>${currentEstimate.customer.email || 'Not provided'}</span>
-            </div>
-            <div class="estimate-row">
-                <span>Phone:</span>
-                <span>${currentEstimate.customer.phone || 'Not provided'}</span>
-            </div>
-            <div class="estimate-row">
-                <span>Job Location:</span>
-                <span>${currentEstimate.customer.location || 'Not provided'}</span>
-            </div>
-        </div>
-        
-        <div class="estimate-section">
-            <h3>Jobs</h3>
-    `;
-    
-    if (currentEstimate.jobs.length === 0) {
-        html += `<p>No jobs selected</p>`;
-    } else {
-        currentEstimate.jobs.forEach(job => {
-            const categoryName = priceSheet.categories[job.category].name;
-            html += `
-                <div class="estimate-row">
-                    <span>${categoryName} - ${job.name} (${job.days} days)</span>
-                    <span>$${formatAccounting(job.labor)}</span>
-                </div>
-            `;
-        });
-    }
-    
-    html += `
-            <div class="estimate-row estimate-total-row">
-                <span>Total Labor:</span>
-                <span>$${formatAccounting(laborTotal)}</span>
-            </div>
-        </div>
-        
-        <div class="estimate-section">
-            <h3>Materials</h3>
-    `;
-    
-    if (currentEstimate.materials.length === 0 && currentEstimate.customMaterials.length === 0) {
-        html += `<p>No materials selected</p>`;
-    } else {
-        currentEstimate.materials.forEach(mat => {
-            html += `
-                <div class="estimate-row">
-                    <span>${mat.name} (${mat.quantity} @ $${formatAccounting(mat.price)})</span>
-                    <span>$${formatAccounting(mat.total)}</span>
-                </div>
-            `;
-        });
-        
-        currentEstimate.customMaterials.forEach(mat => {
-            html += `
-                <div class="estimate-row">
-                    <span>${mat.name} (Custom) (${mat.quantity} @ $${formatAccounting(mat.price)})</span>
-                    <span>$${formatAccounting(mat.total)}</span>
-                </div>
-            `;
-        });
-    }
-    
-    html += `
-            <div class="estimate-row estimate-total-row">
-                <span>Total Materials:</span>
-                <span>$${(formatAccounting(materialsTotal + customMaterialsTotal))}</span>
-            </div>
-        </div>
-    `;
-    
-    // Add fees section if any fees exist
-    if (currentEstimate.fees && currentEstimate.fees.length > 0) {
-           let html = `
+    let html = `
         <div class="estimate-section">
             <h3>Customer Information</h3>
             <div class="estimate-row">
@@ -1216,7 +1134,7 @@ function calculateEstimateTotal(estimate) {
     
     const subtotal = laborTotal + materialsTotal + customMaterialsTotal + feesTotal;
     const discount = estimate.discountPercentage ? (subtotal * estimate.discountPercentage / 100) : 0;
-    return subtotal - discount - estimateFee;
+    return subtotal - discount + estimateFee;
 }
 
 function displayEstimates(estimates) {
@@ -1855,7 +1773,7 @@ function exportEstimate(estimate) {
     const estimateFee = waiveFee ? 0 : 75;
     const subtotal = laborTotal + materialsTotal + customMaterialsTotal + feesTotal;
     const discount = estimate.discountPercentage ? (subtotal * estimate.discountPercentage / 100) : 0;
-    const total = subtotal - discount - estimateFee;
+    const total = subtotal - discount + estimateFee;
 
 let html = `
 <!DOCTYPE html>
