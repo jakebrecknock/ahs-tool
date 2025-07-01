@@ -958,7 +958,7 @@ function updateEstimatePreview() {
     
     const subtotal = laborTotal + materialsTotal + customMaterialsTotal + feesTotal;
     const discount = currentEstimate.discountPercentage ? (subtotal * currentEstimate.discountPercentage / 100) : 0;
-    const total = subtotal - discount + estimateFee; // Changed this line
+    const total = subtotal - discount + estimateFee;
     
     currentEstimate.total = total;
     
@@ -970,15 +970,63 @@ function updateEstimatePreview() {
                 <span>Name:</span>
                 <span>${currentEstimate.customer.name || 'Not provided'}</span>
             </div>
-            <!-- ... rest of customer info ... -->
+            <div class="estimate-row">
+                <span>Email:</span>
+                <span>${currentEstimate.customer.email || 'Not provided'}</span>
+            </div>
+            <div class="estimate-row">
+                <span>Phone:</span>
+                <span>${currentEstimate.customer.phone || 'Not provided'}</span>
+            </div>
+            <div class="estimate-row">
+                <span>Job Location:</span>
+                <span>${currentEstimate.customer.location || 'Not provided'}</span>
+            </div>
         </div>
         
-        <!-- ... jobs and materials sections ... -->
+        <div class="estimate-section">
+            <h3>Jobs</h3>
+            ${currentEstimate.jobs.map(job => {
+                const categoryName = priceSheet.categories[job.category].name;
+                return `
+                    <div class="estimate-row">
+                        <span>${categoryName} - ${job.name} (${job.days} days)</span>
+                        <span>$${formatAccounting(job.labor)}</span>
+                    </div>
+                `;
+            }).join('')}
+            <div class="estimate-row estimate-total-row">
+                <span>Total Labor:</span>
+                <span>$${formatAccounting(laborTotal)}</span>
+            </div>
+        </div>
+        
+        <div class="estimate-section">
+            <h3>Materials</h3>
+            ${currentEstimate.materials.length > 0 ? 
+                currentEstimate.materials.map(mat => `
+                    <div class="estimate-row">
+                        <span>${mat.name} (${mat.quantity} @ $${formatAccounting(mat.price)})</span>
+                        <span>$${formatAccounting(mat.total)}</span>
+                    </div>
+                `).join('') : '<p>No materials selected</p>'}
+            ${currentEstimate.customMaterials.length > 0 ? 
+                currentEstimate.customMaterials.map(mat => `
+                    <div class="estimate-row">
+                        <span>${mat.name} (Custom) (${mat.quantity} @ $${formatAccounting(mat.price)})</span>
+                        <span>$${formatAccounting(mat.total)}</span>
+                    </div>
+                `).join('') : ''}
+            <div class="estimate-row estimate-total-row">
+                <span>Total Materials:</span>
+                <span>$${formatAccounting(materialsTotal + customMaterialsTotal)}</span>
+            </div>
+        </div>
         
         <div class="estimate-section">
             <h3>Fees</h3>
-            ${estimate.fees && estimate.fees.length > 0 ? 
-                estimate.fees.map(fee => `
+            ${currentEstimate.fees && currentEstimate.fees.length > 0 ? 
+                currentEstimate.fees.map(fee => `
                     <div class="estimate-row">
                         <span>${fee.name}</span>
                         <span>$${formatAccounting(fee.amount)}</span>
@@ -990,7 +1038,7 @@ function updateEstimatePreview() {
             </div>
             <div class="estimate-row estimate-total-row">
                 <span>Total Fees:</span>
-                <span>$${formatAccounting(feesTotal + (waiveFee ? 0 : 75))}</span>
+                <span>$${formatAccounting(feesTotal + estimateFee)}</span>
             </div>
         </div>
         
@@ -1768,7 +1816,7 @@ function exportEstimate(estimate) {
     });
     
     // Calculate totals using the stored waiver status
- const laborTotal = estimate.jobs.reduce((sum, job) => sum + job.labor, 0);
+    const laborTotal = estimate.jobs.reduce((sum, job) => sum + job.labor, 0);
     const materialsTotal = estimate.materials.reduce((sum, mat) => sum + mat.total, 0);
     const customMaterialsTotal = estimate.customMaterials.reduce((sum, mat) => sum + mat.total, 0);
     const feesTotal = (estimate.fees ? estimate.fees.reduce((sum, fee) => sum + fee.amount, 0) : 0);
