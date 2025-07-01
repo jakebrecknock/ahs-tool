@@ -977,8 +977,8 @@ function updateEstimatePreview() {
         
         <div class="estimate-section">
             <h3>Fees</h3>
-            ${currentEstimate.fees && currentEstimate.fees.length > 0 ? 
-                currentEstimate.fees.map(fee => `
+            ${estimate.fees && estimate.fees.length > 0 ? 
+                estimate.fees.map(fee => `
                     <div class="estimate-row">
                         <span>${fee.name}</span>
                         <span>$${formatAccounting(fee.amount)}</span>
@@ -1320,14 +1320,17 @@ function openEstimateModal(estimate) {
         `;
     }
     
-    // Calculate totals
+
+  // Calculate totals with the waiver status
     const laborTotal = estimate.jobs.reduce((sum, job) => sum + job.labor, 0);
     const materialsTotal = estimate.materials.reduce((sum, mat) => sum + mat.total, 0);
     const customMaterialsTotal = estimate.customMaterials.reduce((sum, mat) => sum + mat.total, 0);
     const feesTotal = estimate.fees ? estimate.fees.reduce((sum, fee) => sum + fee.amount, 0) : 0;
+    const waiveFee = estimate.waiveEstimateFee || false;
+    const estimateFee = waiveFee ? 0 : 75;
     const subtotal = laborTotal + materialsTotal + customMaterialsTotal + feesTotal;
     const discount = estimate.discountPercentage ? (subtotal * estimate.discountPercentage / 100) : 0;
-    const total = subtotal - discount;
+    const total = subtotal - discount + estimateFee;
     
     // Add subtotal and discount if discount exists
     if (estimate.discountPercentage > 0) {
@@ -1765,7 +1768,7 @@ function exportEstimate(estimate) {
     });
     
     // Calculate totals using the stored waiver status
-    const laborTotal = estimate.jobs.reduce((sum, job) => sum + job.labor, 0);
+ const laborTotal = estimate.jobs.reduce((sum, job) => sum + job.labor, 0);
     const materialsTotal = estimate.materials.reduce((sum, mat) => sum + mat.total, 0);
     const customMaterialsTotal = estimate.customMaterials.reduce((sum, mat) => sum + mat.total, 0);
     const feesTotal = (estimate.fees ? estimate.fees.reduce((sum, fee) => sum + fee.amount, 0) : 0);
