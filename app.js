@@ -353,10 +353,20 @@ function setupEventListeners() {
     if (addCustomMaterial) addCustomMaterial.addEventListener('click', addCustomMaterialToEstimate);
     if (saveEstimateBtn) saveEstimateBtn.addEventListener('click', saveEstimate);
 
-    const waiveEstimateFeeCheckbox = document.getElementById('waiveEstimateFee');
-    if (waiveEstimateFeeCheckbox) {
-        waiveEstimateFeeCheckbox.addEventListener('change', updateEstimatePreview);
+    const waiveEstimateFeeCheckbox = // Replace the checkbox event listener with button click handler
+document.getElementById('waiveEstimateFeeBtn').addEventListener('click', function() {
+    currentEstimate.waiveEstimateFee = !currentEstimate.waiveEstimateFee;
+    
+    if (currentEstimate.waiveEstimateFee) {
+        this.classList.add('active');
+        this.innerHTML = '<i class="fas fa-check"></i> Estimate Fee Waived';
+    } else {
+        this.classList.remove('active');
+        this.innerHTML = '<i class="fas fa-dollar-sign"></i> Waive $75 Estimate Fee';
     }
+    
+    updateEstimatePreview();
+});
 }
 
 function checkPassword() {
@@ -605,14 +615,19 @@ function addCustomJob(categoryId) {
         labor: labor
     });
     
-    // Show feedback
+    // Create and show feedback element
     const feedback = document.createElement('div');
-    feedback.className = 'feedback-message';
-    feedback.innerHTML = `✔ Added custom job: ${name}`;
-    document.querySelector(`[data-category="${categoryId}"]`).appendChild(feedback);
+    feedback.className = 'feedback-message success';
+    feedback.innerHTML = `<i class="fas fa-check-circle"></i> Custom job added: ${name}`;
+    
+    const customJobSection = document.querySelector(`[data-category="${categoryId}"]`);
+    customJobSection.appendChild(feedback);
     
     // Remove feedback after 3 seconds
-    setTimeout(() => feedback.remove(), 3000);
+    setTimeout(() => {
+        feedback.classList.add('fade-out');
+        setTimeout(() => feedback.remove(), 300);
+    }, 3000);
     
     updateEstimatePreview();
 }
@@ -849,6 +864,9 @@ function addCustomMaterialToEstimate() {
         quantity: qty,
         total: price * qty
     });
+    
+    // Update custom materials list display
+    updateCustomMaterialsList();
     
     // Clear form
     document.getElementById('customMaterialName').value = '';
@@ -1220,6 +1238,33 @@ function displayEstimates(estimates) {
         estimateCard.addEventListener('click', () => openEstimateModal(estimate));
         estimatesList.appendChild(estimateCard);
     });
+}
+
+function applyDiscount() {
+    const discountValue = parseFloat(document.getElementById('discountPercentage').value) || 0;
+    currentEstimate.discountPercentage = Math.min(100, Math.max(0, discountValue));
+    
+    const discountDisplay = document.getElementById('discountDisplay');
+    if (currentEstimate.discountPercentage > 0) {
+        discountDisplay.innerHTML = `
+            <span class="discount-value">${currentEstimate.discountPercentage}% Discount Applied</span>
+            <button onclick="removeDiscount()" class="remove-discount"><i class="fas fa-times"></i></button>
+        `;
+        discountDisplay.classList.add('active');
+    } else {
+        discountDisplay.innerHTML = 'No discount applied';
+        discountDisplay.classList.remove('active');
+    }
+    
+    updateEstimatePreview();
+}
+
+function removeDiscount() {
+    document.getElementById('discountPercentage').value = 0;
+    currentEstimate.discountPercentage = 0;
+    document.getElementById('discountDisplay').innerHTML = 'No discount applied';
+    document.getElementById('discountDisplay').classList.remove('active');
+    updateEstimatePreview();
 }
 
 function openEstimateModal(estimate) {
@@ -1658,6 +1703,31 @@ function addCustomMaterialToEstimate() {
     document.getElementById('customMaterialPrice').value = '';
     document.getElementById('customMaterialQty').value = '1';
     
+    updateEstimatePreview();
+}
+function updateCustomMaterialsList() {
+    const container = document.getElementById('customMaterialsList');
+    container.innerHTML = '';
+    
+    if (currentEstimate.customMaterials.length === 0) {
+        container.innerHTML = '<p class="no-materials">No custom materials added yet</p>';
+        return;
+    }
+    
+    currentEstimate.customMaterials.forEach((mat, index) => {
+        const item = document.createElement('div');
+        item.className = 'custom-material-item';
+        item.innerHTML = `
+            <span>${mat.name} (${mat.quantity} @ $${formatAccounting(mat.price)}) = $${formatAccounting(mat.total)}</span>
+            <button onclick="removeCustomMaterial(${index})"><i class="fas fa-times"></i></button>
+        `;
+        container.appendChild(item);
+    });
+}
+
+function removeCustomMaterial(index) {
+    currentEstimate.customMaterials.splice(index, 1);
+    updateCustomMaterialsList();
     updateEstimatePreview();
 }
 
