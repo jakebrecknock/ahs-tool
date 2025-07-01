@@ -2144,15 +2144,13 @@ function exportEstimate(estimate) {
     <div class="payment-terms">
         <h3>Payment Terms</h3>
         <ul>
-            ${paymentTerms.depositRequired ? `
-            <li><strong>Deposit:</strong> ${paymentTerms.depositPercentage}% deposit required to schedule work</li>
-            ` : ''}
+           
             ${paymentTerms.progressPayments ? `
             <li><strong>Progress Payments:</strong> Payments due at agreed milestones during project</li>
             ` : ''}
             <li><strong>Final Payment:</strong> Due ${paymentTerms.finalPaymentDue}</li>
             <li><strong>Accepted Payment Methods:</strong> ${paymentTerms.paymentMethods.join(", ")}</li>
-            <li><strong>Late Payments:</strong> Subject to 1.5% monthly interest charge</li>
+  
         </ul>
     </div>
     
@@ -2166,7 +2164,6 @@ function exportEstimate(estimate) {
             <li><strong>Project Timeline:</strong> to be determined between owner and Ace Handyman Services</li>
             <li><strong>Warranty:</strong> 12 Months: labor and materials provided by Ace Handyman Services</li>
             <li><strong>Disclosure:</strong> Ace Handyman Services operates on a time and materials model. The above estimate is subject to change.</li>
-            <li><strong>Cancellation:</strong> Projects may be cancelled with 48 hours notice without penalty</li>
             <li><strong>Change Orders:</strong> Any changes to scope of work will require a signed change order</li>
         </ul>
     </div>
