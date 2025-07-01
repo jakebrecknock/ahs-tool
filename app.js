@@ -954,7 +954,7 @@ function updateEstimatePreview() {
     
     // Get the current waiver status
     const waiveFee = currentEstimate.waiveEstimateFee || false;
-    const estimateFee = waiveFee ? 0 : 75;
+    const estimateFee = waiveFee ? -75:75;
     
     const subtotal = laborTotal + materialsTotal + customMaterialsTotal + feesTotal;
     const discount = currentEstimate.discountPercentage ? (subtotal * currentEstimate.discountPercentage / 100) : 0;
@@ -1178,7 +1178,7 @@ function calculateEstimateTotal(estimate) {
     
     // Check if the estimate fee is waived (default to false if not set)
     const waiveFee = estimate.waiveEstimateFee || false;
-    const estimateFee = waiveFee ? 0 : 75;
+    const estimateFee = waiveFee ? -75:75;
     
     const subtotal = laborTotal + materialsTotal + customMaterialsTotal + feesTotal;
     const discount = estimate.discountPercentage ? (subtotal * estimate.discountPercentage / 100) : 0;
@@ -1375,7 +1375,7 @@ function openEstimateModal(estimate) {
     const customMaterialsTotal = estimate.customMaterials.reduce((sum, mat) => sum + mat.total, 0);
     const feesTotal = estimate.fees ? estimate.fees.reduce((sum, fee) => sum + fee.amount, 0) : 0;
     const waiveFee = estimate.waiveEstimateFee || false;
-    const estimateFee = waiveFee ? 0 : 75;
+    const estimateFee = waiveFee ? -75:75;
     const subtotal = laborTotal + materialsTotal + customMaterialsTotal + feesTotal;
     const discount = estimate.discountPercentage ? (subtotal * estimate.discountPercentage / 100) : 0;
     const total = subtotal - discount + estimateFee;
@@ -1821,7 +1821,7 @@ function exportEstimate(estimate) {
     const customMaterialsTotal = estimate.customMaterials.reduce((sum, mat) => sum + mat.total, 0);
     const feesTotal = (estimate.fees ? estimate.fees.reduce((sum, fee) => sum + fee.amount, 0) : 0);
     const waiveFee = estimate.waiveEstimateFee || false;
-    const estimateFee = waiveFee ? 0 : 75;
+    const estimateFee = waiveFee ? -75:75;
     const subtotal = laborTotal + materialsTotal + customMaterialsTotal + feesTotal;
     const discount = estimate.discountPercentage ? (subtotal * estimate.discountPercentage / 100) : 0;
     const total = subtotal - discount + estimateFee;
