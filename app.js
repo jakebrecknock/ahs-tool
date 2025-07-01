@@ -1815,7 +1815,7 @@ function exportEstimate(estimate) {
         day: 'numeric'
     });
     
-    // Calculate totals using the stored waiver status
+    // Calculate totals
     const laborTotal = estimate.jobs.reduce((sum, job) => sum + job.labor, 0);
     const materialsTotal = estimate.materials.reduce((sum, mat) => sum + mat.total, 0);
     const customMaterialsTotal = estimate.customMaterials.reduce((sum, mat) => sum + mat.total, 0);
@@ -1825,6 +1825,15 @@ function exportEstimate(estimate) {
     const subtotal = laborTotal + materialsTotal + customMaterialsTotal + feesTotal;
     const discount = estimate.discountPercentage ? (subtotal * estimate.discountPercentage / 100) : 0;
     const total = subtotal - discount + estimateFee;
+
+    // Payment terms options (you can make these configurable)
+    const paymentTerms = {
+        depositRequired: true,
+        depositPercentage: 50,
+        progressPayments: true,
+        finalPaymentDue: "upon completion",
+        paymentMethods: ["Check", "Credit Card", "Bank Transfer"]
+    };
 
     let html = `
 <!DOCTYPE html>
@@ -1943,6 +1952,19 @@ function exportEstimate(estimate) {
         .logo img {
             max-width: 50px;
             height: auto;
+        }
+        .payment-terms {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        .payment-terms h3 {
+            color: #e63946;
+            margin-top: 0;
+        }
+        .payment-terms ul {
+            margin-bottom: 0;
         }
     </style>
 </head>
@@ -2079,7 +2101,10 @@ function exportEstimate(estimate) {
         `;
     }).join('')}
     
+    <div class="page-break"></div>
+    
     <div class="section">
+        <div class="section-title">Payment Summary</div>
         <table>
             <tr>
                 <td style="text-align: right; font-weight: bold;">Labor Total:</td>
@@ -2116,6 +2141,23 @@ function exportEstimate(estimate) {
         </table>
     </div>
     
+    <div class="payment-terms">
+        <h3>Payment Terms</h3>
+        <ul>
+            ${paymentTerms.depositRequired ? `
+            <li><strong>Deposit:</strong> ${paymentTerms.depositPercentage}% deposit required to schedule work</li>
+            ` : ''}
+            ${paymentTerms.progressPayments ? `
+            <li><strong>Progress Payments:</strong> Payments due at agreed milestones during project</li>
+            ` : ''}
+            <li><strong>Final Payment:</strong> Due ${paymentTerms.finalPaymentDue}</li>
+            <li><strong>Accepted Payment Methods:</strong> ${paymentTerms.paymentMethods.join(", ")}</li>
+            <li><strong>Late Payments:</strong> Subject to 1.5% monthly interest charge</li>
+        </ul>
+    </div>
+    
+    <div class="page-break"></div>
+    
     <div class="section terms">
         <div class="section-title">Terms and Conditions</div>
         <ul>
@@ -2124,6 +2166,8 @@ function exportEstimate(estimate) {
             <li><strong>Project Timeline:</strong> to be determined between owner and Ace Handyman Services</li>
             <li><strong>Warranty:</strong> 12 Months: labor and materials provided by Ace Handyman Services</li>
             <li><strong>Disclosure:</strong> Ace Handyman Services operates on a time and materials model. The above estimate is subject to change.</li>
+            <li><strong>Cancellation:</strong> Projects may be cancelled with 48 hours notice without penalty</li>
+            <li><strong>Change Orders:</strong> Any changes to scope of work will require a signed change order</li>
         </ul>
     </div>
     
