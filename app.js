@@ -1821,12 +1821,12 @@ function exportEstimate(estimate) {
     const customMaterialsTotal = estimate.customMaterials.reduce((sum, mat) => sum + mat.total, 0);
     const feesTotal = estimate.fees ? estimate.fees.reduce((sum, fee) => sum + fee.amount, 0) : 0;
     const waiveFee = estimate.waiveEstimateFee || false;
-    const estimateFee = waiveFee ? -75:75;
+    const estimateFee = waiveFee ? -75 : 75;
     const subtotal = laborTotal + materialsTotal + customMaterialsTotal + feesTotal;
     const discount = estimate.discountPercentage ? (subtotal * estimate.discountPercentage / 100) : 0;
     const total = subtotal - discount + estimateFee;
 
-let html = `
+    let html = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -1979,6 +1979,15 @@ let html = `
     
     ${estimate.jobs.map((job, index) => {
         const categoryName = priceSheet.categories[job.category].name;
+        const jobMaterials = estimate.materials.filter(mat => 
+            priceSheet.categories[job.category].materials[mat.name] !== undefined
+        );
+        const jobSubtotal = job.labor + 
+            jobMaterials.reduce((sum, mat) => sum + mat.total, 0) +
+            estimate.customMaterials.reduce((sum, mat) => sum + mat.total, 0) +
+            (estimate.fees ? estimate.fees.reduce((sum, fee) => sum + fee.amount, 0) : 0);
+        const jobDiscount = estimate.discountPercentage ? (jobSubtotal * estimate.discountPercentage / 100) : 0;
+        
         return `
             <div class="section">
                 <div class="section-title">${index + 1}. Scope of Work</div>
@@ -1989,9 +1998,7 @@ let html = `
                 </ul>
                 <p><strong>Materials:</strong></p>
                 <ul>
-                    ${estimate.materials
-                        .filter(mat => priceSheet.categories[job.category].materials[mat.name] !== undefined)
-                        .map(mat => `<li>${mat.name} (${mat.quantity} @ $${formatAccounting(mat.price)})</li>`).join('')}
+                    ${jobMaterials.map(mat => `<li>${mat.name} (${mat.quantity} @ $${formatAccounting(mat.price)})</li>`).join('')}
                     ${estimate.customMaterials.map(mat => `<li>${mat.name} (Custom) (${mat.quantity} @ $${formatAccounting(mat.price)})</li>`).join('')}
                 </ul>
                 <table>   
@@ -2009,60 +2016,63 @@ let html = `
                         <td>$${formatAccounting(job.labor)}</td>
                         <td>$${formatAccounting(job.labor)}</td>
                     </tr>
-                    ${estimate.materials
-                        .filter(mat => priceSheet.categories[job.category].materials[mat.name] !== undefined)
-                        .map(mat => `
-                        <tr>
-                            <td>Material</td>
-                            <td>${mat.name}</td>
-                            <td>${mat.quantity}</td>
-                            <td>$${formatAccounting(mat.price)}</td>
-                            <td>$${formatAccounting(mat.total)}</td>
-                        </tr>
-                        `).join('')}
+                    ${jobMaterials.map(mat => `
+                    <tr>
+                        <td>Material</td>
+                        <td>${mat.name}</td>
+                        <td>${mat.quantity}</td>
+                        <td>$${formatAccounting(mat.price)}</td>
+                        <td>$${formatAccounting(mat.total)}</td>
+                    </tr>
+                    `).join('')}
                     ${estimate.customMaterials.map(mat => `
-                        <tr>
-                            <td>Material</td>
-                            <td>${mat.name} (Custom)</td>
-                            <td>${mat.quantity}</td>
-                            <td>$${formatAccounting(mat.price)}</td>
-                            <td>$${formatAccounting(mat.total)}</td>
-                        </tr>
+                    <tr>
+                        <td>Material</td>
+                        <td>${mat.name} (Custom)</td>
+                        <td>${mat.quantity}</td>
+                        <td>$${formatAccounting(mat.price)}</td>
+                        <td>$${formatAccounting(mat.total)}</td>
+                    </tr>
                     `).join('')}
                     ${estimate.fees && estimate.fees.length > 0 ? estimate.fees.map(fee => `
-                        <tr>
-                            <td>Fee</td>
-                            <td>${fee.name}</td>
-                            <td>1</td>
-                            <td>$${formatAccounting(fee.amount)}</td>
-                            <td>$${formatAccounting(fee.amount)}</td>
-                        </tr>
+                    <tr>
+                        <td>Fee</td>
+                        <td>${fee.name}</td>
+                        <td>1</td>
+                        <td>$${formatAccounting(fee.amount)}</td>
+                        <td>$${formatAccounting(fee.amount)}</td>
+                    </tr>
                     `).join('') : ''}
                     ${!waiveFee ? `
-                        <tr>
-                            <td>Fee</td>
-                            <td>Estimate Fee</td>
-                            <td>1</td>
-                            <td>$75.00</td>
-                            <td>$75.00</td>
-                        </tr>
+                    <tr>
+                        <td>Fee</td>
+                        <td>Estimate Fee</td>
+                        <td>1</td>
+                        <td>$75.00</td>
+                        <td>$75.00</td>
+                    </tr>
                     ` : `
-                        <tr>
-                            <td>Fee</td>
-                            <td>Estimate Fee Removed</td>
-                            <td>1</td>
-                            <td>($75.00)</td>
-                            <td>($75.00)</td>
-                        </tr>
+                    <tr>
+                        <td>Fee</td>
+                        <td>Estimate Fee Removed</td>
+                        <td>1</td>
+                        <td>($75.00)</td>
+                        <td>($75.00)</td>
+                    </tr>
                     `}
-                    <tr class="total-row">
+                    ${estimate.discountPercentage > 0 ? `
+                    <tr>
                         <td colspan="4" style="text-align: right;">Subtotal:</td>
-                        <td>$${formatAccounting((job.labor + 
-                            estimate.materials
-                                .filter(mat => priceSheet.categories[job.category].materials[mat.name] !== undefined)
-                                .reduce((sum, mat) => sum + mat.total, 0) +
-                            estimate.customMaterials.reduce((sum, mat) => sum + mat.total, 0) +
-                            (estimate.fees ? estimate.fees.reduce((sum, fee) => sum + fee.amount, 0) : 0)))}</td>
+                        <td>$${formatAccounting(jobSubtotal)}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="4" style="text-align: right;">Discount (${estimate.discountPercentage}%):</td>
+                        <td>-$${formatAccounting(jobDiscount)}</td>
+                    </tr>
+                    ` : ''}
+                    <tr class="total-row">
+                        <td colspan="4" style="text-align: right;">Total:</td>
+                        <td>$${formatAccounting(jobSubtotal - jobDiscount + (waiveFee ? -75 : 75))}</td>
                     </tr>
                 </table>
             </div>
@@ -2097,7 +2107,7 @@ let html = `
             ` : ''}
             <tr>
                 <td style="text-align: right; font-weight: bold;">Estimate Fee:</td>
-                <td>-$${formatAccounting(estimateFee)}</td>
+                <td>${waiveFee ? '-$75.00' : '$75.00'}</td>
             </tr>
             <tr class="highlight-green">
                 <td style="text-align: right; font-weight: bold; font-size: 1.1em;">Final Total:</td>
