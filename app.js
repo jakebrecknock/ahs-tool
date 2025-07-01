@@ -1876,7 +1876,7 @@ let html = `
             margin-bottom: 20px;
         }
         .logo img {
-            max-width: 200px;
+            max-width: 50px;
             height: auto;
         }
     </style>
@@ -1886,7 +1886,6 @@ let html = `
         <img src="https://raw.githubusercontent.com/jakebrecknock/ahs-tool/refs/heads/main/ace-handy-logos.webp" alt="Ace Handyman Services Logo">
     </div>
     <div class="header">
-        <h1>ACE HANDYMAN SERVICES</h1>
         <h2>Ace Handyman Services Oak Park River Forest</h2>
         <p>207 N Harlem Ave. Oak Park, IL 60302 | (708) 773-0218</p>
         <h3>ESTIMATE: Home Repair Projects</h3>
