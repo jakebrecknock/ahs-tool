@@ -203,7 +203,7 @@ function addNewJob() {
     currentJobId++;
     const newJob = {
         id: currentJobId,
-        category: "custom", // Default to custom
+        category: "custom",
         name: "",
         days: 1,
         labor: 0,
@@ -213,6 +213,23 @@ function addNewJob() {
     };
     currentEstimate.jobs.push(newJob);
     showJobDetails(currentJobId);
+}
+
+function removeJob(jobId) {
+    if (currentEstimate.jobs.length <= 1) {
+        alert("You must have at least one job");
+        return;
+    }
+    
+    currentEstimate.jobs = currentEstimate.jobs.filter(job => job.id !== jobId);
+    
+    // If we removed the currently displayed job, show the first remaining job
+    if (jobId === currentJobId) {
+        currentJobId = currentEstimate.jobs[0].id;
+    }
+    
+    showJobDetails(currentJobId);
+    updateEstimatePreview();
 }
 
 function showJobDetails(jobId) {
@@ -273,7 +290,7 @@ function renderJobDetails(job) {
         <div class="form-group">
             <label>Estimated Days:</label>
             <input type="number" class="job-days" value="${job.days || 1}" min="0" step="0.5"
-                onchange="currentEstimate.jobs.find(j => j.id === ${job.id}).days = this.value">
+                onchange="currentEstimate.jobs.find(j => j.id === ${job.id}).days = parseFloat(this.value)">
         </div>
         <div class="form-group">
             <label>Labor Cost ($):</label>
@@ -340,6 +357,7 @@ function resetEstimateForm() {
     };
     
     // Add initial custom job
+    currentJobId = 1;
     addNewJob();
     
     // Reset form steps
@@ -354,13 +372,11 @@ function resetEstimateForm() {
     });
     document.querySelector('.progress-step[data-step="1"]').classList.add('active');
     
-       
     // Reset form inputs
     customerInfoForm.reset();
     document.getElementById('discountPercentage').value = 0;
     document.getElementById('feesList').innerHTML = '';
     document.getElementById('customMaterialsList').innerHTML = '<p class="no-materials">No custom materials added yet</p>';
-
 }
 
 function initPhoneNumberFormatting() {
@@ -385,7 +401,7 @@ function initCategorySelection() {
     
     // Only show the custom category card
     const categoryCard = document.createElement('div');
-    categoryCard.className = 'category-card selected'; // Start selected
+    categoryCard.className = 'category-card selected';
     categoryCard.setAttribute('data-category', 'custom');
     categoryCard.innerHTML = `
         <div class="category-icon">
@@ -399,26 +415,26 @@ function initCategorySelection() {
     
     categoryCard.addEventListener('click', function() {
         // For custom category, just show job details
+        document.querySelectorAll('.category-card').forEach(card => {
+            card.classList.remove('selected');
+        });
         this.classList.add('selected');
         showJobDetails(currentJobId);
     });
     
     categorySelection.appendChild(categoryCard);
+    
+    // Initialize the first job
+    if (currentEstimate.jobs.length === 0) {
+        addNewJob();
+    } else {
+        showJobDetails(currentJobId);
+    }
 }
 
 function getCategoryIcon(categoryId) {
     const icons = {
         custom: '<i class="fas fa-pencil-alt"></i>',
-        bathroom: '<i class="fas fa-bath"></i>',
-        kitchen: '<i class="fas fa-utensils"></i>',
-        bedroom: '<i class="fas fa-bed"></i>',
-        decking: '<i class="fas fa-border-all"></i>',
-        garage: '<i class="fas fa-warehouse"></i>',
-        basement: '<i class="fas fa-boxes"></i>',
-        flooring: '<i class="fas fa-th-large"></i>',
-        concrete: '<i class="fas fa-border-style"></i>',
-        glass: '<i class="fas fa-window-maximize"></i>',
-        repairs: '<i class="fas fa-tools"></i>'
     };
     
     return icons[categoryId] || '';
