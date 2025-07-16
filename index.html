@@ -99,9 +99,25 @@
                                     <input type="number" id="materialPrice" placeholder="Price" min="0" step="0.01">
                                     <input type="number" id="materialQty" placeholder="Qty" min="1" value="1">
                                     <button id="addMaterial">Add Material</button>
-                                </div>
-                            </div>
-                        </div>
+                                <div class="job-fees-section">
+        <h3>Job Fees</h3>
+        <div class="fee-item">
+            <input type="text" id="jobFeeName" placeholder="Fee Name">
+            <input type="number" id="jobFeeAmount" placeholder="Amount" min="0" step="0.01">
+            <button onclick="addFeeToJob(currentJobId)">Add Fee</button>
+        </div>
+        <div id="jobFeesList"></div>
+    </div>
+    
+    <div class="job-discount-section">
+        <h3>Job Discount</h3>
+        <div class="discount-controls">
+            <input type="number" id="jobDiscountPercentage" min="0" max="100" value="0" 
+                   placeholder="Discount %" onchange="updateJobDiscount(currentJobId, this.value)">
+            <span id="jobDiscountDisplay">No discount applied</span>
+        </div>
+    </div>
+</div>
                         <div class="form-actions">
                             <button type="button" class="btn-prev" onclick="prevStep(1)">Previous</button>
                             <button type="button" class="btn-next" onclick="nextStep(3)">Next</button>
