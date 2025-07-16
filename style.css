@@ -816,9 +816,9 @@ nav button:hover {
 }
 
 .job-tab.active {
-    background-color: white;
-    border-bottom: 1px solid white;
-    margin-bottom: -1px;
+    background-color: rgb(236, 130, 130);
+    border-bottom: 1px solid rgb(145, 55, 55);
+    margin-bottom: 1px;
     color: var(--primary-color);
     font-weight: 500;
 }
@@ -840,7 +840,7 @@ nav button:hover {
     border: none;
     color: var(--gray-color);
     cursor: pointer;
-    padding: 0;
+    padding: 1;
     font-size: 12px;
 }
 

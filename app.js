@@ -205,7 +205,7 @@ function initPhoneNumberFormatting() {
 function addNewJob() {
     const newJob = {
         id: currentJobId++,
-        name: "New Job " + (currentJobId - 1), // Changed from currentJobId to (currentJobId - 1)
+        name: "New Job " + (currentJobId - 1),
         days: 1,
         labor: 0,
         materials: [],
@@ -213,8 +213,9 @@ function addNewJob() {
         discountPercentage: 0
     };
     currentEstimate.jobs.push(newJob);
+    currentJobId = newJob.id + 1; // Update currentJobId to be ready for next job
     showJobDetails(newJob.id);
-    updateJobTabs(); // Added this line
+    updateJobTabs();
     updateEstimatePreview();
 }
 
@@ -242,9 +243,9 @@ function addFeeToJob(jobId) {
 
 function updateJobFeesList(jobId) {
     const job = currentEstimate.jobs.find(j => j.id === jobId);
-    const feesList = document.getElementById(`job-${jobId}-feesList`);
+    const feesList = document.getElementById('jobFeesList');
     
-    if (!job || job.fees.length === 0) {
+    if (!job || !job.fees || job.fees.length === 0) {
         feesList.innerHTML = '<p class="no-fees">No fees added yet</p>';
         return;
     }
@@ -298,7 +299,6 @@ function removeJob(jobId) {
     updateEstimatePreview();
 }
 
-
 function showJobDetails(jobId) {
     // Save current job details before switching
     const currentJob = currentEstimate.jobs.find(j => j.id === currentJobId);
@@ -316,12 +316,7 @@ function showJobDetails(jobId) {
     document.getElementById('jobDays').value = job.days;
     document.getElementById('jobLabor').value = job.labor;
     
-    // Add event listener for real-time updates
-    document.getElementById('jobDescription').addEventListener('input', function() {
-        job.name = this.value || "New Job " + job.id;
-        updateJobTabs();
-    });
-    
+    // Update materials and fees lists
     updateMaterialsList();
     updateJobFeesList(jobId);
     updateEstimatePreview();
