@@ -227,7 +227,7 @@ function showJobDetails(jobId) {
     currentEstimate.jobs.forEach(j => {
         const tab = document.createElement('div');
         tab.className = `job-tab ${j.id === jobId ? 'active' : ''}`;
-        tab.textContent = `Job ${j.id}`;
+        tab.textContent = `Job ${j.id}: ${j.name || 'Custom Job'}`;
         tab.onclick = () => showJobDetails(j.id);
         
         if (currentEstimate.jobs.length > 1) {
@@ -247,7 +247,7 @@ function showJobDetails(jobId) {
     // Add "+" tab for new jobs
     const addTab = document.createElement('div');
     addTab.className = 'job-tab add-job-tab';
-    addTab.innerHTML = '<i class="fas fa-plus"></i>';
+    addTab.innerHTML = '<i class="fas fa-plus"></i> Add Job';
     addTab.onclick = addNewJob;
     jobTabsContainer.appendChild(addTab);
     
@@ -345,38 +345,11 @@ function initPhoneNumberFormatting() {
 
 
 function initCategorySelection() {
-    categorySelection.innerHTML = '';
-    
-    // Only show the custom category card
-    const categoryCard = document.createElement('div');
-    categoryCard.className = 'category-card selected';
-    categoryCard.setAttribute('data-category', 'custom');
-    categoryCard.innerHTML = `
-        <div class="category-icon">
-            <i class="fas fa-pencil-alt"></i>
-        </div>
-        <div class="category-info">
-            <h3>Custom</h3>
-            <p>Create your own job</p>
-        </div>
-    `;
-    
-    categoryCard.addEventListener('click', function() {
-        // For custom category, just show job details
-        document.querySelectorAll('.category-card').forEach(card => {
-            card.classList.remove('selected');
-        });
-        this.classList.add('selected');
-        showJobDetails(currentJobId);
-    });
-    
-    categorySelection.appendChild(categoryCard);
-    
-    // Initialize the first job
+    // For custom jobs only - no category selection needed
     if (currentEstimate.jobs.length === 0) {
-        addNewJob();
+        addNewJob(); // Start with one custom job by default
     } else {
-        showJobDetails(currentJobId);
+        showJobDetails(currentJobId); // Show the existing job
     }
 }
 
