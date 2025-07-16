@@ -744,6 +744,74 @@ nav button:hover {
     font-size: 16px;
 }
 
+/* Add to style.css */
+.job-edit-section {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.edit-fees-list {
+    margin-bottom: 10px;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.edit-fee-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+}
+
+.edit-fee-item:last-child {
+    border-bottom: none;
+}
+
+.edit-fee-item button {
+    background: none;
+    border: none;
+    color: #e63946;
+    cursor: pointer;
+}
+
+.fee-form {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.fee-form input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.fee-form button {
+    padding: 8px 15px;
+    background-color: #e63946;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.estimate-job-section {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.estimate-job-total {
+    font-weight: bold;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #ddd;
+}
+
 #passwordModal button:hover {
     background-color: var(--primary-dark);
 }

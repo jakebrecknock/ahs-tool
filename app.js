@@ -179,6 +179,7 @@ function initPhoneNumberFormatting() {
     });
 }
 
+// Update the job object structure in addNewJob:
 function addNewJob() {
     const newJob = {
         id: currentJobId++,
@@ -186,10 +187,71 @@ function addNewJob() {
         days: 1,
         labor: 0,
         materials: [],
+        fees: [],
         discountPercentage: 0
     };
     currentEstimate.jobs.push(newJob);
     showJobDetails(newJob.id);
+}
+
+// Add functions to handle job-specific fees:
+function addFeeToJob(jobId) {
+    const feeName = document.getElementById(`job-${jobId}-feeName`).value.trim();
+    const feeAmount = parseFloat(document.getElementById(`job-${jobId}-feeAmount`).value);
+    
+    if (!feeName || isNaN(feeAmount) || feeAmount <= 0) {
+        alert('Please enter valid fee details');
+        return;
+    }
+    
+    const job = currentEstimate.jobs.find(j => j.id === jobId);
+    if (!job) return;
+    
+    job.fees.push({
+        name: feeName,
+        amount: feeAmount
+    });
+    
+    updateJobFeesList(jobId);
+    updateEstimatePreview();
+}
+
+function updateJobFeesList(jobId) {
+    const job = currentEstimate.jobs.find(j => j.id === jobId);
+    const feesList = document.getElementById(`job-${jobId}-feesList`);
+    
+    if (!job || job.fees.length === 0) {
+        feesList.innerHTML = '<p class="no-fees">No fees added yet</p>';
+        return;
+    }
+    
+    feesList.innerHTML = '';
+    job.fees.forEach((fee, index) => {
+        const item = document.createElement('div');
+        item.className = 'fee-item';
+        item.innerHTML = `
+            <span>${fee.name}: $${formatAccounting(fee.amount)}</span>
+            <button onclick="removeFeeFromJob(${jobId}, ${index})"><i class="fas fa-times"></i></button>
+        `;
+        feesList.appendChild(item);
+    });
+}
+
+function removeFeeFromJob(jobId, index) {
+    const job = currentEstimate.jobs.find(j => j.id === jobId);
+    if (!job) return;
+    
+    job.fees.splice(index, 1);
+    updateJobFeesList(jobId);
+    updateEstimatePreview();
+}
+
+function updateJobDiscount(jobId, discountPercentage) {
+    const job = currentEstimate.jobs.find(j => j.id === jobId);
+    if (!job) return;
+    
+    job.discountPercentage = parseFloat(discountPercentage) || 0;
+    updateEstimatePreview();
 }
 
 function removeJob(jobId) {
@@ -204,7 +266,18 @@ function removeJob(jobId) {
     updateEstimatePreview();
 }
 
+// In app.js, modify the showJobDetails function:
 function showJobDetails(jobId) {
+    // First save any changes from the current job
+    if (currentJobId) {
+        const currentJob = currentEstimate.jobs.find(j => j.id === currentJobId);
+        if (currentJob) {
+            currentJob.name = document.getElementById('jobDescription').value;
+            currentJob.days = parseFloat(document.getElementById('jobDays').value) || 1;
+            currentJob.labor = parseFloat(document.getElementById('jobLabor').value) || 0;
+        }
+    }
+
     const job = currentEstimate.jobs.find(j => j.id === jobId);
     if (!job) return;
 
@@ -241,7 +314,7 @@ function showJobDetails(jobId) {
     addTab.onclick = addNewJob;
     jobTabsContainer.appendChild(addTab);
     
-    // Update job details form
+    // Update job details form with the selected job's data
     document.getElementById('jobDescription').value = job.name;
     document.getElementById('jobDays').value = job.days;
     document.getElementById('jobLabor').value = job.labor;
@@ -327,9 +400,14 @@ function toggleEstimateFee() {
 function nextStep(step) {
     // Validate current step before proceeding
     if (step === 2 && !validateCustomerInfo()) return;
-    if (step === 3 && currentEstimate.jobs.length === 0) {
-        alert('Please add at least one job');
-        return;
+    
+    // Update job details before checking
+    if (step === 3) {
+        updateJobDetails(); // Make sure this runs before checking jobs
+        if (currentEstimate.jobs.length === 0 || currentEstimate.jobs.some(job => !job.name)) {
+            alert('Please add at least one job with a description');
+            return;
+        }
     }
     
     // Hide current step
@@ -685,22 +763,7 @@ function showEditFields(estimate) {
     editFieldsContainer.innerHTML = `
         <div class="estimate-section">
             <h3>Edit Customer Information</h3>
-            <div class="form-group">
-                <label>Name:</label>
-                <input type="text" id="editCustomerName" value="${estimate.customer.name || ''}">
-            </div>
-            <div class="form-group">
-                <label>Email:</label>
-                <input type="email" id="editCustomerEmail" value="${estimate.customer.email || ''}">
-            </div>
-            <div class="form-group">
-                <label>Phone:</label>
-                <input type="tel" id="editCustomerPhone" value="${estimate.customer.phone || ''}">
-            </div>
-            <div class="form-group">
-                <label>Job Location:</label>
-                <input type="text" id="editJobLocation" value="${estimate.customer.location || ''}">
-            </div>
+            <!-- Existing customer fields... -->
         </div>
         
         <div class="estimate-section">
@@ -716,47 +779,39 @@ function showEditFields(estimate) {
         jobsContainer.innerHTML += `
             <div class="job-edit-section">
                 <h4>Job ${job.id}</h4>
+                <!-- Existing job fields... -->
+                
                 <div class="form-group">
-                    <label>Job Description:</label>
-                    <input type="text" class="edit-job-field" data-job-id="${job.id}" data-field="name" value="${job.name}">
+                    <label>Discount Percentage:</label>
+                    <input type="number" class="edit-job-field" data-job-id="${job.id}" 
+                           data-field="discountPercentage" value="${job.discountPercentage}" min="0" max="100">
                 </div>
+                
                 <div class="form-group">
-                    <label>Days:</label>
-                    <input type="number" class="edit-job-field" data-job-id="${job.id}" data-field="days" value="${job.days}">
+                    <label>Fees:</label>
+                    <div id="editFees-${job.id}" class="edit-fees-list"></div>
+                    <div class="fee-form">
+                        <input type="text" id="editFeeName-${job.id}" placeholder="Fee Name">
+                        <input type="number" id="editFeeAmount-${job.id}" placeholder="Amount" min="0" step="0.01">
+                        <button onclick="addNewFeeForEdit(${job.id})">Add Fee</button>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Labor Cost ($):</label>
-                    <input type="number" class="edit-job-field" data-job-id="${job.id}" data-field="labor" value="${job.labor}">
-                </div>
-                <div class="form-group">
-                    <label>Materials:</label>
-                    <div id="editMaterials-${job.id}" class="edit-materials-list"></div>
-                    <button type="button" class="btn-next" onclick="addNewMaterialField(${job.id})">Add Material</button>
-                </div>
+                
                 ${estimate.jobs.length > 1 ? `
                 <button type="button" class="btn-cancel" onclick="removeJobFromEdit(${job.id})">Remove Job</button>
                 ` : ''}
             </div>
         `;
         
-        // Populate materials for this job
-        const materialsContainer = document.getElementById(`editMaterials-${job.id}`);
-        job.materials.forEach((mat, matIndex) => {
-            materialsContainer.innerHTML += `
-                <div class="edit-material-item">
-                    <div class="form-group">
-                        <label>Name:</label>
-                        <input type="text" class="edit-material-field" data-job-id="${job.id}" data-mat-index="${matIndex}" data-field="name" value="${mat.name}">
-                    </div>
-                    <div class="form-group">
-                        <label>Price:</label>
-                        <input type="number" class="edit-material-field" data-job-id="${job.id}" data-mat-index="${matIndex}" data-field="price" value="${mat.price}">
-                    </div>
-                    <div class="form-group">
-                        <label>Qty:</label>
-                        <input type="number" class="edit-material-field" data-job-id="${job.id}" data-mat-index="${matIndex}" data-field="quantity" value="${mat.quantity}">
-                    </div>
-                    <button class="qty-btn" onclick="removeMaterialFromEdit(${job.id}, ${matIndex})"><i class="fas fa-trash"></i></button>
+        // Populate fees for this job
+        const feesContainer = document.getElementById(`editFees-${job.id}`);
+        job.fees.forEach((fee, feeIndex) => {
+            feesContainer.innerHTML += `
+                <div class="edit-fee-item">
+                    <span>${fee.name}: $${formatAccounting(fee.amount)}</span>
+                    <button onclick="removeFeeFromEdit(${job.id}, ${feeIndex})">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 </div>
             `;
         });
@@ -774,6 +829,32 @@ function showEditFields(estimate) {
         });
     });
     
+function addNewFeeForEdit(jobId) {
+    const name = document.getElementById(`editFeeName-${jobId}`).value.trim();
+    const amount = parseFloat(document.getElementById(`editFeeAmount-${jobId}`).value);
+    
+    if (!name || isNaN(amount) || amount <= 0) {
+        alert('Please enter valid fee details');
+        return;
+    }
+    
+    const job = currentEstimate.jobs.find(j => j.id === jobId);
+    if (!job) return;
+    
+    if (!job.fees) job.fees = [];
+    job.fees.push({ name, amount });
+    
+    showEditFields(currentEstimate);
+}
+
+function removeFeeFromEdit(jobId, feeIndex) {
+    const job = currentEstimate.jobs.find(j => j.id === jobId);
+    if (!job || !job.fees) return;
+    
+    job.fees.splice(feeIndex, 1);
+    showEditFields(currentEstimate);
+}
+
     document.querySelectorAll('.edit-material-field').forEach(input => {
         input.addEventListener('change', function() {
             const jobId = parseInt(this.dataset.jobId);
