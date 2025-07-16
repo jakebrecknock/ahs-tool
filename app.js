@@ -62,227 +62,14 @@ let currentEstimate = {
     waiveEstimateFee: false
 };
 
-// Price sheet data (from your PDF)
 const priceSheet = {
     categories: {
-         custom: {
+        custom: {
             name: "Custom",
             jobs: [
                 { name: "Custom job", days: "1", labor: "$0" }
             ],
             materials: {}
-        },
-        bathroom: {
-            name: "Bathroom",
-            jobs: [
-                { name: "Small remodel", days: "5-7", labor: "$12,200-$18,000" },
-                { name: "Full renovation", days: "10-15", labor: "$24,400-$36,600" },
-                { name: "Minor updates", days: "1-2", labor: "$2,000" }
-            ],
-            materials: {
-                "Vents (8x8 with light)": 100,
-                "Vents (8x8 no light)": 75,
-                "Herringbone tile (per sqft)": 18,
-                "Glazed wall tile (per sqft)": 6,
-                "Floor tile (per sqft)": 4,
-                "Single vanity": 300,
-                "Double vanity": 2000,
-                "Faucet": 100,
-                "Can lighting (per 4 lights)": 100,
-                "Heated floor (per sqft)": 9.5,
-                "Supply lines (per ft)": 7,
-                "GFCI outlets": 75,
-                "Shower head": 120,
-                "Bath spout": 40,
-                "Bath": 350,
-                "Toilet": 400
-            }
-        },
-        kitchen: {
-            name: "Kitchen",
-            jobs: [
-                { name: "Full remodel", days: "15-25", labor: "$36,600-$61,000" },
-                { name: "Cabinet replacement only", days: "3-5", labor: "$1,320-$12,200" },
-                { name: "Countertops + backsplash", days: "2-4", labor: "$4,880-$9,760" },
-                { name: "Appliance/light updates", days: "1-2", labor: "$2,000" }
-            ],
-            materials: {
-                "Stock cabinets (per ft)": 300,
-                "Custom cabinets (per ft)": 900,
-                "Laminate countertops (per sqft)": 45,
-                "Quartz countertops (per sqft)": 120,
-                "Granite countertops (per sqft)": 110,
-                "Butcher block countertops (per sqft)": 80,
-                "Subway tile backsplash (per sqft)": 15,
-                "Glass tile backsplash (per sqft)": 22,
-                "Mosaic backsplash (per sqft)": 28,
-                "Range (Electric/Gas)": 1000,
-                "Refrigerator (Standard)": 1500,
-                "Dishwasher": 800,
-                "Microwave (Over-range)": 450,
-                "Range Hood": 300,
-                "Undermount Sink": 350,
-                "Farmhouse Sink": 600,
-                "Kitchen Faucet": 180,
-                "Pendant Lights (each)": 120,
-                "Recessed/Can Lights (peer 4 lights)": 100,
-                "Under Cabinet Lighting (per foot)": 35,
-                "GFCI Outlets": 75,
-                "Switches/Dimmers": 60
-            }
-        },
-        bedroom: {
-            name: "Bedroom",
-            jobs: [
-                { name: "Basic refresh (paint, lights, trim)", days: "1-3", labor: "$1,220-$1,320" },
-                { name: "Closet upgrade", days: "1-2", labor: "$1,220-$4,880" },
-                { name: "Flooring install", days: "1-2", labor: "$2,440-$4,880" }
-            ],
-            materials: {
-                "Standard Reach-In closet": 600,
-                "Walk-In Shelving/Storage": 1500,
-                "Ceiling Fan w/ Light": 200,
-                "Flush Mount Light": 100,
-                "Recessed Lighting (each)": 100,
-                "Interior Door": 200,
-                "Closet Bifold": 180,
-                "Paint (Walls & Ceiling per sqft)": 2.5,
-                "Standard Molding (per linear foot)": 5
-            }
-        },
-        decking: {
-            name: "Decking",
-            jobs: [
-                { name: "New deck (10x10-12x16)", days: "5-10", labor: "$12,200-$24,400" },
-                { name: "Stairs/railing replacement", days: "1-2", labor: "$2,440-$4,880" },
-                { name: "Resurfacing/staining", days: "1-3", labor: "$1,220-$1,320" }
-            ],
-            materials: {
-                "Pressure-Treated Joists/Framing (per sqft)": 12,
-                "Steel Framing (optional upgrade per sqft)": 18,
-                "Pressure-Treated Lumber (per sqft)": 16,
-                "Cedar (per sqft)": 20,
-                "Composite (e.g., Trex, TimberTech per sqft)": 28,
-                "PVC (per sqft)": 32,
-                "Wood Railing (per linear foot)": 40,
-                "Composite Railing (per linear foot)": 60,
-                "Cable Railing (per linear foot)": 90,
-                "Basic Wood Steps (per flight up to 4 steps)": 350,
-                "Composite Steps (per flight)": 500,
-                "Additional Steps (each)": 90,
-                "Lattice Wood Skirt (per sqft)": 18,
-                "Composite/Decorative Skirt (per sqft)": 25,
-                "Concrete Footings w/ support posts": 250,
-                "Post Cap Lights (each)": 80,
-                "Stair Lights (each)": 60,
-                "Initial Seal/Stain (wood only per sqft)": 3.5,
-                "Maintenance Recoat (wood only per sqft)": 2
-            }
-        },
-        garage: {
-            name: "Garage",
-            jobs: [
-                { name: "Door + opener replacement", days: "1", labor: "$2,440" },
-                { name: "Epoxy floor coating", days: "2-3", labor: "$4,880-$1,320" },
-                { name: "Storage & lighting", days: "1-2", labor: "$2,000" }
-            ],
-            materials: {
-                "Single Door (Manual)": 900,
-                "Single Door (Automatic)": 1300,
-                "Double Door (Automatic)": 1900,
-                "Chain Drive opener": 300,
-                "Belt Drive opener": 450,
-                "Wall-mounted Shelving": 400,
-                "Ceiling Storage Rack": 300,
-                "LED Strip Light (each)": 120,
-                "Epoxy floor coating (per sqft)": 6
-            }
-        },
-        basement: {
-            name: "Basement",
-            jobs: [
-                { name: "Full finish", days: "15-25", labor: "$36,600-$61,000" },
-                { name: "Bathroom addition", days: "5-10", labor: "$12,200-$24,400" },
-                { name: "Minor upgrades", days: "2-5", labor: "$2,440-$12,200" }
-            ],
-            materials: {
-                "Framing & Insulation (per sqft)": 28,
-                "Drywall (per sqft)": 4.5,
-                "Can Lights (each)": 100,
-                "Sump Pump System": 1600,
-                "Dehumidifier Unit": 850,
-                "Full Bath (with fixtures)": 9000
-            }
-        },
-        flooring: {
-            name: "Flooring",
-            jobs: [
-                { name: "Hardwood/LVP (400-600 sqft)", days: "2-4", labor: "$4,880-$9,760" },
-                { name: "Tile flooring", days: "3-5", labor: "$1,320-$12,200" },
-                { name: "Carpet replacement", days: "1", labor: "$2,440" }
-            ],
-            materials: {
-                "Solid Hardwood (per sqft)": 10,
-                "Engineered Hardwood (per sqft)": 8,
-                "Laminate (per sqft)": 4.5,
-                "Luxury Vinyl Plank (LVP per sqft)": 6,
-                "Porcelain Tile (per sqft)": 6.5,
-                "Stone Tile (per sqft)": 9,
-                "Carpet (includes padding and install per sqft)": 5.5
-            }
-        },
-        concrete: {
-            name: "Concrete",
-            jobs: [
-                { name: "Driveway (400-600 sqft)", days: "3-5", labor: "$1,320-$12,200" },
-                { name: "Walkway or steps", days: "1-3", labor: "$2,440-$1,320" },
-                { name: "Stamped patio", days: "3-4", labor: "$1,320-$9,760" }
-            ],
-            materials: {
-                "Standard Pour Driveway (per sqft)": 10,
-                "Stamped Driveway (per sqft)": 16,
-                "Standard Walkway (per sqft)": 8,
-                "Decorative Walkway (per sqft)": 14,
-                "Plain Patio (per sqft)": 9,
-                "Decorative/Stained Patio (per sqft)": 15,
-                "Steps (per step)": 350
-            }
-        },
-        glass: {
-            name: "Glass",
-            jobs: [
-                { name: "Window replacement (≤6 windows)", days: "1-2", labor: "$2,440-$4,880" },
-                { name: "Shower glass install", days: "0.5-1", labor: "$1,220" },
-                { name: "Mirror install", days: "0.25-0.5", labor: "$400" }
-            ],
-            materials: {
-                "Standard Double-Hung Window": 500,
-                "Picture Window": 700,
-                "Bay Window": 1600,
-                "Frameless Shower Enclosure": 1200,
-                "Sliding Glass Shower Doors": 850,
-                "Standard Vanity Mirror": 200,
-                "Custom Cut Mirror": 400
-            }
-        },
-        repairs: {
-            name: "Misc. Repairs",
-            jobs: [
-                { name: "Door replacement", days: "0.5", labor: "$400" },
-                { name: "Trim/baseboard install", days: "1-2", labor: "$2,440-$4,880" },
-                { name: "Drywall patch/paint", days: "0.5", labor: "$400" }
-            ],
-            materials: {
-                "Exterior Door (Steel)": 750,
-                "Exterior Door (Wood)": 900,
-                "French Doors": 1200,
-                "Sliding Glass Door": 1400,
-                "Small Drywall Patch (under 2x2 ft)": 150,
-                "Large Drywall Patch": 300,
-                "Caulking/Sealant Work (per foot)": 5,
-                "Baseboard Heater Replacement (each)": 250,
-                "Smoke/CO Detector Install (each)": 90
-            }
         }
     }
 };
@@ -416,7 +203,7 @@ function addNewJob() {
     currentJobId++;
     const newJob = {
         id: currentJobId,
-        category: "",
+        category: "custom", // Default to custom
         name: "",
         days: 1,
         labor: 0,
@@ -426,14 +213,6 @@ function addNewJob() {
     };
     currentEstimate.jobs.push(newJob);
     showJobDetails(currentJobId);
-}
-
-function removeJob(jobId) {
-    currentEstimate.jobs = currentEstimate.jobs.filter(job => job.id !== jobId);
-    if (currentEstimate.jobs.length === 0) {
-        addNewJob(); // Always keep at least one job
-    }
-    showJobDetails(currentEstimate.jobs[0].id);
 }
 
 function showJobDetails(jobId) {
@@ -481,52 +260,29 @@ function renderJobDetails(job) {
     const jobDetailsContent = document.getElementById('jobDetailsContent');
     jobDetailsContent.innerHTML = '';
     
-    // Category selection
-    const categorySection = document.createElement('div');
-    categorySection.className = 'job-section';
-    categorySection.innerHTML = `
-        <h4>Select Job Category</h4>
-        <div class="category-grid" id="categoryGrid-${job.id}"></div>
+    // Job details form - simplified for custom jobs only
+    const detailsSection = document.createElement('div');
+    detailsSection.className = 'job-section';
+    detailsSection.innerHTML = `
+        <h4>Custom Job Details</h4>
+        <div class="form-group">
+            <label>Job Description:</label>
+            <input type="text" class="job-description" value="${job.name || ''}" 
+                onchange="currentEstimate.jobs.find(j => j.id === ${job.id}).name = this.value">
+        </div>
+        <div class="form-group">
+            <label>Estimated Days:</label>
+            <input type="number" class="job-days" value="${job.days || 1}" min="0" step="0.5"
+                onchange="currentEstimate.jobs.find(j => j.id === ${job.id}).days = this.value">
+        </div>
+        <div class="form-group">
+            <label>Labor Cost ($):</label>
+            <input type="number" class="job-labor" value="${job.labor || 0}" min="0" step="0.01"
+                onchange="currentEstimate.jobs.find(j => j.id === ${job.id}).labor = parseFloat(this.value)">
+        </div>
     `;
-    jobDetailsContent.appendChild(categorySection);
-    
-    // Populate categories
-    const categoryGrid = document.getElementById(`categoryGrid-${job.id}`);
-    for (const categoryId in priceSheet.categories) {
-        const category = priceSheet.categories[categoryId];
-        
-        const categoryCard = document.createElement('div');
-        categoryCard.className = `category-card ${job.category === categoryId ? 'selected' : ''}`;
-        categoryCard.setAttribute('data-category', categoryId);
-        categoryCard.innerHTML = `
-            <div class="category-icon">
-                ${getCategoryIcon(categoryId)}
-            </div>
-            <div class="category-info">
-                <h3>${category.name}</h3>
-                <p>Click to select</p>
-            </div>
-        `;
-        
-        categoryCard.addEventListener('click', function() {
-            // Update all category cards
-            document.querySelectorAll(`#categoryGrid-${job.id} .category-card`).forEach(card => {
-                card.classList.remove('selected');
-            });
-            this.classList.add('selected');
-            
-            // Update job category
-            job.category = categoryId;
-            job.name = category.jobs[0].name;
-            job.days = category.jobs[0].days.includes('-') ? 
-                category.jobs[0].days.split('-')[0] : category.jobs[0].days;
-            job.labor = parseFloat(category.jobs[0].labor.replace(/[^0-9.-]+/g, ""));
-            
-            renderJobDetails(job); // Refresh the view
-        });
-        
-        categoryGrid.appendChild(categoryCard);
-    }
+    jobDetailsContent.appendChild(detailsSection);
+}
     
     // Job details form
     const detailsSection = document.createElement('div');
@@ -564,7 +320,6 @@ function renderJobDetails(job) {
             setTimeout(() => feedback.remove(), 300);
         }, 3000);
     }
-}
 
 function showNewEstimate() {
     dashboardView.classList.remove('active-view');
@@ -579,13 +334,13 @@ function resetEstimateForm() {
     currentEstimate = {
         customer: {},
         jobs: [],
-        materials: [],
-        customMaterials: [],
         fees: [],
-        discountPercentage: 0,
         total: 0,
         waiveEstimateFee: false
     };
+    
+    // Add initial custom job
+    addNewJob();
     
     // Reset form steps
     document.querySelectorAll('.estimate-step').forEach(step => {
@@ -628,35 +383,27 @@ function initPhoneNumberFormatting() {
 function initCategorySelection() {
     categorySelection.innerHTML = '';
     
-    for (const categoryId in priceSheet.categories) {
-        const category = priceSheet.categories[categoryId];
-        
-        const categoryCard = document.createElement('div');
-        categoryCard.className = 'category-card';
-        categoryCard.setAttribute('data-category', categoryId);
-        categoryCard.innerHTML = `
-            <div class="category-icon">
-                ${getCategoryIcon(categoryId)}
-            </div>
-            <div class="category-info">
-                <h3>${category.name}</h3>
-                <p>Click to select</p>
-            </div>
-        `;
-        
-        categoryCard.addEventListener('click', function() {
-            // For custom category, don't toggle selection - just show job details
-            if (categoryId === 'custom') {
-                this.classList.add('selected');
-                showJobDetails(categoryId);
-            } else {
-                this.classList.toggle('selected');
-                showJobDetails(categoryId);
-            }
-        });
-        
-        categorySelection.appendChild(categoryCard);
-    }
+    // Only show the custom category card
+    const categoryCard = document.createElement('div');
+    categoryCard.className = 'category-card selected'; // Start selected
+    categoryCard.setAttribute('data-category', 'custom');
+    categoryCard.innerHTML = `
+        <div class="category-icon">
+            <i class="fas fa-pencil-alt"></i>
+        </div>
+        <div class="category-info">
+            <h3>Custom</h3>
+            <p>Create your own job</p>
+        </div>
+    `;
+    
+    categoryCard.addEventListener('click', function() {
+        // For custom category, just show job details
+        this.classList.add('selected');
+        showJobDetails(currentJobId);
+    });
+    
+    categorySelection.appendChild(categoryCard);
 }
 
 function getCategoryIcon(categoryId) {
