@@ -84,6 +84,16 @@ function setupEventListeners() {
     saveEstimateBtn.addEventListener('click', saveEstimate);
     document.getElementById('addMaterial').addEventListener('click', addMaterialToJob);
     document.getElementById('waiveEstimateFeeBtn').addEventListener('click', toggleEstimateFee);
+    
+    // Add these global functions for HTML onclick handlers
+    window.nextStep = nextStep;
+    window.prevStep = prevStep;
+    window.cancelEstimate = cancelEstimate;
+    window.addNewJob = addNewJob;
+    window.removeJob = removeJob;
+    window.addMaterialToJob = addMaterialToJob;
+    window.removeMaterialFromJob = removeMaterialFromJob;
+    window.toggleEstimateFee = toggleEstimateFee;
 }
 
 function checkPassword() {
@@ -266,7 +276,7 @@ function removeJob(jobId) {
     updateEstimatePreview();
 }
 
-// In app.js, modify the showJobDetails function:
+
 function showJobDetails(jobId) {
     // First save any changes from the current job
     if (currentJobId) {
@@ -403,7 +413,7 @@ function nextStep(step) {
     
     // Update job details before checking
     if (step === 3) {
-        updateJobDetails(); // Make sure this runs before checking jobs
+        updateJobDetails();
         if (currentEstimate.jobs.length === 0 || currentEstimate.jobs.some(job => !job.name)) {
             alert('Please add at least one job with a description');
             return;
@@ -423,6 +433,27 @@ function nextStep(step) {
     // If moving to review step, update preview
     if (step === 3) {
         updateEstimatePreview();
+    }
+}
+
+function prevStep(step) {
+    // Hide current step
+    document.querySelector('.estimate-step.active-step').classList.remove('active-step');
+    
+    // Show previous step
+    document.getElementById(`${getStepName(step)}Step`).classList.add('active-step');
+    
+    // Update progress indicator
+    document.querySelector('.progress-step.active').classList.remove('active');
+    document.querySelector(`.progress-step[data-step="${step}"]`).classList.add('active');
+}
+
+function getStepName(step) {
+    switch(step) {
+        case 1: return 'customerInfo';
+        case 2: return 'jobs';
+        case 3: return 'review';
+        default: return '';
     }
 }
 
