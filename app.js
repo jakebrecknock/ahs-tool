@@ -1,5 +1,5 @@
 // DOM Elements
-const base64Image = "https://raw.githubusercontent.com/jakebrecknock/ahs-tool/refs/heads/main/ace-handy-logos.webp"
+const base64Image = "https://raw.githubusercontent.com/jakebrecknock/ahs-tool/refs/heads/main/ace-handy-logos.webp";
 const dashboardView = document.getElementById('dashboardView');
 const newEstimateView = document.getElementById('newEstimateView');
 const dashboardBtn = document.getElementById('dashboardBtn');
@@ -24,6 +24,7 @@ const passwordModal = document.getElementById('passwordModal');
 const passwordInput = document.getElementById('passwordInput');
 const passwordError = document.getElementById('passwordError');
 const submitPassword = document.getElementById('submitPassword');
+
 function formatAccounting(num) {
     return num.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
 }
@@ -45,11 +46,9 @@ const db = firebase.firestore();
 // Estimate form elements
 const customerInfoForm = document.getElementById('customerInfoForm');
 const customerPhone = document.getElementById('customerPhone');
-const categorySelection = document.getElementById('categorySelection');
 const jobDetailsContainer = document.getElementById('jobDetailsContainer');
 const jobDetailsContent = document.getElementById('jobDetailsContent');
 const materialsContainer = document.getElementById('materialsContainer');
-const addCustomMaterial = document.getElementById('addCustomMaterial');
 const estimatePreview = document.getElementById('estimatePreview');
 const saveEstimateBtn = document.getElementById('saveEstimateBtn');
 
@@ -62,17 +61,7 @@ let currentEstimate = {
     waiveEstimateFee: false
 };
 
-const priceSheet = {
-    categories: {
-        custom: {
-            name: "Custom",
-            jobs: [
-                { name: "Custom job", days: "1", labor: "$0" }
-            ],
-            materials: {}
-        }
-    }
-};
+let currentJobId = 1; // Track the current job being edited
 
 // Initialize the app
 document.addEventListener('DOMContentLoaded', function() {
@@ -84,9 +73,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Load estimates from Firebase
     loadEstimates();
-    
-    // Initialize category selection
-    initCategorySelection();
     
     // Initialize phone number formatting
     initPhoneNumberFormatting();
@@ -135,23 +121,21 @@ function setupEventListeners() {
     if (exportEstimateBtn) exportEstimateBtn.addEventListener('click', exportEstimateToWord);
     
     // Estimate form buttons
-    if (addCustomMaterial) addCustomMaterial.addEventListener('click', addCustomMaterialToEstimate);
     if (saveEstimateBtn) saveEstimateBtn.addEventListener('click', saveEstimate);
 
-    const waiveEstimateFeeCheckbox = // Replace the checkbox event listener with button click handler
-document.getElementById('waiveEstimateFeeBtn').addEventListener('click', function() {
-    currentEstimate.waiveEstimateFee = !currentEstimate.waiveEstimateFee;
-    
-    if (currentEstimate.waiveEstimateFee) {
-        this.classList.add('active');
-        this.innerHTML = '<i class="fas fa-check"></i> Estimate Fee Waived';
-    } else {
-        this.classList.remove('active');
-        this.innerHTML = '<i class="fas fa-dollar-sign"></i> Waive $75 Estimate Fee';
-    }
-    
-    updateEstimatePreview();
-});
+    document.getElementById('waiveEstimateFeeBtn').addEventListener('click', function() {
+        currentEstimate.waiveEstimateFee = !currentEstimate.waiveEstimateFee;
+        
+        if (currentEstimate.waiveEstimateFee) {
+            this.classList.add('active');
+            this.innerHTML = '<i class="fas fa-check"></i> Estimate Fee Waived';
+        } else {
+            this.classList.remove('active');
+            this.innerHTML = '<i class="fas fa-dollar-sign"></i> Waive $75 Estimate Fee';
+        }
+        
+        updateEstimatePreview();
+    });
 }
 
 function checkPassword() {
@@ -196,8 +180,6 @@ function showDashboard() {
     newEstimateBtn.classList.remove('active');
     loadEstimates();
 }
-
-let currentJobId = 1; // Track the current job being edited
 
 function addNewJob() {
     currentJobId++;
@@ -274,7 +256,6 @@ function showJobDetails(jobId) {
 }
 
 function renderJobDetails(job) {
-    const jobDetailsContent = document.getElementById('jobDetailsContent');
     jobDetailsContent.innerHTML = '';
     
     // Job details form - simplified for custom jobs only
@@ -300,43 +281,6 @@ function renderJobDetails(job) {
     `;
     jobDetailsContent.appendChild(detailsSection);
 }
-    
-    // Job details form
-    const detailsSection = document.createElement('div');
-    detailsSection.className = 'job-section';
-    detailsSection.innerHTML = `
-        <h4>Job Details</h4>
-        <div class="form-group">
-            <label>Job Description:</label>
-            <input type="text" class="job-description" value="${job.name}" 
-                onchange="currentEstimate.jobs.find(j => j.id === ${job.id}).name = this.value">
-        </div>
-        <div class="form-group">
-            <label>Estimated Days:</label>
-            <input type="number" class="job-days" value="${job.days}" min="0" step="0.5"
-                onchange="currentEstimate.jobs.find(j => j.id === ${job.id}).days = this.value">
-        </div>
-        <div class="form-group">
-            <label>Labor Cost ($):</label>
-            <input type="number" class="job-labor" value="${job.labor}" min="0" step="0.01"
-                onchange="currentEstimate.jobs.find(j => j.id === ${job.id}).labor = parseFloat(this.value)">
-        </div>
-    `;
-    jobDetailsContent.appendChild(detailsSection);
-    
-    // Show feedback when category is selected
-    if (job.category) {
-        const feedback = document.createElement('div');
-        feedback.className = 'feedback-message success';
-        feedback.innerHTML = `<i class="fas fa-check-circle"></i> ${priceSheet.categories[job.category].name} job added`;
-        detailsSection.appendChild(feedback);
-        
-        // Remove feedback after 3 seconds
-        setTimeout(() => {
-            feedback.classList.add('fade-out');
-            setTimeout(() => feedback.remove(), 300);
-        }, 3000);
-    }
 
 function showNewEstimate() {
     dashboardView.classList.remove('active-view');
@@ -380,7 +324,10 @@ function resetEstimateForm() {
 }
 
 function initPhoneNumberFormatting() {
-    customerPhone.addEventListener('input', function(e) {
+    const phoneInput = document.getElementById('customerPhone');
+    if (!phoneInput) return;
+    
+    phoneInput.addEventListener('input', function(e) {
         const input = e.target.value.replace(/\D/g, '').substring(0, 10);
         const areaCode = input.substring(0, 3);
         const middle = input.substring(3, 6);
@@ -395,6 +342,7 @@ function initPhoneNumberFormatting() {
         }
     });
 }
+
 
 function initCategorySelection() {
     categorySelection.innerHTML = '';
