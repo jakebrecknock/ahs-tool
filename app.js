@@ -65,6 +65,18 @@ document.addEventListener('DOMContentLoaded', function() {
     loadEstimates();
     initPhoneNumberFormatting();
     addNewJob(); // Start with one job by default
+    
+    // Initialize job description listener for the first job
+    const jobDescInput = document.getElementById('jobDescription');
+    if (jobDescInput) {
+        jobDescInput.addEventListener('input', function() {
+            const job = currentEstimate.jobs.find(j => j.id === currentJobId);
+            if (job) {
+                job.name = this.value || "New Job " + job.id;
+                updateJobTabs();
+            }
+        });
+    }
 });
 
 function setupEventListeners() {
@@ -291,10 +303,7 @@ function showJobDetails(jobId) {
     // Save current job details before switching
     const currentJob = currentEstimate.jobs.find(j => j.id === currentJobId);
     if (currentJob) {
-        const jobDescInput = document.getElementById('jobDescription');
-        if (jobDescInput) {
-            currentJob.name = jobDescInput.value || "New Job " + currentJob.id;
-        }
+        currentJob.name = document.getElementById('jobDescription').value || "New Job " + currentJob.id;
         currentJob.days = parseFloat(document.getElementById('jobDays').value) || 1;
         currentJob.labor = parseFloat(document.getElementById('jobLabor').value) || 0;
     }
@@ -302,13 +311,16 @@ function showJobDetails(jobId) {
     currentJobId = jobId;
     const job = currentEstimate.jobs.find(j => j.id === jobId);
     
-    // Update job tabs
-    updateJobTabs();
-    
     // Update form with selected job's data
     document.getElementById('jobDescription').value = job.name;
     document.getElementById('jobDays').value = job.days;
     document.getElementById('jobLabor').value = job.labor;
+    
+    // Add event listener for real-time updates
+    document.getElementById('jobDescription').addEventListener('input', function() {
+        job.name = this.value || "New Job " + job.id;
+        updateJobTabs();
+    });
     
     updateMaterialsList();
     updateJobFeesList(jobId);
@@ -394,18 +406,25 @@ function updateJobTabs() {
     currentEstimate.jobs.forEach(job => {
         const tab = document.createElement('div');
         tab.className = `job-tab ${job.id === currentJobId ? 'active' : ''}`;
-        tab.textContent = `Job ${job.id}: ${job.name || 'New Job ' + job.id}`; // Updated this line
-        tab.onclick = () => showJobDetails(job.id);
+        tab.innerHTML = `
+            <span>${job.name || 'Job ' + job.id}</span>
+            ${currentEstimate.jobs.length > 1 ? `
+            <button class="remove-job-btn"><i class="fas fa-times"></i></button>
+            ` : ''}
+        `;
+        
+        tab.onclick = (e) => {
+            if (!e.target.classList.contains('remove-job-btn')) {
+                showJobDetails(job.id);
+            }
+        };
         
         if (currentEstimate.jobs.length > 1) {
-            const removeBtn = document.createElement('button');
-            removeBtn.innerHTML = '<i class="fas fa-times"></i>';
-            removeBtn.className = 'remove-job-btn';
+            const removeBtn = tab.querySelector('.remove-job-btn');
             removeBtn.onclick = (e) => {
                 e.stopPropagation();
                 removeJob(job.id);
             };
-            tab.appendChild(removeBtn);
         }
         
         jobTabsContainer.appendChild(tab);
@@ -414,7 +433,7 @@ function updateJobTabs() {
     // Add "+" tab for new jobs
     const addTab = document.createElement('div');
     addTab.className = 'job-tab add-job-tab';
-    addTab.innerHTML = '<i class="fas fa-plus"></i> Add Job';
+    addTab.innerHTML = '<i class="fas fa-plus"></i>';
     addTab.onclick = addNewJob;
     jobTabsContainer.appendChild(addTab);
 }

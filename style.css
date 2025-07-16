@@ -790,6 +790,64 @@ nav button:hover {
     border-radius: 4px;
 }
 
+.job-tabs-container {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 20px;
+    overflow-x: auto;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #ddd;
+}
+
+.job-tab {
+    padding: 8px 15px;
+    background-color: #f8f9fa;
+    border-radius: 4px 4px 0 0;
+    cursor: pointer;
+    position: relative;
+    min-width: 120px;
+    text-align: center;
+    border: 1px solid #ddd;
+    border-bottom: none;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.job-tab.active {
+    background-color: white;
+    border-bottom: 1px solid white;
+    margin-bottom: -1px;
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+.job-tab.add-job-tab {
+    background-color: transparent;
+    border: 1px dashed var(--primary-color);
+    color: var(--primary-color);
+    min-width: 40px;
+    justify-content: center;
+}
+
+.job-tab.add-job-tab:hover {
+    background-color: rgba(230, 57, 70, 0.1);
+}
+
+.remove-job-btn {
+    background: none;
+    border: none;
+    color: var(--gray-color);
+    cursor: pointer;
+    padding: 0;
+    font-size: 12px;
+}
+
+.remove-job-btn:hover {
+    color: #dc3545;
+}
+
 .fee-form button {
     padding: 8px 15px;
     background-color: #e63946;
