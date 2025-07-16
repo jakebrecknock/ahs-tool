@@ -270,9 +270,18 @@ function removeJob(jobId) {
         return;
     }
     
-    currentEstimate.jobs = currentEstimate.jobs.filter(job => job.id !== jobId);
-    currentJobId = currentEstimate.jobs[0].id;
-    showJobDetails(currentJobId);
+    // Find the index of the job to remove
+    const jobIndex = currentEstimate.jobs.findIndex(job => job.id === jobId);
+    if (jobIndex === -1) return;
+    
+    currentEstimate.jobs.splice(jobIndex, 1);
+    
+    // Set currentJobId to the first remaining job
+    if (currentEstimate.jobs.length > 0) {
+        currentJobId = currentEstimate.jobs[0].id;
+        showJobDetails(currentJobId);
+    }
+    
     updateEstimatePreview();
 }
 
@@ -457,27 +466,6 @@ function getStepName(step) {
     }
 }
 
-function prevStep(step) {
-    // Hide current step
-    document.querySelector('.estimate-step.active-step').classList.remove('active-step');
-    
-    // Show previous step
-    document.getElementById(`${getStepName(step)}Step`).classList.add('active-step');
-    
-    // Update progress indicator
-    document.querySelector('.progress-step.active').classList.remove('active');
-    document.querySelector(`.progress-step[data-step="${step}"]`).classList.add('active');
-}
-
-function getStepName(step) {
-    switch(step) {
-        case 1: return 'customerInfo';
-        case 2: return 'jobs';
-        case 3: return 'review';
-        default: return '';
-    }
-}
-
 function validateCustomerInfo() {
     if (!customerInfoForm.checkValidity()) {
         alert('Please fill out all customer information fields');
@@ -499,17 +487,18 @@ function updateJobDetails() {
     const job = currentEstimate.jobs.find(j => j.id === currentJobId);
     if (!job) return;
     
-    job.name = document.getElementById('jobDescription').value;
-    job.days = parseFloat(document.getElementById('jobDays').value) || 1;
-    job.labor = parseFloat(document.getElementById('jobLabor').value) || 0;
+    // Only update fields if they exist (not during initialization)
+    const jobDescInput = document.getElementById('jobDescription');
+    const jobDaysInput = document.getElementById('jobDays');
+    const jobLaborInput = document.getElementById('jobLabor');
     
-    updateEstimatePreview();
+    if (jobDescInput) job.name = jobDescInput.value;
+    if (jobDaysInput) job.days = parseFloat(jobDaysInput.value) || 1;
+    if (jobLaborInput) job.labor = parseFloat(jobLaborInput.value) || 0;
 }
 
+
 function updateEstimatePreview() {
-    // Update job details first
-    updateJobDetails();
-    
     // Calculate totals
     let laborTotal = 0;
     let materialsTotal = 0;
@@ -944,6 +933,37 @@ function removeMaterialFromEdit(jobId, matIndex) {
     
     job.materials.splice(matIndex, 1);
     showEditFields(currentEstimate);
+}
+
+function addFee() {
+    const feeName = document.getElementById('feeName').value.trim();
+    const feeAmount = parseFloat(document.getElementById('feeAmount').value);
+    
+    if (!feeName || isNaN(feeAmount) || feeAmount <= 0) {
+        alert('Please enter valid fee details');
+        return;
+    }
+    
+    if (!currentEstimate.fees) currentEstimate.fees = [];
+    currentEstimate.fees.push({ name: feeName, amount: feeAmount });
+    
+    updateEstimatePreview();
+}
+
+function removeFee(index) {
+    if (!currentEstimate.fees) return;
+    currentEstimate.fees.splice(index, 1);
+    updateEstimatePreview();
+}
+
+function updateDiscount() {
+    const discountPercentage = parseFloat(document.getElementById('discountPercentage').value) || 0;
+    currentEstimate.discountPercentage = discountPercentage;
+    updateEstimatePreview();
+}
+
+function applyDiscount() {
+    updateDiscount();
 }
 
 function saveEstimateChanges() {
@@ -1523,20 +1543,15 @@ function filterByDate() {
 }
 
 // Make functions available globally for HTML event handlers
-window.updateJobSelection = updateJobSelection;
-window.updateJobField = updateJobField;
-window.updateMaterialField = updateMaterialField;
-window.updateFeeField = updateFeeField;
-window.addNewFeeField = addNewFeeField;
-window.addNewCustomMaterialField = addNewCustomMaterialField;
-window.removeMaterial = removeMaterial;
+// Update this section at the bottom of app.js:
 window.nextStep = nextStep;
 window.prevStep = prevStep;
-window.updateSelectedJob = updateSelectedJob;
-window.updateJobDays = updateJobDays;
-window.adjustMaterialQty = adjustMaterialQty;
-window.updateMaterialQty = updateMaterialQty;
+window.cancelEstimate = cancelEstimate;
+window.addNewJob = addNewJob;
+window.removeJob = removeJob;
+window.addMaterialToJob = addMaterialToJob;
+window.removeMaterialFromJob = removeMaterialFromJob;
+window.toggleEstimateFee = toggleEstimateFee;
 window.addFee = addFee;
 window.removeFee = removeFee;
 window.updateDiscount = updateDiscount;
-window.cancelEstimate = cancelEstimate;
