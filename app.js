@@ -7,9 +7,6 @@ const newEstimateBtn = document.getElementById('newEstimateBtn');
 const estimatesList = document.getElementById('estimatesList');
 const searchInput = document.getElementById('searchInput');
 const searchBtn = document.getElementById('searchBtn');
-const timeFilter = document.getElementById('timeFilter');
-const monthFilter = document.getElementById('monthFilter');
-const yearFilter = document.getElementById('yearFilter');
 const estimateModal = document.getElementById('estimateModal');
 const closeModal = document.querySelector('.close-modal');
 const editEstimateBtn = document.getElementById('editEstimateBtn');
@@ -19,7 +16,7 @@ const modalContent = document.getElementById('modalContent');
 const editFieldsContainer = document.getElementById('editFieldsContainer');
 const saveChangesBtn = document.getElementById('saveChangesBtn');
 let isEditing = false;
-const PASSWORD = "AHS"; // Change at some point
+const PASSWORD = "AHS";
 const passwordModal = document.getElementById('passwordModal');
 const passwordInput = document.getElementById('passwordInput');
 const passwordError = document.getElementById('passwordError');
@@ -46,130 +43,73 @@ const db = firebase.firestore();
 // Estimate form elements
 const customerInfoForm = document.getElementById('customerInfoForm');
 const customerPhone = document.getElementById('customerPhone');
-const jobDetailsContainer = document.getElementById('jobDetailsContainer');
 const jobDetailsContent = document.getElementById('jobDetailsContent');
-const materialsContainer = document.getElementById('materialsContainer');
 const estimatePreview = document.getElementById('estimatePreview');
 const saveEstimateBtn = document.getElementById('saveEstimateBtn');
 
 // Current estimate data
 let currentEstimate = {
     customer: {},
-    jobs: [], // This will now contain job objects with their own materials and discounts
-    fees: [],
+    jobs: [], // Array of job objects
     total: 0,
     waiveEstimateFee: false
 };
 
-let currentJobId = 1; // Track the current job being edited
+let currentJobId = 1;
 
 // Initialize the app
 document.addEventListener('DOMContentLoaded', function() {
-    // Check password
     checkPassword();
-
-    // Set up event listeners
     setupEventListeners();
-    
-    // Load estimates from Firebase
     loadEstimates();
-    
-    // Initialize phone number formatting
     initPhoneNumberFormatting();
-    
-    // Initialize month/year filters
-    initDateFilters();
+    addNewJob(); // Start with one job by default
 });
 
 function setupEventListeners() {
-    // Navigation buttons
-    if (dashboardBtn) dashboardBtn.addEventListener('click', showDashboard);
-    if (newEstimateBtn) newEstimateBtn.addEventListener('click', showNewEstimate);
-    if (saveChangesBtn) saveChangesBtn.addEventListener('click', saveEstimateChanges);
+    dashboardBtn.addEventListener('click', showDashboard);
+    newEstimateBtn.addEventListener('click', showNewEstimate);
+    saveChangesBtn.addEventListener('click', saveEstimateChanges);
     
-    // Search functionality
-    if (searchInput) {
-        searchInput.addEventListener('keyup', function(e) {
-            if (e.key === 'Enter') {
-                searchEstimates();
-            }
-        });
-    }
-    if (searchBtn) searchBtn.addEventListener('click', searchEstimates);
-    
-    // Time filter
-    if (timeFilter) {
-        timeFilter.addEventListener('change', function() {
-            if (this.value === 'month') {
-                if (monthFilter) monthFilter.style.display = 'inline-block';
-                if (yearFilter) yearFilter.style.display = 'inline-block';
-            } else {
-                if (monthFilter) monthFilter.style.display = 'none';
-                if (yearFilter) yearFilter.style.display = 'none';
-                loadEstimates();
-            }
-        });
-    }
-    
-    if (monthFilter) monthFilter.addEventListener('change', filterByDate);
-    if (yearFilter) yearFilter.addEventListener('change', filterByDate);
-    
-    // Modal buttons
-    if (closeModal) closeModal.addEventListener('click', closeEstimateModal);
-    if (editEstimateBtn) editEstimateBtn.addEventListener('click', editEstimate);
-    if (deleteEstimateBtn) deleteEstimateBtn.addEventListener('click', deleteEstimate);
-    if (exportEstimateBtn) exportEstimateBtn.addEventListener('click', exportEstimateToWord);
-    
-    // Estimate form buttons
-    if (saveEstimateBtn) saveEstimateBtn.addEventListener('click', saveEstimate);
-
-    document.getElementById('waiveEstimateFeeBtn').addEventListener('click', function() {
-        currentEstimate.waiveEstimateFee = !currentEstimate.waiveEstimateFee;
-        
-        if (currentEstimate.waiveEstimateFee) {
-            this.classList.add('active');
-            this.innerHTML = '<i class="fas fa-check"></i> Estimate Fee Waived';
-        } else {
-            this.classList.remove('active');
-            this.innerHTML = '<i class="fas fa-dollar-sign"></i> Waive $75 Estimate Fee';
-        }
-        
-        updateEstimatePreview();
+    searchInput.addEventListener('keyup', function(e) {
+        if (e.key === 'Enter') searchEstimates();
     });
+    searchBtn.addEventListener('click', searchEstimates);
+    
+    closeModal.addEventListener('click', closeEstimateModal);
+    editEstimateBtn.addEventListener('click', editEstimate);
+    deleteEstimateBtn.addEventListener('click', deleteEstimate);
+    exportEstimateBtn.addEventListener('click', exportEstimateToWord);
+    
+    saveEstimateBtn.addEventListener('click', saveEstimate);
+    document.getElementById('addMaterial').addEventListener('click', addMaterialToJob);
+    document.getElementById('waiveEstimateFeeBtn').addEventListener('click', toggleEstimateFee);
 }
 
 function checkPassword() {
-    // Check if already authenticated
     if (localStorage.getItem('authenticated')) {
         passwordModal.style.display = 'none';
         return;
     }
 
-    // Show the modal initially (with full coverage)
     passwordModal.style.display = 'flex';
-    document.body.style.overflow = 'hidden'; // Prevent scrolling
+    document.body.style.overflow = 'hidden';
 
-    // Handle password submission
     function verifyPassword() {
         if (passwordInput.value === PASSWORD) {
             localStorage.setItem('authenticated', 'true');
             passwordModal.style.display = 'none';
             passwordError.style.display = 'none';
-            document.body.style.overflow = ''; // Re-enable scrolling
+            document.body.style.overflow = '';
         } else {
             passwordError.style.display = 'block';
             passwordInput.value = '';
         }
     }
 
-    // Click event
     submitPassword.addEventListener('click', verifyPassword);
-
-    // Enter key event
     passwordInput.addEventListener('keyup', function(e) {
-        if (e.key === 'Enter') {
-            verifyPassword();
-        }
+        if (e.key === 'Enter') verifyPassword();
     });
 }
 
@@ -181,20 +121,75 @@ function showDashboard() {
     loadEstimates();
 }
 
+function showNewEstimate() {
+    dashboardView.classList.remove('active-view');
+    newEstimateView.classList.add('active-view');
+    dashboardBtn.classList.remove('active');
+    newEstimateBtn.classList.add('active');
+    resetEstimateForm();
+}
+
+function resetEstimateForm() {
+    currentEstimate = {
+        customer: {},
+        jobs: [],
+        total: 0,
+        waiveEstimateFee: false
+    };
+    currentJobId = 1;
+    addNewJob();
+    
+    // Reset form steps
+    document.querySelectorAll('.estimate-step').forEach(step => {
+        step.classList.remove('active-step');
+    });
+    document.getElementById('customerInfoStep').classList.add('active-step');
+    
+    // Reset progress steps
+    document.querySelectorAll('.progress-step').forEach(step => {
+        step.classList.remove('active');
+    });
+    document.querySelector('.progress-step[data-step="1"]').classList.add('active');
+    
+    // Clear form inputs
+    customerInfoForm.reset();
+    document.getElementById('discountPercentage').value = 0;
+    document.getElementById('feesList').innerHTML = '';
+    document.getElementById('waiveEstimateFeeBtn').classList.remove('active');
+    document.getElementById('waiveEstimateFeeBtn').innerHTML = '<i class="fas fa-dollar-sign"></i> Waive $75 Estimate Fee';
+}
+
+function initPhoneNumberFormatting() {
+    const phoneInput = document.getElementById('customerPhone');
+    if (!phoneInput) return;
+    
+    phoneInput.addEventListener('input', function(e) {
+        const input = e.target.value.replace(/\D/g, '').substring(0, 10);
+        const areaCode = input.substring(0, 3);
+        const middle = input.substring(3, 6);
+        const last = input.substring(6, 10);
+        
+        if (input.length > 6) {
+            e.target.value = `(${areaCode}) ${middle}-${last}`;
+        } else if (input.length > 3) {
+            e.target.value = `(${areaCode}) ${middle}`;
+        } else if (input.length > 0) {
+            e.target.value = `(${areaCode}`;
+        }
+    });
+}
+
 function addNewJob() {
-    currentJobId++;
     const newJob = {
-        id: currentJobId,
-        category: "custom",
+        id: currentJobId++,
         name: "",
         days: 1,
         labor: 0,
         materials: [],
-        customMaterials: [],
         discountPercentage: 0
     };
     currentEstimate.jobs.push(newJob);
-    showJobDetails(currentJobId);
+    showJobDetails(newJob.id);
 }
 
 function removeJob(jobId) {
@@ -204,12 +199,7 @@ function removeJob(jobId) {
     }
     
     currentEstimate.jobs = currentEstimate.jobs.filter(job => job.id !== jobId);
-    
-    // If we removed the currently displayed job, show the first remaining job
-    if (jobId === currentJobId) {
-        currentJobId = currentEstimate.jobs[0].id;
-    }
-    
+    currentJobId = currentEstimate.jobs[0].id;
     showJobDetails(currentJobId);
     updateEstimatePreview();
 }
@@ -220,14 +210,14 @@ function showJobDetails(jobId) {
 
     currentJobId = jobId;
     
-    // Update UI to show job tabs
+    // Update job tabs
     const jobTabsContainer = document.getElementById('jobTabsContainer');
     jobTabsContainer.innerHTML = '';
     
     currentEstimate.jobs.forEach(j => {
         const tab = document.createElement('div');
         tab.className = `job-tab ${j.id === jobId ? 'active' : ''}`;
-        tab.textContent = `Job ${j.id}: ${j.name || 'Custom Job'}`;
+        tab.textContent = `Job ${j.id}: ${j.name || 'New Job'}`;
         tab.onclick = () => showJobDetails(j.id);
         
         if (currentEstimate.jobs.length > 1) {
@@ -251,306 +241,99 @@ function showJobDetails(jobId) {
     addTab.onclick = addNewJob;
     jobTabsContainer.appendChild(addTab);
     
-    // Show job details for the selected job
-    renderJobDetails(job);
+    // Update job details form
+    document.getElementById('jobDescription').value = job.name;
+    document.getElementById('jobDays').value = job.days;
+    document.getElementById('jobLabor').value = job.labor;
+    
+    // Update materials list
+    updateMaterialsList();
 }
 
-function renderJobDetails(job) {
-    jobDetailsContent.innerHTML = '';
+function updateMaterialsList() {
+    const job = currentEstimate.jobs.find(j => j.id === currentJobId);
+    const materialsList = document.getElementById('materialsList');
     
-    // Job details form - simplified for custom jobs only
-    const detailsSection = document.createElement('div');
-    detailsSection.className = 'job-section';
-    detailsSection.innerHTML = `
-        <h4>Custom Job Details</h4>
-        <div class="form-group">
-            <label>Job Description:</label>
-            <input type="text" class="job-description" value="${job.name || ''}" 
-                onchange="currentEstimate.jobs.find(j => j.id === ${job.id}).name = this.value">
-        </div>
-        <div class="form-group">
-            <label>Estimated Days:</label>
-            <input type="number" class="job-days" value="${job.days || 1}" min="0" step="0.5"
-                onchange="currentEstimate.jobs.find(j => j.id === ${job.id}).days = parseFloat(this.value)">
-        </div>
-        <div class="form-group">
-            <label>Labor Cost ($):</label>
-            <input type="number" class="job-labor" value="${job.labor || 0}" min="0" step="0.01"
-                onchange="currentEstimate.jobs.find(j => j.id === ${job.id}).labor = parseFloat(this.value)">
-        </div>
-    `;
-    jobDetailsContent.appendChild(detailsSection);
-}
-
-function showNewEstimate() {
-    dashboardView.classList.remove('active-view');
-    newEstimateView.classList.add('active-view');
-    dashboardBtn.classList.remove('active');
-    newEstimateBtn.classList.add('active');
-    resetEstimateForm();
-}
-
-function resetEstimateForm() {
-    // Reset current estimate
-    currentEstimate = {
-        customer: {},
-        jobs: [],
-        fees: [],
-        total: 0,
-        waiveEstimateFee: false
-    };
-    
-    // Add initial custom job
-    currentJobId = 1;
-    addNewJob();
-    
-    // Reset form steps
-    document.querySelectorAll('.estimate-step').forEach(step => {
-        step.classList.remove('active-step');
-    });
-    document.getElementById('customerInfoStep').classList.add('active-step');
-    
-    // Reset progress steps
-    document.querySelectorAll('.progress-step').forEach(step => {
-        step.classList.remove('active');
-    });
-    document.querySelector('.progress-step[data-step="1"]').classList.add('active');
-    
-    // Reset form inputs
-    customerInfoForm.reset();
-    document.getElementById('discountPercentage').value = 0;
-    document.getElementById('feesList').innerHTML = '';
-    document.getElementById('customMaterialsList').innerHTML = '<p class="no-materials">No custom materials added yet</p>';
-}
-
-function initPhoneNumberFormatting() {
-    const phoneInput = document.getElementById('customerPhone');
-    if (!phoneInput) return;
-    
-    phoneInput.addEventListener('input', function(e) {
-        const input = e.target.value.replace(/\D/g, '').substring(0, 10);
-        const areaCode = input.substring(0, 3);
-        const middle = input.substring(3, 6);
-        const last = input.substring(6, 10);
-        
-        if (input.length > 6) {
-            e.target.value = `(${areaCode}) ${middle}-${last}`;
-        } else if (input.length > 3) {
-            e.target.value = `(${areaCode}) ${middle}`;
-        } else if (input.length > 0) {
-            e.target.value = `(${areaCode}`;
-        }
-    });
-}
-
-
-function initCategorySelection() {
-    // For custom jobs only - no category selection needed
-    if (currentEstimate.jobs.length === 0) {
-        addNewJob(); // Start with one custom job by default
-    } else {
-        showJobDetails(currentJobId); // Show the existing job
-    }
-}
-
-function getCategoryIcon(categoryId) {
-    const icons = {
-        custom: '<i class="fas fa-pencil-alt"></i>',
-    };
-    
-    return icons[categoryId] || '';
-}
-
-function showJobDetails(categoryId) {
-    const selectedCategories = document.querySelectorAll('.category-card.selected');
-    
-    if (selectedCategories.length > 0) {
-        jobDetailsContainer.style.display = 'block';
-        jobDetailsContent.innerHTML = '';
-        
-        selectedCategories.forEach(card => {
-            const categoryName = card.querySelector('h3').textContent;
-            const categoryId = card.getAttribute('data-category');
-            const category = priceSheet.categories[categoryId];
-            
-            const categorySection = document.createElement('div');
-            categorySection.className = 'job-option';
-            categorySection.innerHTML = `
-                <h4>${category.name}</h4>
-            `;
-            
-            if (categoryId === 'custom') {
-                // Custom job input fields
-                categorySection.innerHTML += `
-                    <div class="form-group">
-                        <label>Job Description:</label>
-                        <input type="text" id="customJobName" placeholder="Describe the work">
-                    </div>
-                    <div class="form-group">
-                        <label>Estimated Days:</label>
-                        <input type="number" id="customJobDays" min="0" step="0.5" value="1">
-                    </div>
-                    <div class="form-group">
-                        <label>Labor Cost ($):</label>
-                        <input type="number" id="customJobLabor" min="0" step="0.01" value="0">
-                    </div>
-                    <button onclick="addCustomJob('${categoryId}')">Add Custom Job</button>
-                `;
-            } else {
-                // Existing job selection logic
-                category.jobs.forEach((job, index) => {
-                    const jobId = `${categoryId}-job-${index}`;
-                    
-                    const jobOption = document.createElement('div');
-                    jobOption.innerHTML = `
-                        <label>
-                            <input type="radio" name="${categoryId}" value="${index}" 
-                                onchange="updateSelectedJob('${categoryId}', ${index})">
-                            ${job.name} (${job.days} days) - ${job.labor}
-                        </label>
-                    `;
-                    
-                    if (job.days.includes('-')) {
-                        const [minDays, maxDays] = job.days.split('-').map(Number);
-                        const daysSelect = document.createElement('div');
-                        daysSelect.className = 'days-selection';
-                        daysSelect.innerHTML = `
-                            <label>Days:</label>
-                            <select id="${jobId}-days" onchange="updateJobDays('${categoryId}', ${index}, this.value)">
-                                ${Array.from({length: maxDays - minDays + 1}, (_, i) => 
-                                    `<option value="${minDays + i}">${minDays + i}</option>`).join('')}
-                            </select>
-                        `;
-                        jobOption.appendChild(daysSelect);
-                    }
-                    
-                    categorySection.appendChild(jobOption);
-                });
-            }
-            
-            jobDetailsContent.appendChild(categorySection);
-        });
-    } else {
-        jobDetailsContainer.style.display = 'none';
-    }
-}
-
-
-function addCustomJob(categoryId) {
-    const name = document.getElementById('customJobName').value.trim();
-    const days = parseFloat(document.getElementById('customJobDays').value) || 1;
-    const labor = parseFloat(document.getElementById('customJobLabor').value) || 0;
-    
-    if (!name) {
-        alert('Please enter a job description');
+    if (!job || job.materials.length === 0) {
+        materialsList.innerHTML = '<p class="no-materials">No materials added yet</p>';
         return;
     }
     
-    // Remove any existing job for this category
-    currentEstimate.jobs = currentEstimate.jobs.filter(j => j.category !== categoryId);
+    materialsList.innerHTML = '';
+    job.materials.forEach((mat, index) => {
+        const item = document.createElement('div');
+        item.className = 'material-item';
+        item.innerHTML = `
+            <span>${mat.name} (${mat.quantity} @ $${formatAccounting(mat.price)}) = $${formatAccounting(mat.total)}</span>
+            <button onclick="removeMaterialFromJob(${index})"><i class="fas fa-times"></i></button>
+        `;
+        materialsList.appendChild(item);
+    });
+}
+
+function addMaterialToJob() {
+    const name = document.getElementById('materialName').value.trim();
+    const price = parseFloat(document.getElementById('materialPrice').value);
+    const qty = parseInt(document.getElementById('materialQty').value);
     
-    // Add the new custom job
-    currentEstimate.jobs.push({
-        category: categoryId,
+    if (!name || isNaN(price) || price <= 0 || isNaN(qty) || qty <= 0) {
+        alert('Please enter valid material details');
+        return;
+    }
+    
+    const job = currentEstimate.jobs.find(j => j.id === currentJobId);
+    if (!job) return;
+    
+    job.materials.push({
         name: name,
-        days: days,
-        labor: labor
+        price: price,
+        quantity: qty,
+        total: price * qty
     });
     
-    // Create and show feedback element
-    const feedback = document.createElement('div');
-    feedback.className = 'feedback-message success';
-    feedback.innerHTML = `<i class="fas fa-check-circle"></i> Custom job added: ${name}`;
+    // Clear form
+    document.getElementById('materialName').value = '';
+    document.getElementById('materialPrice').value = '';
+    document.getElementById('materialQty').value = '1';
     
-    // Find the custom job section and append feedback
-    const customJobSection = document.querySelector('.job-option');
-    if (customJobSection) {
-        // Remove any existing feedback first
-        const existingFeedback = customJobSection.querySelector('.feedback-message');
-        if (existingFeedback) {
-            existingFeedback.remove();
-        }
-        customJobSection.appendChild(feedback);
-    }
-    
-    // Remove feedback after 3 seconds
-    setTimeout(() => {
-        feedback.classList.add('fade-out');
-        setTimeout(() => feedback.remove(), 300);
-    }, 3000);
-    
+    updateMaterialsList();
     updateEstimatePreview();
 }
 
-function updateSelectedJob(categoryId, jobIndex) {
-    const category = priceSheet.categories[categoryId];
-    const job = category.jobs[jobIndex];
+function removeMaterialFromJob(index) {
+    const job = currentEstimate.jobs.find(j => j.id === currentJobId);
+    if (!job) return;
     
-    // Remove any existing job for this category
-    currentEstimate.jobs = currentEstimate.jobs.filter(j => j.category !== categoryId);
+    job.materials.splice(index, 1);
+    updateMaterialsList();
+    updateEstimatePreview();
+}
+
+function toggleEstimateFee() {
+    currentEstimate.waiveEstimateFee = !currentEstimate.waiveEstimateFee;
+    const btn = document.getElementById('waiveEstimateFeeBtn');
     
-    // Parse labor cost
-    let laborCost = 0;
-    if (job.labor.includes('-')) {
-        const [min, max] = job.labor.replace(/[$,]/g, '').split('-').map(Number);
-        const days = job.days.includes('-') ? 
-            parseInt(document.getElementById(`${categoryId}-job-${jobIndex}-days`).value) : 
-            parseInt(job.days);
-        
-        // Calculate cost based on days (simple linear interpolation)
-        const [minDays, maxDays] = job.days.split('-').map(Number);
-        const ratio = (days - minDays) / (maxDays - minDays);
-        laborCost = min + ((max - min) * ratio);
-        
-        // Ensure labor cost is never negative
-        laborCost = Math.max(0, laborCost);
+    if (currentEstimate.waiveEstimateFee) {
+        btn.classList.add('active');
+        btn.innerHTML = '<i class="fas fa-check"></i> Estimate Fee Waived';
     } else {
-        laborCost = Math.max(0, parseFloat(job.labor.replace(/[$,]/g, '')));
+        btn.classList.remove('active');
+        btn.innerHTML = '<i class="fas fa-dollar-sign"></i> Waive $75 Estimate Fee';
     }
-    
-    // Add the new job
-    currentEstimate.jobs.push({
-        category: categoryId,
-        name: job.name,
-        days: job.days.includes('-') ? 
-            document.getElementById(`${categoryId}-job-${jobIndex}-days`).value : 
-            job.days,
-        labor: laborCost
-    });
     
     updateEstimatePreview();
-}
-
-function updateJobField(categoryId, jobIndex, field, value) {
-    if (field === 'labor') {
-        value = Math.max(0, parseFloat(value));
-    } else if (field === 'days') {
-        value = Math.max(0, parseFloat(value));
-    }
-    currentEstimate.jobs[jobIndex][field] = value;
-}
-
-function updateJobDays(categoryId, jobIndex, days) {
-    // Find the job in currentEstimate and update days
-    const job = currentEstimate.jobs.find(j => 
-        j.category === categoryId && j.name === priceSheet.categories[categoryId].jobs[jobIndex].name);
-    
-    if (job) {
-        job.days = days;
-        updateSelectedJob(categoryId, jobIndex); // Recalculate labor cost
-    }
 }
 
 function nextStep(step) {
     // Validate current step before proceeding
     if (step === 2 && !validateCustomerInfo()) return;
     if (step === 3 && currentEstimate.jobs.length === 0) {
-        alert('Please select at least one job');
+        alert('Please add at least one job');
         return;
     }
     
     // Hide current step
-    document.querySelector(`.estimate-step.active-step`).classList.remove('active-step');
+    document.querySelector('.estimate-step.active-step').classList.remove('active-step');
     
     // Show next step
     document.getElementById(`${getStepName(step)}Step`).classList.add('active-step');
@@ -559,21 +342,15 @@ function nextStep(step) {
     document.querySelector('.progress-step.active').classList.remove('active');
     document.querySelector(`.progress-step[data-step="${step}"]`).classList.add('active');
     
-    // If moving to materials step, initialize materials
-    if (step === 3) {
-        initMaterialsSelection();
-        updateCustomMaterialsList(); // Add this line
-    }
-    
     // If moving to review step, update preview
-    if (step === 4) {
+    if (step === 3) {
         updateEstimatePreview();
     }
 }
 
 function prevStep(step) {
     // Hide current step
-    document.querySelector(`.estimate-step.active-step`).classList.remove('active-step');
+    document.querySelector('.estimate-step.active-step').classList.remove('active-step');
     
     // Show previous step
     document.getElementById(`${getStepName(step)}Step`).classList.add('active-step');
@@ -586,9 +363,8 @@ function prevStep(step) {
 function getStepName(step) {
     switch(step) {
         case 1: return 'customerInfo';
-        case 2: return 'jobSelection';
-        case 3: return 'materials';
-        case 4: return 'review';
+        case 2: return 'jobs';
+        case 3: return 'review';
         default: return '';
     }
 }
@@ -610,271 +386,32 @@ function validateCustomerInfo() {
     return true;
 }
 
-function initMaterialsSelection() {
-    materialsContainer.innerHTML = '';
-    
-    // Show current job tab
-    const materialsHeader = document.createElement('div');
-    materialsHeader.className = 'materials-header';
-    materialsHeader.innerHTML = `
-        <h3>Materials for Job ${currentJobId}</h3>
-        <div class="job-tabs-mini" id="jobTabsMini"></div>
-    `;
-    materialsContainer.appendChild(materialsHeader);
-    
-    // Populate mini job tabs
-    const jobTabsMini = document.getElementById('jobTabsMini');
-    currentEstimate.jobs.forEach(job => {
-        const tab = document.createElement('div');
-        tab.className = `job-tab-mini ${job.id === currentJobId ? 'active' : ''}`;
-        tab.textContent = `Job ${job.id}`;
-        tab.onclick = () => {
-            currentJobId = job.id;
-            initMaterialsSelection();
-        };
-        jobTabsMini.appendChild(tab);
-    });
-    
-    // Get current job
+function updateJobDetails() {
     const job = currentEstimate.jobs.find(j => j.id === currentJobId);
     if (!job) return;
     
-    // Get materials from selected category
-    if (job.category && priceSheet.categories[job.category]) {
-        const category = priceSheet.categories[job.category];
-        
-        for (const [materialName, price] of Object.entries(category.materials)) {
-            const existingMat = job.materials.find(m => m.name === materialName);
-            
-            const materialItem = document.createElement('div');
-            materialItem.className = 'material-item';
-            materialItem.innerHTML = `
-                <div class="material-info">
-                    <h4>${materialName}</h4>
-                    <p>$${formatAccounting(price)}</p>
-                </div>
-                <div class="material-qty">
-                    <button class="qty-btn minus" onclick="adjustMaterialQty('${materialName}', -1, ${job.id})">-</button>
-                    <input type="number" id="qty-${job.id}-${materialName.replace(/\s+/g, '-')}" 
-                        value="${existingMat ? existingMat.quantity : 0}" min="0" 
-                        onchange="updateMaterialQty('${materialName}', this.value, ${job.id})">
-                    <button class="qty-btn plus" onclick="adjustMaterialQty('${materialName}', 1, ${job.id})">+</button>
-                </div>
-            `;
-            
-            materialsContainer.appendChild(materialItem);
-        }
-    }
+    job.name = document.getElementById('jobDescription').value;
+    job.days = parseFloat(document.getElementById('jobDays').value) || 1;
+    job.labor = parseFloat(document.getElementById('jobLabor').value) || 0;
     
-    // Custom materials section
-    const customMaterialsSection = document.createElement('div');
-    customMaterialsSection.className = 'custom-materials';
-    customMaterialsSection.innerHTML = `
-        <h3>Custom Materials</h3>
-        <div id="customMaterialsList-${job.id}" class="custom-materials-list">
-            ${job.customMaterials.length > 0 ? 
-                job.customMaterials.map(mat => `
-                    <div class="custom-material-item">
-                        <span>${mat.name} (${mat.quantity} @ $${formatAccounting(mat.price)}) = $${formatAccounting(mat.total)}</span>
-                        <button onclick="removeCustomMaterial(${job.id}, '${mat.name}')"><i class="fas fa-times"></i></button>
-                    </div>
-                `).join('') : 
-                '<p class="no-materials">No custom materials added yet</p>'}
-        </div>
-        <div class="custom-material-form">
-            <input type="text" id="customMaterialName-${job.id}" placeholder="Material Name">
-            <input type="number" id="customMaterialPrice-${job.id}" placeholder="Price" min="0" step="0.01">
-            <input type="number" id="customMaterialQty-${job.id}" placeholder="Qty" min="1" value="1">
-            <button onclick="addCustomMaterialToEstimate(${job.id})">Add Material</button>
-        </div>
-    `;
-    materialsContainer.appendChild(customMaterialsSection);
-    
-    // Job discount
-    const discountSection = document.createElement('div');
-    discountSection.className = 'job-discount-section';
-    discountSection.innerHTML = `
-        <h3>Job Discount</h3>
-        <div class="discount-controls">
-            <input type="number" id="jobDiscount-${job.id}" min="0" max="100" 
-                value="${job.discountPercentage}" placeholder="Discount %">
-            <button onclick="applyJobDiscount(${job.id})">Apply Discount</button>
-        </div>
-        <div id="jobDiscountDisplay-${job.id}" class="discount-display">
-            ${job.discountPercentage > 0 ? 
-                `${job.discountPercentage}% Discount Applied` : 
-                'No discount applied'}
-        </div>
-    `;
-    materialsContainer.appendChild(discountSection);
-}
-
-function applyJobDiscount(jobId) {
-    const job = currentEstimate.jobs.find(j => j.id === jobId);
-    if (!job) return;
-    
-    const discountValue = parseFloat(document.getElementById(`jobDiscount-${jobId}`).value) || 0;
-    job.discountPercentage = Math.min(100, Math.max(0, discountValue));
-    
-    const discountDisplay = document.getElementById(`jobDiscountDisplay-${jobId}`);
-    if (job.discountPercentage > 0) {
-        discountDisplay.textContent = `${job.discountPercentage}% Discount Applied`;
-        discountDisplay.classList.add('active');
-    } else {
-        discountDisplay.textContent = 'No discount applied';
-        discountDisplay.classList.remove('active');
-    }
-    
-    updateEstimatePreview();
-}
-
-function adjustMaterialQty(materialName, change) {
-    const input = document.getElementById(`qty-${materialName.replace(/\s+/g, '-')}`);
-    let newVal = parseInt(input.value) + change;
-    if (newVal < 0) newVal = 0;
-    input.value = newVal;
-    updateMaterialQty(materialName, newVal);
-}
-
-function updateMaterialQty(materialName, qty) {
-    qty = parseInt(qty);
-    if (isNaN(qty) || qty < 0) qty = 0;
-    
-    // Find the material in currentEstimate
-    const materialIndex = currentEstimate.materials.findIndex(m => m.name === materialName);
-    
-    if (qty > 0) {
-        // Add or update material
-        const price = getMaterialPrice(materialName);
-        if (materialIndex >= 0) {
-            currentEstimate.materials[materialIndex].quantity = qty;
-            currentEstimate.materials[materialIndex].total = price * qty;
-        } else {
-            currentEstimate.materials.push({
-                name: materialName,
-                price: price,
-                quantity: qty,
-                total: price * qty
-            });
-        }
-    } else if (materialIndex >= 0) {
-        // Remove material if quantity is 0
-        currentEstimate.materials.splice(materialIndex, 1);
-    }
-    
-    updateEstimatePreview();
-}
-
-function getMaterialPrice(materialName) {
-    // Search through all categories to find the material price
-    for (const category of Object.values(priceSheet.categories)) {
-        if (category.materials[materialName] !== undefined) {
-            return category.materials[materialName];
-        }
-    }
-    return 0;
-}
-
-function addCustomMaterialToEstimate() {
-    const name = document.getElementById('customMaterialName').value.trim();
-    const price = parseFloat(document.getElementById('customMaterialPrice').value);
-    const qty = parseInt(document.getElementById('customMaterialQty').value);
-    
-    if (!name || isNaN(price) || price <= 0 || isNaN(qty) || qty <= 0) {
-        alert('Please enter valid material details');
-        return;
-    }
-    
-    // Add custom material
-    currentEstimate.customMaterials.push({
-        name: name,
-        price: price,
-        quantity: qty,
-        total: price * qty
-    });
-    
-    // Update custom materials list display
-    updateCustomMaterialsList();
-    
-    // Clear form
-    document.getElementById('customMaterialName').value = '';
-    document.getElementById('customMaterialPrice').value = '';
-    document.getElementById('customMaterialQty').value = '1';
-    
-    updateEstimatePreview();
-}
-
-function addFee() {
-    const name = document.getElementById('feeName').value.trim();
-    const amount = parseFloat(document.getElementById('feeAmount').value);
-    
-    if (!name || isNaN(amount)) {
-        alert('Please enter valid fee details');
-        return;
-    }
-    
-    if (!currentEstimate.fees) {
-        currentEstimate.fees = [];
-    }
-    
-    currentEstimate.fees.push({
-        name: name,
-        amount: amount
-    });
-    
-    document.getElementById('feeName').value = '';
-    document.getElementById('feeAmount').value = '';
-    
-    updateFeesList();
-    updateEstimatePreview();
-}
-
-function updateFeesList() {
-    const feesList = document.getElementById('feesList');
-    feesList.innerHTML = '';
-    
-    if (!currentEstimate.fees || currentEstimate.fees.length === 0) {
-        return;
-    }
-    
-    currentEstimate.fees.forEach((fee, index) => {
-        const feeItem = document.createElement('div');
-        feeItem.className = 'fee-row';
-        feeItem.innerHTML = `
-            <span>${fee.name}</span>
-            <span>$${formatAccounting(fee.amount)}</span>
-            <button onclick="removeFee(${index})"><i class="fas fa-times"></i></button>
-        `;
-        feesList.appendChild(feeItem);
-    });
-}
-
-function removeFee(index) {
-    currentEstimate.fees.splice(index, 1);
-    updateFeesList();
-    updateEstimatePreview();
-}
-
-function updateDiscount() {
-    currentEstimate.discountPercentage = parseFloat(document.getElementById('discountPercentage').value) || 0;
     updateEstimatePreview();
 }
 
 function updateEstimatePreview() {
-    // Calculate subtotals
-    const laborTotal = currentEstimate.jobs.reduce((sum, job) => sum + job.labor, 0);
-    const materialsTotal = currentEstimate.materials.reduce((sum, mat) => sum + mat.total, 0);
-    const customMaterialsTotal = currentEstimate.customMaterials.reduce((sum, mat) => sum + mat.total, 0);
-    const feesTotal = (currentEstimate.fees ? currentEstimate.fees.reduce((sum, fee) => sum + fee.amount, 0) : 0);
+    // Update job details first
+    updateJobDetails();
     
-    // Get the current waiver status
-    const waiveFee = currentEstimate.waiveEstimateFee || false;
-    const estimateFee = waiveFee ? -75:75;
+    // Calculate totals
+    let laborTotal = 0;
+    let materialsTotal = 0;
     
-    const subtotal = laborTotal + materialsTotal + customMaterialsTotal + feesTotal;
-    const discount = currentEstimate.discountPercentage ? (subtotal * currentEstimate.discountPercentage / 100) : 0;
-    const total = subtotal - discount + estimateFee;
+    currentEstimate.jobs.forEach(job => {
+        laborTotal += job.labor || 0;
+        materialsTotal += job.materials.reduce((sum, mat) => sum + mat.total, 0);
+    });
     
+    const estimateFee = currentEstimate.waiveEstimateFee ? -75 : 75;
+    const total = laborTotal + materialsTotal + estimateFee;
     currentEstimate.total = total;
     
     // Generate preview HTML
@@ -901,74 +438,34 @@ function updateEstimatePreview() {
         
         <div class="estimate-section">
             <h3>Jobs</h3>
-            ${currentEstimate.jobs.map(job => {
-                const categoryName = priceSheet.categories[job.category].name;
-                return `
-                    <div class="estimate-row">
-                        <span>${categoryName} - ${job.name} (${job.days} days)</span>
-                        <span>$${formatAccounting(job.labor)}</span>
-                    </div>
-                `;
-            }).join('')}
-            <div class="estimate-row estimate-total-row">
-                <span>Total Labor:</span>
-                <span>$${formatAccounting(laborTotal)}</span>
-            </div>
-        </div>
-        
-        <div class="estimate-section">
-            <h3>Materials</h3>
-            ${currentEstimate.materials.length > 0 ? 
-                currentEstimate.materials.map(mat => `
+            ${currentEstimate.jobs.map(job => `
+                <div class="estimate-row">
+                    <span>${job.name} (${job.days} days)</span>
+                    <span>$${formatAccounting(job.labor)}</span>
+                </div>
+                ${job.materials.map(mat => `
                     <div class="estimate-row">
                         <span>${mat.name} (${mat.quantity} @ $${formatAccounting(mat.price)})</span>
                         <span>$${formatAccounting(mat.total)}</span>
                     </div>
-                `).join('') : '<p>No materials selected</p>'}
-            ${currentEstimate.customMaterials.length > 0 ? 
-                currentEstimate.customMaterials.map(mat => `
-                    <div class="estimate-row">
-                        <span>${mat.name} (Custom) (${mat.quantity} @ $${formatAccounting(mat.price)})</span>
-                        <span>$${formatAccounting(mat.total)}</span>
-                    </div>
-                `).join('') : ''}
+                `).join('')}
+            `).join('')}
+            <div class="estimate-row estimate-total-row">
+                <span>Total Labor:</span>
+                <span>$${formatAccounting(laborTotal)}</span>
+            </div>
             <div class="estimate-row estimate-total-row">
                 <span>Total Materials:</span>
-                <span>$${formatAccounting(materialsTotal + customMaterialsTotal)}</span>
+                <span>$${formatAccounting(materialsTotal)}</span>
             </div>
         </div>
         
         <div class="estimate-section">
-            <h3>Fees</h3>
-            ${currentEstimate.fees && currentEstimate.fees.length > 0 ? 
-                currentEstimate.fees.map(fee => `
-                    <div class="estimate-row">
-                        <span>${fee.name}</span>
-                        <span>$${formatAccounting(fee.amount)}</span>
-                    </div>
-                `).join('') : '<p>No fees added</p>'}
             <div class="estimate-row">
                 <span>Estimate Fee:</span>
-                <span>${waiveFee ? 'Waived (-$75.00)' : '$75.00'}</span>
-            </div>
-            <div class="estimate-row estimate-total-row">
-                <span>Total Fees:</span>
-                <span>$${formatAccounting(feesTotal + estimateFee)}</span>
+                <span>${currentEstimate.waiveEstimateFee ? 'Waived (-$75.00)' : '$75.00'}</span>
             </div>
         </div>
-        
-        ${currentEstimate.discountPercentage > 0 ? `
-            <div class="estimate-section">
-                <div class="estimate-row">
-                    <span>Subtotal:</span>
-                    <span>$${formatAccounting(subtotal)}</span>
-                </div>
-                <div class="estimate-row">
-                    <span>Discount (${currentEstimate.discountPercentage}%):</span>
-                    <span>-$${formatAccounting(discount)}</span>
-                </div>
-            </div>
-        ` : ''}
         
         <div class="estimate-section">
             <div class="estimate-row estimate-total-row">
@@ -983,80 +480,24 @@ function updateEstimatePreview() {
 
 function saveEstimate() {
     if (!currentEstimate.customer.name || currentEstimate.jobs.length === 0) {
-        alert('Please complete all required fields and select at least one job');
+        alert('Please complete all required fields and add at least one job');
         return;
     }
 
-    // Get the current waiver status from the button state
-    const waiveFeeBtn = document.getElementById('waiveEstimateFeeBtn');
-    currentEstimate.waiveEstimateFee = waiveFeeBtn.classList.contains('active');
-    
-    // Add timestamp with proper date formatting
+    // Add timestamp
     currentEstimate.createdAt = new Date().toISOString();
     currentEstimate.updatedAt = currentEstimate.createdAt;
 
-    // Calculate total before saving
-    currentEstimate.total = calculateEstimateTotal(currentEstimate);
-
-    // Save to Firestore (automatically generates ID)
+    // Save to Firestore
     db.collection("estimates").add(currentEstimate)
         .then(() => {
             alert('Estimate saved successfully!');
             showDashboard();
-            loadEstimates(); // Explicitly reload estimates to show the new one
+            loadEstimates();
         })
         .catch(error => {
             console.error('Error saving estimate:', error);
             alert('Error saving estimate. Please try again.');
-        });
-}
-
-function saveEstimateChanges() {
-    if (!currentEstimate.customer.name || currentEstimate.jobs.length === 0) {
-        alert('Please complete all required fields and select at least one job');
-        return;
-    }
-
-    // Update customer info from edit fields
-    currentEstimate.customer = {
-        name: document.getElementById('editCustomerName').value,
-        email: document.getElementById('editCustomerEmail').value,
-        phone: document.getElementById('editCustomerPhone').value,
-        location: document.getElementById('editJobLocation').value
-    };
-
-    // Update discount percentage
-    currentEstimate.discountPercentage = parseFloat(document.getElementById('editDiscountPercentage').value) || 0;
-
-    // Recalculate total
-    currentEstimate.total = calculateEstimateTotal(currentEstimate);
-
-    // Update timestamp
-    currentEstimate.updatedAt = new Date().toISOString();
-
-    // Save to Firestore
-    db.collection("estimates").doc(currentEstimate.id).update(currentEstimate)
-        .then(() => {
-            alert('Estimate updated successfully!');
-            
-            // Reset editing state
-            isEditing = false;
-            editFieldsContainer.style.display = 'none';
-            modalContent.style.display = 'block';
-            
-            // Update button visibility
-            editEstimateBtn.style.display = 'inline-block';
-            saveChangesBtn.style.display = 'none';
-            exportEstimateBtn.style.display = 'inline-block';
-            deleteEstimateBtn.style.display = 'inline-block';
-            
-            // Reload the estimate to show changes
-            loadEstimates(); // This will refresh the dashboard
-            openEstimateModal(currentEstimate);
-        })
-        .catch(error => {
-            console.error('Error updating estimate:', error);
-            alert('Error updating estimate. Please try again.');
         });
 }
 
@@ -1068,10 +509,6 @@ function loadEstimates() {
             const estimates = [];
             querySnapshot.forEach(doc => {
                 const estimateData = doc.data();
-                // Ensure total is calculated if missing
-                if (typeof estimateData.total === 'undefined') {
-                    estimateData.total = calculateEstimateTotal(estimateData);
-                }
                 estimates.push({
                     id: doc.id,
                     ...estimateData
@@ -1084,24 +521,9 @@ function loadEstimates() {
         });
 }
 
-// Helper function
-function calculateEstimateTotal(estimate) {
-    const laborTotal = estimate.jobs.reduce((sum, job) => sum + (job.labor || 0), 0);
-    const materialsTotal = estimate.materials.reduce((sum, mat) => sum + (mat.total || 0), 0);
-    const customMaterialsTotal = estimate.customMaterials.reduce((sum, mat) => sum + (mat.total || 0), 0);
-    const feesTotal = estimate.fees ? estimate.fees.reduce((sum, fee) => sum + (fee.amount || 0), 0) : 0;
-    
-    // Check if the estimate fee is waived (default to false if not set)
-    const waiveFee = estimate.waiveEstimateFee || false;
-    const estimateFee = waiveFee ? -75:75;
-    
-    const subtotal = laborTotal + materialsTotal + customMaterialsTotal + feesTotal;
-    const discount = estimate.discountPercentage ? (subtotal * estimate.discountPercentage / 100) : 0;
-    return subtotal - discount + estimateFee;
-}
-
 function displayEstimates(estimates) {
     estimatesList.innerHTML = '';
+    
     // Calculate totals
     const totalCount = estimates.length;
     const totalAmount = estimates.reduce((sum, estimate) => sum + estimate.total, 0);
@@ -1114,9 +536,6 @@ function displayEstimates(estimates) {
         estimatesList.innerHTML = '<p class="no-estimates">No estimates found</p>';
         return;
     }
-    
-    // Sort by date (newest first)
-    estimates.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     
     estimates.forEach(estimate => {
         const date = new Date(estimate.createdAt);
@@ -1143,33 +562,6 @@ function displayEstimates(estimates) {
     });
 }
 
-function applyDiscount() {
-    const discountValue = parseFloat(document.getElementById('discountPercentage').value) || 0;
-    currentEstimate.discountPercentage = Math.min(100, Math.max(0, discountValue));
-    
-    const discountDisplay = document.getElementById('discountDisplay');
-    if (currentEstimate.discountPercentage > 0) {
-        discountDisplay.innerHTML = `
-            <span class="discount-value">${currentEstimate.discountPercentage}% Discount Applied</span>
-            <button onclick="removeDiscount()" class="remove-discount"><i class="fas fa-times"></i></button>
-        `;
-        discountDisplay.classList.add('active');
-    } else {
-        discountDisplay.innerHTML = 'No discount applied';
-        discountDisplay.classList.remove('active');
-    }
-    
-    updateEstimatePreview();
-}
-
-function removeDiscount() {
-    document.getElementById('discountPercentage').value = 0;
-    currentEstimate.discountPercentage = 0;
-    document.getElementById('discountDisplay').innerHTML = 'No discount applied';
-    document.getElementById('discountDisplay').classList.remove('active');
-    updateEstimatePreview();
-}
-
 function openEstimateModal(estimate) {
     const date = new Date(estimate.createdAt);
     const formattedDate = date.toLocaleDateString('en-US', {
@@ -1182,6 +574,18 @@ function openEstimateModal(estimate) {
     
     modalContent.dataset.estimateId = estimate.id;
     modalContent.dataset.estimateData = JSON.stringify(estimate);
+
+    // Calculate totals
+    let laborTotal = 0;
+    let materialsTotal = 0;
+    
+    estimate.jobs.forEach(job => {
+        laborTotal += job.labor || 0;
+        materialsTotal += job.materials.reduce((sum, mat) => sum + mat.total, 0);
+    });
+    
+    const estimateFee = estimate.waiveEstimateFee ? -75 : 75;
+    const total = laborTotal + materialsTotal + estimateFee;
 
     let html = `
         <div class="estimate-section">
@@ -1211,108 +615,33 @@ function openEstimateModal(estimate) {
         
         <div class="estimate-section">
             <h3>Jobs</h3>
-    `;
-    
-    estimate.jobs.forEach(job => {
-        const categoryName = priceSheet.categories[job.category].name;
-        html += `
-            <div class="estimate-row">
-                <span>${categoryName} - ${job.name} (${job.days} days)</span>
-                <span>$${formatAccounting(job.labor)}</span>
-            </div>
-        `;
-    });
-    
-    html += `
+            ${estimate.jobs.map(job => `
+                <div class="estimate-row">
+                    <span>${job.name} (${job.days} days)</span>
+                    <span>$${formatAccounting(job.labor)}</span>
+                </div>
+                ${job.materials.map(mat => `
+                    <div class="estimate-row">
+                        <span>${mat.name} (${mat.quantity} @ $${formatAccounting(mat.price)})</span>
+                        <span>$${formatAccounting(mat.total)}</span>
+                    </div>
+                `).join('')}
+            `).join('')}
             <div class="estimate-row estimate-total-row">
                 <span>Total Labor:</span>
-                <span>$${formatAccounting(estimate.jobs.reduce((sum, job) => sum + job.labor, 0))}</span>
+                <span>$${formatAccounting(laborTotal)}</span>
+            </div>
+            <div class="estimate-row estimate-total-row">
+                <span>Total Materials:</span>
+                <span>$${formatAccounting(materialsTotal)}</span>
             </div>
         </div>
         
         <div class="estimate-section">
-            <h3>Materials</h3>
-    `;
-    
-    if (estimate.materials.length === 0 && estimate.customMaterials.length === 0) {
-        html += `<p>No materials selected</p>`;
-    } else {
-        estimate.materials.forEach(mat => {
-            html += `
-                <div class="estimate-row">
-                    <span>${mat.name} (${mat.quantity} @ $${formatAccounting(mat.price)})</span>
-                    <span>$${formatAccounting(mat.total)}</span>
-                </div>
-            `;
-        });
-        
-        estimate.customMaterials.forEach(mat => {
-            html += `
-                <div class="estimate-row">
-                    <span>${mat.name} (Custom) (${mat.quantity} @ $${formatAccounting(mat.price)})</span>
-                    <span>$${formatAccounting(mat.total)}</span>
-                </div>
-            `;
-        });
-    }
-    
-    // Add fees section if any fees exist
-    if (estimate.fees && estimate.fees.length > 0) {
-        html += `
-            <div class="estimate-section">
-                <h3>Fees</h3>
-        `;
-        
-        estimate.fees.forEach(fee => {
-            html += `
-                <div class="estimate-row">
-                    <span>${fee.name}</span>
-                    <span>$${formatAccounting(fee.amount)}</span>
-                </div>
-            `;
-        });
-        
-        const feesTotal = estimate.fees.reduce((sum, fee) => sum + fee.amount, 0);
-        
-        html += `
-                <div class="estimate-row estimate-total-row">
-                    <span>Total Fees:</span>
-                    <span>$${formatAccounting(feesTotal)}</span>
-                </div>
+            <div class="estimate-row">
+                <span>Estimate Fee:</span>
+                <span>${estimate.waiveEstimateFee ? 'Waived (-$75.00)' : '$75.00'}</span>
             </div>
-        `;
-    }
-    
-
-  // Calculate totals with the waiver status
-    const laborTotal = estimate.jobs.reduce((sum, job) => sum + job.labor, 0);
-    const materialsTotal = estimate.materials.reduce((sum, mat) => sum + mat.total, 0);
-    const customMaterialsTotal = estimate.customMaterials.reduce((sum, mat) => sum + mat.total, 0);
-    const feesTotal = estimate.fees ? estimate.fees.reduce((sum, fee) => sum + fee.amount, 0) : 0;
-    const waiveFee = estimate.waiveEstimateFee || false;
-    const estimateFee = waiveFee ? -75:75;
-    const subtotal = laborTotal + materialsTotal + customMaterialsTotal + feesTotal;
-    const discount = estimate.discountPercentage ? (subtotal * estimate.discountPercentage / 100) : 0;
-    const total = subtotal - discount + estimateFee;
-    
-    // Add subtotal and discount if discount exists
-    if (estimate.discountPercentage > 0) {
-        html += `
-            <div class="estimate-section">
-                <div class="estimate-row">
-                    <span>Subtotal:</span>
-                    <span>$${formatAccounting(subtotal)}</span>
-                </div>
-                <div class="estimate-row">
-                    <span>Discount (${estimate.discountPercentage}%):</span>
-                    <span>-$${formatAccounting(discount)}</span>
-                </div>
-            </div>
-        `;
-    }
-    
-    html += `
-        <div class="estimate-section">
             <div class="estimate-row estimate-total-row">
                 <span>Total Estimate:</span>
                 <span>$${formatAccounting(total)}</span>
@@ -1322,9 +651,6 @@ function openEstimateModal(estimate) {
     
     modalContent.innerHTML = html;
     estimateModal.style.display = 'block';
-    
-    // Store the current estimate ID for editing/deleting
-    modalContent.dataset.estimateId = estimate.id;
 }
 
 function closeEstimateModal() {
@@ -1335,345 +661,220 @@ function editEstimate() {
     const estimateId = modalContent.dataset.estimateId;
     const estimateData = JSON.parse(modalContent.dataset.estimateData);
     
-    // Create a new object that combines the document data with the ID
     currentEstimate = {
         id: estimateId,
         ...estimateData
     };
     
-    // Ensure we have the latest data
-    db.collection("estimates").doc(estimateId).get()
-        .then(doc => {
-            if (doc.exists) {
-                currentEstimate = {
-                    id: doc.id,
-                    ...doc.data()
-                };
-                
-                // Show edit fields
-                showEditFields(currentEstimate);
-                isEditing = true;
-                
-                // Hide the static view and show edit fields
-                modalContent.style.display = 'none';
-                editFieldsContainer.style.display = 'block';
-                
-                // Update button visibility
-                editEstimateBtn.style.display = 'none';
-                saveChangesBtn.style.display = 'inline-block';
-                exportEstimateBtn.style.display = 'none';
-                deleteEstimateBtn.style.display = 'none';
-            }
-        })
-        .catch(error => {
-            console.error('Error loading estimate for editing:', error);
-            alert('Error loading estimate for editing');
-        });
+    // Show edit fields
+    showEditFields(currentEstimate);
+    isEditing = true;
+    
+    // Hide the static view and show edit fields
+    modalContent.style.display = 'none';
+    editFieldsContainer.style.display = 'block';
+    
+    // Update button visibility
+    editEstimateBtn.style.display = 'none';
+    saveChangesBtn.style.display = 'inline-block';
+    exportEstimateBtn.style.display = 'none';
+    deleteEstimateBtn.style.display = 'none';
 }
 
 function showEditFields(estimate) {
-    editFieldsContainer.style.display = 'block';
     editFieldsContainer.innerHTML = `
         <div class="estimate-section">
             <h3>Edit Customer Information</h3>
             <div class="form-group">
                 <label>Name:</label>
-                <input type="text" class="editable-field" id="editCustomerName" value="${estimate.customer.name || ''}">
+                <input type="text" id="editCustomerName" value="${estimate.customer.name || ''}">
             </div>
             <div class="form-group">
                 <label>Email:</label>
-                <input type="email" class="editable-field" id="editCustomerEmail" value="${estimate.customer.email || ''}">
+                <input type="email" id="editCustomerEmail" value="${estimate.customer.email || ''}">
             </div>
             <div class="form-group">
                 <label>Phone:</label>
-                <input type="tel" class="editable-field" id="editCustomerPhone" value="${estimate.customer.phone || ''}">
+                <input type="tel" id="editCustomerPhone" value="${estimate.customer.phone || ''}">
             </div>
             <div class="form-group">
                 <label>Job Location:</label>
-                <input type="text" class="editable-field" id="editJobLocation" value="${estimate.customer.location || ''}">
+                <input type="text" id="editJobLocation" value="${estimate.customer.location || ''}">
             </div>
         </div>
         
         <div class="estimate-section">
             <h3>Edit Jobs</h3>
             <div id="editJobsContainer"></div>
-        </div>
-        
-        <div class="estimate-section">
-            <h3>Edit Materials</h3>
-            <div id="editMaterialsContainer"></div>
-        </div>
-        
-        <div class="estimate-section">
-            <h3>Edit Fees & Discount</h3>
-            <div class="form-group">
-                <label>Discount Percentage:</label>
-                <input type="number" class="editable-field" id="editDiscountPercentage" 
-                    min="0" max="100" value="${estimate.discountPercentage || 0}">
-            </div>
-            <div id="editFeesContainer"></div>
-            <button type="button" class="btn-next" onclick="addNewFeeField()">Add New Fee</button>
+            <button type="button" class="btn-next" onclick="addNewJobForEdit()">Add New Job</button>
         </div>
     `;
     
     // Populate jobs
     const jobsContainer = document.getElementById('editJobsContainer');
     estimate.jobs.forEach((job, index) => {
-        const categoryName = priceSheet.categories[job.category].name;
-        const jobOptions = priceSheet.categories[job.category].jobs.map((j, i) => 
-            `<option value="${i}" ${i === index ? 'selected' : ''}>${j.name}</option>`
-        ).join('');
-        
         jobsContainer.innerHTML += `
             <div class="job-edit-section">
-                <h4>${categoryName}</h4>
+                <h4>Job ${job.id}</h4>
                 <div class="form-group">
-                    <label>Job Type:</label>
-                    <select class="editable-select" onchange="updateJobSelection('${job.category}', ${index}, this.value)">
-                        ${jobOptions}
-                    </select>
+                    <label>Job Description:</label>
+                    <input type="text" class="edit-job-field" data-job-id="${job.id}" data-field="name" value="${job.name}">
                 </div>
                 <div class="form-group">
                     <label>Days:</label>
-                    <input type="text" class="editable-field" value="${job.days}" 
-                        onchange="updateJobField('${job.category}', ${index}, 'days', this.value)">
+                    <input type="number" class="edit-job-field" data-job-id="${job.id}" data-field="days" value="${job.days}">
                 </div>
                 <div class="form-group">
                     <label>Labor Cost ($):</label>
-                    <input type="number" class="editable-field" value="${job.labor}" 
-                        onchange="updateJobField('${job.category}', ${index}, 'labor', this.value)">
+                    <input type="number" class="edit-job-field" data-job-id="${job.id}" data-field="labor" value="${job.labor}">
                 </div>
                 <div class="form-group">
-                    <label>Scope of Work:</label>
-                    <textarea class="editable-field" style="width: 100%; min-height: 80px;"
-                        onchange="updateJobField('${job.category}', ${index}, 'name', this.value)">${job.name}</textarea>
+                    <label>Materials:</label>
+                    <div id="editMaterials-${job.id}" class="edit-materials-list"></div>
+                    <button type="button" class="btn-next" onclick="addNewMaterialField(${job.id})">Add Material</button>
                 </div>
+                ${estimate.jobs.length > 1 ? `
+                <button type="button" class="btn-cancel" onclick="removeJobFromEdit(${job.id})">Remove Job</button>
+                ` : ''}
             </div>
         `;
-    });
-    
-    // Populate materials
-    const materialsContainer = document.getElementById('editMaterialsContainer');
-    materialsContainer.innerHTML = `
-        <h4>Standard Materials</h4>
-        <div class="edit-materials-list" id="editStandardMaterials"></div>
-        <h4>Custom Materials</h4>
-        <div class="edit-materials-list" id="editCustomMaterials"></div>
-        <button type="button" class="btn-next" onclick="addNewCustomMaterialField()">Add Custom Material</button>
-    `;
-    
-    // Standard materials
-    const standardMaterialsContainer = document.getElementById('editStandardMaterials');
-    estimate.materials.forEach((mat, index) => {
-        standardMaterialsContainer.innerHTML += `
-            <div class="edit-material-item">
-                <div style="flex: 1;">
+        
+        // Populate materials for this job
+        const materialsContainer = document.getElementById(`editMaterials-${job.id}`);
+        job.materials.forEach((mat, matIndex) => {
+            materialsContainer.innerHTML += `
+                <div class="edit-material-item">
                     <div class="form-group">
                         <label>Name:</label>
-                        <input type="text" class="editable-field" value="${mat.name}" 
-                            onchange="updateMaterialField(${index}, false, 'name', this.value)">
+                        <input type="text" class="edit-material-field" data-job-id="${job.id}" data-mat-index="${matIndex}" data-field="name" value="${mat.name}">
                     </div>
-                </div>
-                <div style="margin-left: 15px;">
                     <div class="form-group">
                         <label>Price:</label>
-                        <input type="number" class="editable-field" value="${mat.price}" 
-                            onchange="updateMaterialField(${index}, false, 'price', this.value)">
+                        <input type="number" class="edit-material-field" data-job-id="${job.id}" data-mat-index="${matIndex}" data-field="price" value="${mat.price}">
                     </div>
-                </div>
-                <div style="margin-left: 15px;">
                     <div class="form-group">
                         <label>Qty:</label>
-                        <input type="number" class="editable-field" value="${mat.quantity}" 
-                            onchange="updateMaterialField(${index}, false, 'quantity', this.value)">
+                        <input type="number" class="edit-material-field" data-job-id="${job.id}" data-mat-index="${matIndex}" data-field="quantity" value="${mat.quantity}">
                     </div>
+                    <button class="qty-btn" onclick="removeMaterialFromEdit(${job.id}, ${matIndex})"><i class="fas fa-trash"></i></button>
                 </div>
-            </div>
-        `;
+            `;
+        });
     });
     
-    // Custom materials
-    const customMaterialsContainer = document.getElementById('editCustomMaterials');
-    estimate.customMaterials.forEach((mat, index) => {
-        customMaterialsContainer.innerHTML += `
-            <div class="edit-material-item">
-                <div style="flex: 1;">
-                    <div class="form-group">
-                        <label>Name:</label>
-                        <input type="text" class="editable-field" value="${mat.name}" 
-                            onchange="updateMaterialField(${index}, true, 'name', this.value)">
-                    </div>
-                </div>
-                <div style="margin-left: 15px;">
-                    <div class="form-group">
-                        <label>Price:</label>
-                        <input type="number" class="editable-field" value="${mat.price}" 
-                            onchange="updateMaterialField(${index}, true, 'price', this.value)">
-                    </div>
-                </div>
-                <div style="margin-left: 15px;">
-                    <div class="form-group">
-                        <label>Qty:</label>
-                        <input type="number" class="editable-field" value="${mat.quantity}" 
-                            onchange="updateMaterialField(${index}, true, 'quantity', this.value)">
-                    </div>
-                </div>
-                <button class="qty-btn" onclick="removeMaterial(${index}, true)"><i class="fas fa-trash"></i></button>
-            </div>
-        `;
+    // Add event listeners for editing
+    document.querySelectorAll('.edit-job-field').forEach(input => {
+        input.addEventListener('change', function() {
+            const jobId = parseInt(this.dataset.jobId);
+            const field = this.dataset.field;
+            const value = field === 'days' || field === 'labor' ? parseFloat(this.value) : this.value;
+            
+            const job = currentEstimate.jobs.find(j => j.id === jobId);
+            if (job) job[field] = value;
+        });
     });
     
-    // Fees
-    const feesContainer = document.getElementById('editFeesContainer');
-    estimate.fees?.forEach((fee, index) => {
-        feesContainer.innerHTML += `
-            <div class="edit-material-item">
-                <div style="flex: 1;">
-                    <div class="form-group">
-                        <label>Fee Name:</label>
-                        <input type="text" class="editable-field" value="${fee.name}" 
-                            onchange="updateFeeField(${index}, 'name', this.value)">
-                    </div>
-                </div>
-                <div style="margin-left: 15px;">
-                    <div class="form-group">
-                        <label>Amount:</label>
-                        <input type="number" class="editable-field" value="${fee.amount}" 
-                            onchange="updateFeeField(${index}, 'amount', this.value)">
-                    </div>
-                </div>
-                <button class="qty-btn" onclick="removeFee(${index})"><i class="fas fa-trash"></i></button>
-            </div>
-        `;
+    document.querySelectorAll('.edit-material-field').forEach(input => {
+        input.addEventListener('change', function() {
+            const jobId = parseInt(this.dataset.jobId);
+            const matIndex = parseInt(this.dataset.matIndex);
+            const field = this.dataset.field;
+            const value = parseFloat(this.value);
+            
+            const job = currentEstimate.jobs.find(j => j.id === jobId);
+            if (job && job.materials[matIndex]) {
+                job.materials[matIndex][field] = value;
+                job.materials[matIndex].total = job.materials[matIndex].price * job.materials[matIndex].quantity;
+            }
+        });
     });
 }
 
-// Add these new functions for editing
-function updateJobSelection(categoryId, jobIndex, newJobIndex) {
-    newJobIndex = parseInt(newJobIndex);
-    const job = priceSheet.categories[categoryId].jobs[newJobIndex];
-    
-    // Update the job in currentEstimate
-    currentEstimate.jobs[jobIndex] = {
-        ...currentEstimate.jobs[jobIndex],
-        name: job.name,
-        days: job.days,
-        labor: parseFloat(job.labor.replace(/[^0-9.-]+/g,""))
+function addNewJobForEdit() {
+    const newJob = {
+        id: currentJobId++,
+        name: "New Job",
+        days: 1,
+        labor: 0,
+        materials: []
     };
-    
-    // Update the display
+    currentEstimate.jobs.push(newJob);
     showEditFields(currentEstimate);
 }
 
-function updateJobField(categoryId, jobIndex, field, value) {
-    if (field === 'labor') value = parseFloat(value);
-    currentEstimate.jobs[jobIndex][field] = value;
-}
-
-function updateMaterialField(index, isCustom, field, value) {
-    if (field === 'price' || field === 'quantity') {
-        value = Math.max(0, parseFloat(value));
-    }
+function addNewMaterialField(jobId) {
+    const job = currentEstimate.jobs.find(j => j.id === jobId);
+    if (!job) return;
     
-    if (isCustom) {
-        currentEstimate.customMaterials[index][field] = value;
-        currentEstimate.customMaterials[index].total = 
-            currentEstimate.customMaterials[index].price * currentEstimate.customMaterials[index].quantity;
-    } else {
-        currentEstimate.materials[index][field] = value;
-        currentEstimate.materials[index].total = 
-            currentEstimate.materials[index].price * currentEstimate.materials[index].quantity;
-    }
-}
-
-function addCustomMaterialToEstimate() {
-    const name = document.getElementById('customMaterialName').value.trim();
-    const price = parseFloat(document.getElementById('customMaterialPrice').value);
-    const qty = parseInt(document.getElementById('customMaterialQty').value);
-    
-    if (!name || isNaN(price) || price <= 0 || isNaN(qty) || qty <= 0) {
-        alert('Please enter valid material details');
-        return;
-    }
-    
-    // Add custom material
-    currentEstimate.customMaterials.push({
-        name: name,
-        price: price,
-        quantity: qty,
-        total: price * qty
-    });
-    
-    // Update custom materials list display
-    updateCustomMaterialsList();
-    
-    // Clear form
-    document.getElementById('customMaterialName').value = '';
-    document.getElementById('customMaterialPrice').value = '';
-    document.getElementById('customMaterialQty').value = '1';
-    
-    updateEstimatePreview();
-}
-
-function updateCustomMaterialsList() {
-    const container = document.getElementById('customMaterialsList');
-    container.innerHTML = '';
-    
-    if (currentEstimate.customMaterials.length === 0) {
-        container.innerHTML = '<p class="no-materials">No custom materials added yet</p>';
-        return;
-    }
-    
-    currentEstimate.customMaterials.forEach((mat, index) => {
-        const item = document.createElement('div');
-        item.className = 'custom-material-item';
-        item.innerHTML = `
-            <span>${mat.name} (${mat.quantity} @ $${formatAccounting(mat.price)}) = $${formatAccounting(mat.total)}</span>
-            <button onclick="removeCustomMaterial(${index})"><i class="fas fa-times"></i></button>
-        `;
-        container.appendChild(item);
-    });
-}
-
-function removeCustomMaterial(index) {
-    currentEstimate.customMaterials.splice(index, 1);
-    updateCustomMaterialsList();
-    updateEstimatePreview();
-}
-
-function updateFeeField(index, field, value) {
-    if (field === 'amount') {
-        value = Math.max(0, parseFloat(value));
-    }
-    currentEstimate.fees[index][field] = value;
-}
-
-function addNewFeeField() {
-    if (!currentEstimate.fees) currentEstimate.fees = [];
-    currentEstimate.fees.push({
-        name: "New Fee",
-        amount: 0
-    });
-    showEditFields(currentEstimate);
-}
-
-function addNewCustomMaterialField() {
-    currentEstimate.customMaterials.push({
+    job.materials.push({
         name: "New Material",
         price: 0,
         quantity: 1,
         total: 0
     });
+    
     showEditFields(currentEstimate);
 }
 
-function removeMaterial(index, isCustom) {
-    if (isCustom) {
-        currentEstimate.customMaterials.splice(index, 1);
-    } else {
-        currentEstimate.materials.splice(index, 1);
+function removeJobFromEdit(jobId) {
+    if (currentEstimate.jobs.length <= 1) {
+        alert("You must have at least one job");
+        return;
     }
+    
+    currentEstimate.jobs = currentEstimate.jobs.filter(job => job.id !== jobId);
     showEditFields(currentEstimate);
+}
+
+function removeMaterialFromEdit(jobId, matIndex) {
+    const job = currentEstimate.jobs.find(j => j.id === jobId);
+    if (!job) return;
+    
+    job.materials.splice(matIndex, 1);
+    showEditFields(currentEstimate);
+}
+
+function saveEstimateChanges() {
+    if (!currentEstimate.customer.name || currentEstimate.jobs.length === 0) {
+        alert('Please complete all required fields and add at least one job');
+        return;
+    }
+
+    // Update customer info from edit fields
+    currentEstimate.customer = {
+        name: document.getElementById('editCustomerName').value,
+        email: document.getElementById('editCustomerEmail').value,
+        phone: document.getElementById('editCustomerPhone').value,
+        location: document.getElementById('editJobLocation').value
+    };
+
+    // Update timestamp
+    currentEstimate.updatedAt = new Date().toISOString();
+
+    // Save to Firestore
+    db.collection("estimates").doc(currentEstimate.id).update(currentEstimate)
+        .then(() => {
+            alert('Estimate updated successfully!');
+            
+            // Reset editing state
+            isEditing = false;
+            editFieldsContainer.style.display = 'none';
+            modalContent.style.display = 'block';
+            
+            // Update button visibility
+            editEstimateBtn.style.display = 'inline-block';
+            saveChangesBtn.style.display = 'none';
+            exportEstimateBtn.style.display = 'inline-block';
+            deleteEstimateBtn.style.display = 'inline-block';
+            
+            // Reload the estimate to show changes
+            loadEstimates();
+            openEstimateModal(currentEstimate);
+        })
+        .catch(error => {
+            console.error('Error updating estimate:', error);
+            alert('Error updating estimate. Please try again.');
+        });
 }
 
 function deleteEstimate() {
@@ -1731,17 +932,18 @@ function exportEstimate(estimate) {
     });
     
     // Calculate totals
-    const laborTotal = estimate.jobs.reduce((sum, job) => sum + job.labor, 0);
-    const materialsTotal = estimate.materials.reduce((sum, mat) => sum + mat.total, 0);
-    const customMaterialsTotal = estimate.customMaterials.reduce((sum, mat) => sum + mat.total, 0);
-    const feesTotal = estimate.fees ? estimate.fees.reduce((sum, fee) => sum + fee.amount, 0) : 0;
-    const waiveFee = estimate.waiveEstimateFee || false;
-    const estimateFee = waiveFee ? -75 : 75;
-    const subtotal = laborTotal + materialsTotal + customMaterialsTotal + feesTotal;
-    const discount = estimate.discountPercentage ? (subtotal * estimate.discountPercentage / 100) : 0;
-    const total = subtotal - discount + estimateFee;
+    let laborTotal = 0;
+    let materialsTotal = 0;
+    
+    estimate.jobs.forEach(job => {
+        laborTotal += job.labor || 0;
+        materialsTotal += job.materials.reduce((sum, mat) => sum + mat.total, 0);
+    });
+    
+    const estimateFee = estimate.waiveEstimateFee ? -75 : 75;
+    const total = laborTotal + materialsTotal + estimateFee;
 
-    // Payment terms options (you can make these configurable)
+    // Payment terms
     const paymentTerms = {
         depositRequired: true,
         depositPercentage: 50,

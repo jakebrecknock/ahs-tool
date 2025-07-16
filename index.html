@@ -20,42 +20,29 @@
 
         <main>
             <!-- Dashboard View -->
-<div id="dashboardView" class="view active-view">
-    <div class="dashboard-header">
-        <div class="estimates-counter">
-            <span id="estimatesCount">0</span> estimates totaling $<span id="estimatesTotal">0.00</span>
-        </div>
-        <div class="dashboard-controls">
-            <div class="search-container">
-                <input type="text" id="searchInput" placeholder="Search by customer name...">
-                <button id="searchBtn"><i class="fas fa-search"></i></button>
+            <div id="dashboardView" class="view active-view">
+                <div class="dashboard-header">
+                    <div class="estimates-counter">
+                        <span id="estimatesCount">0</span> estimates totaling $<span id="estimatesTotal">0.00</span>
+                    </div>
+                    <div class="dashboard-controls">
+                        <div class="search-container">
+                            <input type="text" id="searchInput" placeholder="Search by customer name...">
+                            <button id="searchBtn"><i class="fas fa-search"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <div id="estimatesList" class="estimates-grid">
+                    <!-- Estimates will be loaded here -->
+                </div>
             </div>
-            <div class="filter-container">
-                <select id="timeFilter">
-                    <option value="all">All Time</option>
-                    <option value="month">Select Month</option>
-                </select>
-                <select id="monthFilter" style="display: none;">
-                    <option value="">Select Month</option>
-                </select>
-                <select id="yearFilter" style="display: none;">
-                    <option value="">Select Year</option>
-                </select>
-            </div>
-        </div>
-    </div>
-    <div id="estimatesList" class="estimates-grid">
-        <!-- Estimates will be loaded here -->
-    </div>
-</div>
 
             <!-- New Estimate View -->
             <div id="newEstimateView" class="view">
                 <div class="estimate-progress">
                     <div class="progress-step active" data-step="1">Customer Info</div>
-                    <div class="progress-step" data-step="2">Job Selection</div>
-                    <div class="progress-step" data-step="3">Materials</div>
-                    <div class="progress-step" data-step="4">Review</div>
+                    <div class="progress-step" data-step="2">Jobs</div>
+                    <div class="progress-step" data-step="3">Review</div>
                 </div>
 
                 <!-- Step 1: Customer Info -->
@@ -84,47 +71,45 @@
                     </form>
                 </div>
 
-                <!-- Step 2: Job Selection -->
-<!-- Step 2: Job Selection -->
-<div id="jobSelectionStep" class="estimate-step">
-    <h2>Custom Jobs</h2>
-    <div id="jobTabsContainer" class="job-tabs-container"></div>
-    <div id="jobDetailsContainer">
-        <div id="jobDetailsContent">
-            <!-- Job details will be populated here -->
-        </div>
-        <div class="form-actions">
-            <button type="button" class="btn-prev" onclick="prevStep(1)">Previous</button>
-            <button type="button" class="btn-next" onclick="nextStep(3)">Next</button>
-        </div>
-    </div>
-</div>
+                <!-- Step 2: Jobs -->
+                <div id="jobsStep" class="estimate-step">
+                    <h2>Job Details</h2>
+                    <div id="jobTabsContainer" class="job-tabs-container"></div>
+                    <div id="jobDetailsContainer">
+                        <div id="jobDetailsContent">
+                            <div class="form-group">
+                                <label>Job Description:</label>
+                                <input type="text" id="jobDescription" placeholder="Describe the work">
+                            </div>
+                            <div class="form-group">
+                                <label>Estimated Days:</label>
+                                <input type="number" id="jobDays" min="0" step="0.5" value="1">
+                            </div>
+                            <div class="form-group">
+                                <label>Labor Cost ($):</label>
+                                <input type="number" id="jobLabor" min="0" step="0.01" value="0">
+                            </div>
+                            <div class="materials-section">
+                                <h3>Materials</h3>
+                                <div id="materialsList" class="materials-list">
+                                    <p class="no-materials">No materials added yet</p>
+                                </div>
+                                <div class="material-form">
+                                    <input type="text" id="materialName" placeholder="Material Name">
+                                    <input type="number" id="materialPrice" placeholder="Price" min="0" step="0.01">
+                                    <input type="number" id="materialQty" placeholder="Qty" min="1" value="1">
+                                    <button id="addMaterial">Add Material</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn-prev" onclick="prevStep(1)">Previous</button>
+                            <button type="button" class="btn-next" onclick="nextStep(3)">Next</button>
+                        </div>
+                    </div>
+                </div>
 
-                <!-- Step 3: Materials -->
-<div id="materialsStep" class="estimate-step">
-    <h2>Materials Selection</h2>
-    <div id="materialsContainer">
-        <!-- Materials will be populated by JS -->
-    </div>
-    <div class="custom-materials">
-        <h3>Custom Materials</h3>
-        <div id="customMaterialsList" class="custom-materials-list">
-            <!-- Custom materials will be displayed here -->
-        </div>
-        <div class="custom-material-form">
-            <input type="text" id="customMaterialName" placeholder="Material Name">
-            <input type="number" id="customMaterialPrice" placeholder="Price" min="0" step="0.01">
-            <input type="number" id="customMaterialQty" placeholder="Qty" min="1" value="1">
-            <button id="addCustomMaterial">Add Material</button>
-        </div>
-    </div>
-    <div class="form-actions">
-        <button type="button" class="btn-prev" onclick="prevStep(2)">Previous</button>
-        <button type="button" class="btn-next" onclick="nextStep(4)">Next</button>
-    </div>
-</div>
-
-                <!-- Step 4: Review -->
+                <!-- Step 3: Review -->
                 <div id="reviewStep" class="estimate-step">
                     <h2>Review Estimate</h2>
                     <div class="fees-section">
@@ -134,69 +119,68 @@
                             <input type="number" id="feeAmount" placeholder="Amount" min="0" step="0.01">
                             <button onclick="addFee()">Add Fee</button>
                         </div>
-                        
                         <div id="feesList"></div>
-                       <div class="discount-section">
-    <h3>Discount</h3>
-    <div class="discount-controls">
-        <input type="number" id="discountPercentage" min="0" max="100" value="0" placeholder="Discount %">
-        <button onclick="applyDiscount()">Apply Discount</button>
-    </div>
-    <div id="discountDisplay" class="discount-display">
-        No discount applied
-    </div>
-</div>
+                        <div class="discount-section">
+                            <h3>Discount</h3>
+                            <div class="discount-controls">
+                                <input type="number" id="discountPercentage" min="0" max="100" value="0" placeholder="Discount %">
+                                <button onclick="applyDiscount()">Apply Discount</button>
+                            </div>
+                            <div id="discountDisplay" class="discount-display">
+                                No discount applied
+                            </div>
+                        </div>
                         <div class="fee-waiver">
-    <button id="waiveEstimateFeeBtn" class="fee-waiver-btn">
-        <i class="fas fa-dollar-sign"></i> Waive $75 Estimate Fee
-    </button>
-</div>
+                            <button id="waiveEstimateFeeBtn" class="fee-waiver-btn">
+                                <i class="fas fa-dollar-sign"></i> Waive $75 Estimate Fee
+                            </button>
+                        </div>
                     </div>
                     <div id="estimatePreview">
                         <!-- Estimate preview will be populated by JS -->
                     </div>
                     <div class="form-actions">
-                        <button type="button" class="btn-prev" onclick="prevStep(3)">Previous</button>
+                        <button type="button" class="btn-prev" onclick="prevStep(2)">Previous</button>
                         <button type="button" class="btn-cancel" onclick="cancelEstimate()">Cancel</button>
                         <button type="button" id="saveEstimateBtn">Save Estimate</button>
                     </div>
                 </div>
             </div>
 
-    <!-- Estimate Detail Modal -->
-<div id="estimateModal" class="modal">
-    <div class="modal-content">
-        <span class="close-modal">&times;</span>
-        <div id="editFieldsContainer"></div> <!-- Add this line -->
-        <div id="modalContent">
-            <!-- Estimate details will be loaded here -->
-        </div>
-        <div class="modal-actions">
-            <button id="editEstimateBtn">Edit</button>
-            <button id="deleteEstimateBtn">Delete</button>
-            <button id="exportEstimateBtn">Export to Word</button>
-            <button id="saveChangesBtn" style="display: none;">Save Changes</button>
-        </div>
-    </div>
-</div>
-            
+            <!-- Estimate Detail Modal -->
+            <div id="estimateModal" class="modal">
+                <div class="modal-content">
+                    <span class="close-modal">&times;</span>
+                    <div id="editFieldsContainer"></div>
+                    <div id="modalContent">
+                        <!-- Estimate details will be loaded here -->
+                    </div>
+                    <div class="modal-actions">
+                        <button id="editEstimateBtn">Edit</button>
+                        <button id="deleteEstimateBtn">Delete</button>
+                        <button id="exportEstimateBtn">Export to Word</button>
+                        <button id="saveChangesBtn" style="display: none;">Save Changes</button>
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
 
-<div id="passwordModal" class="modal" style="display: block;">
-    <div class="modal-content" style="max-width: 400px;">
-        <div class="modal-header">
-            <h2>Enter Password</h2>
-        </div>
-        <div class="modal-body">
-            <input type="password" id="passwordInput" placeholder="Enter site password">
-            <p id="passwordError" style="color: red; display: none;">Incorrect password. Please try again.</p>
-        </div>
-        <div class="modal-actions">
-            <button id="submitPassword">Submit</button>
+    <div id="passwordModal" class="modal" style="display: block;">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2>Enter Password</h2>
+            </div>
+            <div class="modal-body">
+                <input type="password" id="passwordInput" placeholder="Enter site password">
+                <p id="passwordError" style="color: red; display: none;">Incorrect password. Please try again.</p>
+            </div>
+            <div class="modal-actions">
+                <button id="submitPassword">Submit</button>
+            </div>
         </div>
     </div>
-</div>
+
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
