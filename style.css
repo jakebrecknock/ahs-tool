@@ -1001,6 +1001,96 @@ nav button:hover {
 
 /* Responsive Styles */
 
+/* Job Tabs */
+.job-tabs-container {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 20px;
+    overflow-x: auto;
+    padding-bottom: 5px;
+}
+
+.job-tab {
+    padding: 8px 15px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+    min-width: 60px;
+    text-align: center;
+    border: 1px solid #ddd;
+    transition: all 0.3s;
+}
+
+.job-tab.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.job-tab.add-job-tab {
+    background-color: transparent;
+    border: 1px dashed var(--primary-color);
+    color: var(--primary-color);
+}
+
+.job-tab.add-job-tab:hover {
+    background-color: rgba(230, 57, 70, 0.1);
+}
+
+.remove-job-btn {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+}
+
+.job-tabs-mini {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 15px;
+}
+
+.job-tab-mini {
+    padding: 5px 10px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8em;
+    border: 1px solid #ddd;
+}
+
+.job-tab-mini.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.job-section {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
+.job-discount-section {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
 .feedback-message {
     padding: 8px 12px;
     border-radius: 4px;

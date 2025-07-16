@@ -56,12 +56,10 @@ const saveEstimateBtn = document.getElementById('saveEstimateBtn');
 // Current estimate data
 let currentEstimate = {
     customer: {},
-    jobs: [],
-    materials: [],
-    customMaterials: [],
+    jobs: [], // This will now contain job objects with their own materials and discounts
     fees: [],
-    discountPercentage: 0,
-    total: 0
+    total: 0,
+    waiveEstimateFee: false
 };
 
 // Price sheet data (from your PDF)
@@ -410,6 +408,162 @@ function showDashboard() {
     dashboardBtn.classList.add('active');
     newEstimateBtn.classList.remove('active');
     loadEstimates();
+}
+
+let currentJobId = 1; // Track the current job being edited
+
+function addNewJob() {
+    currentJobId++;
+    const newJob = {
+        id: currentJobId,
+        category: "",
+        name: "",
+        days: 1,
+        labor: 0,
+        materials: [],
+        customMaterials: [],
+        discountPercentage: 0
+    };
+    currentEstimate.jobs.push(newJob);
+    showJobDetails(currentJobId);
+}
+
+function removeJob(jobId) {
+    currentEstimate.jobs = currentEstimate.jobs.filter(job => job.id !== jobId);
+    if (currentEstimate.jobs.length === 0) {
+        addNewJob(); // Always keep at least one job
+    }
+    showJobDetails(currentEstimate.jobs[0].id);
+}
+
+function showJobDetails(jobId) {
+    const job = currentEstimate.jobs.find(j => j.id === jobId);
+    if (!job) return;
+
+    currentJobId = jobId;
+    
+    // Update UI to show job tabs
+    const jobTabsContainer = document.getElementById('jobTabsContainer');
+    jobTabsContainer.innerHTML = '';
+    
+    currentEstimate.jobs.forEach(j => {
+        const tab = document.createElement('div');
+        tab.className = `job-tab ${j.id === jobId ? 'active' : ''}`;
+        tab.textContent = `Job ${j.id}`;
+        tab.onclick = () => showJobDetails(j.id);
+        
+        if (currentEstimate.jobs.length > 1) {
+            const removeBtn = document.createElement('button');
+            removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+            removeBtn.className = 'remove-job-btn';
+            removeBtn.onclick = (e) => {
+                e.stopPropagation();
+                removeJob(j.id);
+            };
+            tab.appendChild(removeBtn);
+        }
+        
+        jobTabsContainer.appendChild(tab);
+    });
+    
+    // Add "+" tab for new jobs
+    const addTab = document.createElement('div');
+    addTab.className = 'job-tab add-job-tab';
+    addTab.innerHTML = '<i class="fas fa-plus"></i>';
+    addTab.onclick = addNewJob;
+    jobTabsContainer.appendChild(addTab);
+    
+    // Show job details for the selected job
+    renderJobDetails(job);
+}
+
+function renderJobDetails(job) {
+    const jobDetailsContent = document.getElementById('jobDetailsContent');
+    jobDetailsContent.innerHTML = '';
+    
+    // Category selection
+    const categorySection = document.createElement('div');
+    categorySection.className = 'job-section';
+    categorySection.innerHTML = `
+        <h4>Select Job Category</h4>
+        <div class="category-grid" id="categoryGrid-${job.id}"></div>
+    `;
+    jobDetailsContent.appendChild(categorySection);
+    
+    // Populate categories
+    const categoryGrid = document.getElementById(`categoryGrid-${job.id}`);
+    for (const categoryId in priceSheet.categories) {
+        const category = priceSheet.categories[categoryId];
+        
+        const categoryCard = document.createElement('div');
+        categoryCard.className = `category-card ${job.category === categoryId ? 'selected' : ''}`;
+        categoryCard.setAttribute('data-category', categoryId);
+        categoryCard.innerHTML = `
+            <div class="category-icon">
+                ${getCategoryIcon(categoryId)}
+            </div>
+            <div class="category-info">
+                <h3>${category.name}</h3>
+                <p>Click to select</p>
+            </div>
+        `;
+        
+        categoryCard.addEventListener('click', function() {
+            // Update all category cards
+            document.querySelectorAll(`#categoryGrid-${job.id} .category-card`).forEach(card => {
+                card.classList.remove('selected');
+            });
+            this.classList.add('selected');
+            
+            // Update job category
+            job.category = categoryId;
+            job.name = category.jobs[0].name;
+            job.days = category.jobs[0].days.includes('-') ? 
+                category.jobs[0].days.split('-')[0] : category.jobs[0].days;
+            job.labor = parseFloat(category.jobs[0].labor.replace(/[^0-9.-]+/g, ""));
+            
+            renderJobDetails(job); // Refresh the view
+        });
+        
+        categoryGrid.appendChild(categoryCard);
+    }
+    
+    // Job details form
+    const detailsSection = document.createElement('div');
+    detailsSection.className = 'job-section';
+    detailsSection.innerHTML = `
+        <h4>Job Details</h4>
+        <div class="form-group">
+            <label>Job Description:</label>
+            <input type="text" class="job-description" value="${job.name}" 
+                onchange="currentEstimate.jobs.find(j => j.id === ${job.id}).name = this.value">
+        </div>
+        <div class="form-group">
+            <label>Estimated Days:</label>
+            <input type="number" class="job-days" value="${job.days}" min="0" step="0.5"
+                onchange="currentEstimate.jobs.find(j => j.id === ${job.id}).days = this.value">
+        </div>
+        <div class="form-group">
+            <label>Labor Cost ($):</label>
+            <input type="number" class="job-labor" value="${job.labor}" min="0" step="0.01"
+                onchange="currentEstimate.jobs.find(j => j.id === ${job.id}).labor = parseFloat(this.value)">
+        </div>
+    `;
+    jobDetailsContent.appendChild(detailsSection);
+    
+    // Show feedback when category is selected
+    if (job.category) {
+        const feedback = document.createElement('div');
+        feedback.className = 'feedback-message success';
+        feedback.innerHTML = `<i class="fas fa-check-circle"></i> ${priceSheet.categories[job.category].name} job added`;
+        detailsSection.appendChild(feedback);
+        
+        // Remove feedback after 3 seconds
+        setTimeout(() => {
+            feedback.classList.add('fade-out');
+            setTimeout(() => feedback.remove(), 300);
+        }, 3000);
+    }
 }
 
 function showNewEstimate() {
@@ -775,42 +929,119 @@ function validateCustomerInfo() {
 function initMaterialsSelection() {
     materialsContainer.innerHTML = '';
     
-    // Get all materials from selected categories
-    const selectedCategories = document.querySelectorAll('.category-card.selected');
-    const materialsMap = new Map();
+    // Show current job tab
+    const materialsHeader = document.createElement('div');
+    materialsHeader.className = 'materials-header';
+    materialsHeader.innerHTML = `
+        <h3>Materials for Job ${currentJobId}</h3>
+        <div class="job-tabs-mini" id="jobTabsMini"></div>
+    `;
+    materialsContainer.appendChild(materialsHeader);
     
-    selectedCategories.forEach(card => {
-        const categoryName = card.querySelector('h3').textContent;
-        const categoryId = Object.keys(priceSheet.categories).find(
-            key => priceSheet.categories[key].name === categoryName
-        );
-        
-        const category = priceSheet.categories[categoryId];
+    // Populate mini job tabs
+    const jobTabsMini = document.getElementById('jobTabsMini');
+    currentEstimate.jobs.forEach(job => {
+        const tab = document.createElement('div');
+        tab.className = `job-tab-mini ${job.id === currentJobId ? 'active' : ''}`;
+        tab.textContent = `Job ${job.id}`;
+        tab.onclick = () => {
+            currentJobId = job.id;
+            initMaterialsSelection();
+        };
+        jobTabsMini.appendChild(tab);
+    });
+    
+    // Get current job
+    const job = currentEstimate.jobs.find(j => j.id === currentJobId);
+    if (!job) return;
+    
+    // Get materials from selected category
+    if (job.category && priceSheet.categories[job.category]) {
+        const category = priceSheet.categories[job.category];
         
         for (const [materialName, price] of Object.entries(category.materials)) {
-            materialsMap.set(materialName, price);
+            const existingMat = job.materials.find(m => m.name === materialName);
+            
+            const materialItem = document.createElement('div');
+            materialItem.className = 'material-item';
+            materialItem.innerHTML = `
+                <div class="material-info">
+                    <h4>${materialName}</h4>
+                    <p>$${formatAccounting(price)}</p>
+                </div>
+                <div class="material-qty">
+                    <button class="qty-btn minus" onclick="adjustMaterialQty('${materialName}', -1, ${job.id})">-</button>
+                    <input type="number" id="qty-${job.id}-${materialName.replace(/\s+/g, '-')}" 
+                        value="${existingMat ? existingMat.quantity : 0}" min="0" 
+                        onchange="updateMaterialQty('${materialName}', this.value, ${job.id})">
+                    <button class="qty-btn plus" onclick="adjustMaterialQty('${materialName}', 1, ${job.id})">+</button>
+                </div>
+            `;
+            
+            materialsContainer.appendChild(materialItem);
         }
-    });
+    }
     
-    // Add materials to the container
-    materialsMap.forEach((price, materialName) => {
-        const materialItem = document.createElement('div');
-        materialItem.className = 'material-item';
-        materialItem.innerHTML = `
-            <div class="material-info">
-                <h4>${materialName}</h4>
-                <p>$${formatAccounting(price)}</p>
-            </div>
-            <div class="material-qty">
-                <button class="qty-btn minus" onclick="adjustMaterialQty('${materialName}', -1)">-</button>
-                <input type="number" id="qty-${materialName.replace(/\s+/g, '-')}" 
-                    value="0" min="0" onchange="updateMaterialQty('${materialName}', this.value)">
-                <button class="qty-btn plus" onclick="adjustMaterialQty('${materialName}', 1)">+</button>
-            </div>
-        `;
-        
-        materialsContainer.appendChild(materialItem);
-    });
+    // Custom materials section
+    const customMaterialsSection = document.createElement('div');
+    customMaterialsSection.className = 'custom-materials';
+    customMaterialsSection.innerHTML = `
+        <h3>Custom Materials</h3>
+        <div id="customMaterialsList-${job.id}" class="custom-materials-list">
+            ${job.customMaterials.length > 0 ? 
+                job.customMaterials.map(mat => `
+                    <div class="custom-material-item">
+                        <span>${mat.name} (${mat.quantity} @ $${formatAccounting(mat.price)}) = $${formatAccounting(mat.total)}</span>
+                        <button onclick="removeCustomMaterial(${job.id}, '${mat.name}')"><i class="fas fa-times"></i></button>
+                    </div>
+                `).join('') : 
+                '<p class="no-materials">No custom materials added yet</p>'}
+        </div>
+        <div class="custom-material-form">
+            <input type="text" id="customMaterialName-${job.id}" placeholder="Material Name">
+            <input type="number" id="customMaterialPrice-${job.id}" placeholder="Price" min="0" step="0.01">
+            <input type="number" id="customMaterialQty-${job.id}" placeholder="Qty" min="1" value="1">
+            <button onclick="addCustomMaterialToEstimate(${job.id})">Add Material</button>
+        </div>
+    `;
+    materialsContainer.appendChild(customMaterialsSection);
+    
+    // Job discount
+    const discountSection = document.createElement('div');
+    discountSection.className = 'job-discount-section';
+    discountSection.innerHTML = `
+        <h3>Job Discount</h3>
+        <div class="discount-controls">
+            <input type="number" id="jobDiscount-${job.id}" min="0" max="100" 
+                value="${job.discountPercentage}" placeholder="Discount %">
+            <button onclick="applyJobDiscount(${job.id})">Apply Discount</button>
+        </div>
+        <div id="jobDiscountDisplay-${job.id}" class="discount-display">
+            ${job.discountPercentage > 0 ? 
+                `${job.discountPercentage}% Discount Applied` : 
+                'No discount applied'}
+        </div>
+    `;
+    materialsContainer.appendChild(discountSection);
+}
+
+function applyJobDiscount(jobId) {
+    const job = currentEstimate.jobs.find(j => j.id === jobId);
+    if (!job) return;
+    
+    const discountValue = parseFloat(document.getElementById(`jobDiscount-${jobId}`).value) || 0;
+    job.discountPercentage = Math.min(100, Math.max(0, discountValue));
+    
+    const discountDisplay = document.getElementById(`jobDiscountDisplay-${jobId}`);
+    if (job.discountPercentage > 0) {
+        discountDisplay.textContent = `${job.discountPercentage}% Discount Applied`;
+        discountDisplay.classList.add('active');
+    } else {
+        discountDisplay.textContent = 'No discount applied';
+        discountDisplay.classList.remove('active');
+    }
+    
+    updateEstimatePreview();
 }
 
 function adjustMaterialQty(materialName, change) {

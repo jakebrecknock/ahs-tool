@@ -86,22 +86,19 @@
                 </div>
 
                 <!-- Step 2: Job Selection -->
-                <div id="jobSelectionStep" class="estimate-step">
-                    <h2>Select Job Categories</h2>
-                    <div id="categorySelection" class="category-grid">
-                        <!-- Categories will be populated by JS -->
-                    </div>
-                    <div id="jobDetailsContainer" style="display: none;">
-                        <h3>Job Details</h3>
-                        <div id="jobDetailsContent">
-                            <!-- Job details will be populated by JS -->
-                        </div>
-                        <div class="form-actions">
-                            <button type="button" class="btn-prev" onclick="prevStep(1)">Previous</button>
-                            <button type="button" class="btn-next" onclick="nextStep(3)">Next</button>
-                        </div>
-                    </div>
-                </div>
+<div id="jobSelectionStep" class="estimate-step">
+    <h2>Job Selection</h2>
+    <div id="jobTabsContainer" class="job-tabs-container"></div>
+    <div id="jobDetailsContainer">
+        <div id="jobDetailsContent">
+            <!-- Job details will be populated here -->
+        </div>
+        <div class="form-actions">
+            <button type="button" class="btn-prev" onclick="prevStep(1)">Previous</button>
+            <button type="button" class="btn-next" onclick="nextStep(3)">Next</button>
+        </div>
+    </div>
+</div>
 
                 <!-- Step 3: Materials -->
 <div id="materialsStep" class="estimate-step">
