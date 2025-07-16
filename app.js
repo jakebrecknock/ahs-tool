@@ -21,6 +21,7 @@ const passwordModal = document.getElementById('passwordModal');
 const passwordInput = document.getElementById('passwordInput');
 const passwordError = document.getElementById('passwordError');
 const submitPassword = document.getElementById('submitPassword');
+let currentJobId = 1;
 
 function formatAccounting(num) {
     return num.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
@@ -55,7 +56,7 @@ let currentEstimate = {
     waiveEstimateFee: false
 };
 
-let currentJobId = 1;
+
 
 // Initialize the app
 document.addEventListener('DOMContentLoaded', function() {
@@ -189,11 +190,10 @@ function initPhoneNumberFormatting() {
     });
 }
 
-// Update the job object structure in addNewJob:
 function addNewJob() {
     const newJob = {
         id: currentJobId++,
-        name: "New Job " + currentJobId,
+        name: "New Job " + (currentJobId - 1), // Changed from currentJobId to (currentJobId - 1)
         days: 1,
         labor: 0,
         materials: [],
@@ -202,8 +202,10 @@ function addNewJob() {
     };
     currentEstimate.jobs.push(newJob);
     showJobDetails(newJob.id);
+    updateJobTabs(); // Added this line
     updateEstimatePreview();
 }
+
 // Add functions to handle job-specific fees:
 function addFeeToJob(jobId) {
     const feeName = document.getElementById(`job-${jobId}-feeName`).value.trim();
@@ -270,7 +272,6 @@ function removeJob(jobId) {
         return;
     }
     
-    // Find the index of the job to remove
     const jobIndex = currentEstimate.jobs.findIndex(job => job.id === jobId);
     if (jobIndex === -1) return;
     
@@ -290,7 +291,10 @@ function showJobDetails(jobId) {
     // Save current job details before switching
     const currentJob = currentEstimate.jobs.find(j => j.id === currentJobId);
     if (currentJob) {
-        currentJob.name = document.getElementById('jobDescription').value || "New Job";
+        const jobDescInput = document.getElementById('jobDescription');
+        if (jobDescInput) {
+            currentJob.name = jobDescInput.value || "New Job " + currentJob.id;
+        }
         currentJob.days = parseFloat(document.getElementById('jobDays').value) || 1;
         currentJob.labor = parseFloat(document.getElementById('jobLabor').value) || 0;
     }
@@ -308,6 +312,7 @@ function showJobDetails(jobId) {
     
     updateMaterialsList();
     updateJobFeesList(jobId);
+    updateEstimatePreview();
 }
 
 function addFeeToJob(jobId) {
@@ -389,7 +394,7 @@ function updateJobTabs() {
     currentEstimate.jobs.forEach(job => {
         const tab = document.createElement('div');
         tab.className = `job-tab ${job.id === currentJobId ? 'active' : ''}`;
-        tab.textContent = `Job ${job.id}: ${job.name || 'New Job'}`;
+        tab.textContent = `Job ${job.id}: ${job.name || 'New Job ' + job.id}`; // Updated this line
         tab.onclick = () => showJobDetails(job.id);
         
         if (currentEstimate.jobs.length > 1) {
@@ -416,9 +421,11 @@ function updateJobTabs() {
 
 function updateMaterialsList() {
     const job = currentEstimate.jobs.find(j => j.id === currentJobId);
+    if (!job) return;
+    
     const materialsList = document.getElementById('materialsList');
     
-    if (!job || job.materials.length === 0) {
+    if (!job.materials || job.materials.length === 0) {
         materialsList.innerHTML = '<p class="no-materials">No materials added yet</p>';
         return;
     }
@@ -494,8 +501,15 @@ function nextStep(step) {
     
     // Update job details before checking
     if (step === 3) {
-        updateJobDetails();
-        if (currentEstimate.jobs.length === 0 || currentEstimate.jobs.some(job => !job.name)) {
+        // Save current job details
+        const currentJob = currentEstimate.jobs.find(j => j.id === currentJobId);
+        if (currentJob) {
+            currentJob.name = document.getElementById('jobDescription').value || "New Job " + currentJob.id;
+            currentJob.days = parseFloat(document.getElementById('jobDays').value) || 1;
+            currentJob.labor = parseFloat(document.getElementById('jobLabor').value) || 0;
+        }
+        
+        if (currentEstimate.jobs.length === 0 || currentEstimate.jobs.some(job => !job.name || job.name === "")) {
             alert('Please add at least one job with a description');
             return;
         }
