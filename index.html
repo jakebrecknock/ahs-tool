@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AHS Handyman Services - Estimate Generator</title>
+    <title>ACE Handyman Services - Estimate Generator</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="style.css">
+    <!-- Add Google Maps API -->
 </head>
 <body>
     <div class="container">
@@ -30,6 +31,26 @@
                             <input type="text" id="searchInput" placeholder="Search by customer name...">
                             <button id="searchBtn"><i class="fas fa-search"></i></button>
                         </div>
+                        <div class="date-filters">
+                            <select id="monthFilter">
+                                <option value="">All Months</option>
+                                <option value="1">January</option>
+                                <option value="2">February</option>
+                                <option value="3">March</option>
+                                <option value="4">April</option>
+                                <option value="5">May</option>
+                                <option value="6">June</option>
+                                <option value="7">July</option>
+                                <option value="8">August</option>
+                                <option value="9">September</option>
+                                <option value="10">October</option>
+                                <option value="11">November</option>
+                                <option value="12">December</option>
+                            </select>
+                            <select id="yearFilter">
+                                <option value="">All Years</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
                 <div id="estimatesList" class="estimates-grid">
@@ -50,20 +71,21 @@
                     <h2>Customer Information</h2>
                     <form id="customerInfoForm">
                         <div class="form-group">
-                            <label for="customerName">Customer Name</label>
+                            <label for="customerName">Customer Name*</label>
                             <input type="text" id="customerName" required>
                         </div>
                         <div class="form-group">
-                            <label for="customerEmail">Email</label>
+                            <label for="customerEmail">Email*</label>
                             <input type="email" id="customerEmail" required>
                         </div>
                         <div class="form-group">
-                            <label for="customerPhone">Phone Number</label>
+                            <label for="customerPhone">Phone Number*</label>
                             <input type="tel" id="customerPhone" required>
                         </div>
                         <div class="form-group">
-                            <label for="jobLocation">Job Location</label>
+                            <label for="jobLocation">Job Location*</label>
                             <input type="text" id="jobLocation" required>
+                            <small>Start typing to search locations</small>
                         </div>
                         <div class="form-actions">
                             <button type="button" class="btn-next" onclick="nextStep(2)">Next</button>
@@ -71,90 +93,85 @@
                     </form>
                 </div>
 
-<!-- Step 2: Jobs -->
-<div id="jobsStep" class="estimate-step">
-    <h2>Job Details</h2>
-    <div id="jobTabsContainer" class="job-tabs-container"></div>
-    <div id="jobDetailsContainer">
-        <div id="jobDetailsContent">
-            <div class="form-group">
-                <label>Job Description:</label>
-                <input type="text" id="jobDescription" placeholder="Describe the work">
-            </div>
-            <div class="form-group">
-                <label>Estimated Days:</label>
-                <input type="number" id="jobDays" min="0" step="0.5" value="1">
-            </div>
-            <div class="form-group">
-                <label>Labor Cost ($):</label>
-                <input type="number" id="jobLabor" min="0" step="0.01" value="0">
-            </div>
-            <div class="materials-section">
-                <h3>Materials</h3>
-                <div id="materialsList" class="materials-list">
-                    <p class="no-materials">No materials added yet</p>
-                </div>
-                <div class="material-form">
-                    <input type="text" id="materialName" placeholder="Material Name">
-                    <input type="number" id="materialPrice" placeholder="Price" min="0" step="0.01">
-                    <input type="number" id="materialQty" placeholder="Qty" min="1" value="1">
-                    <button id="addMaterial">Add Material</button>
-                </div>
-            </div>
-            
-            <div class="job-fees-section">
-                <h3>Job Fees</h3>
-                <div class="fee-item">
-                    <input type="text" id="jobFeeName" placeholder="Fee Name">
-                    <input type="number" id="jobFeeAmount" placeholder="Amount" min="0" step="0.01">
-                    <button onclick="addFeeToJob(currentJobId)">Add Fee</button>
-                </div>
-                <div id="jobFeesList"></div>
-            </div>
-            
-            <div class="job-discount-section">
-                <h3>Job Discount</h3>
-                <div class="discount-controls">
-                    <input type="number" id="jobDiscountPercentage" min="0" max="100" value="0" 
-                           placeholder="Discount %" onchange="updateJobDiscount(currentJobId, this.value)">
-                    <span id="jobDiscountDisplay">No discount applied</span>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="form-actions">
-        <button type="button" class="btn-prev" onclick="prevStep(1)">Previous</button>
-        <button type="button" class="btn-next" onclick="nextStep(3)">Next</button>
-    </div>
-</div>
-
-                <!-- Step 3: Review -->
-                <div id="reviewStep" class="estimate-step">
-                    <h2>Review Estimate</h2>
-                    <div class="fees-section">
-                        <h3>Fees & Discounts</h3>
-                        <div class="fee-item">
-                            <input type="text" id="feeName" placeholder="Fee Name">
-                            <input type="number" id="feeAmount" placeholder="Amount" min="0" step="0.01">
-                            <button onclick="addFee()">Add Fee</button>
+                <!-- Step 2: Jobs -->
+                <div id="jobsStep" class="estimate-step">
+                    <h2>Job Details</h2>
+                    <div id="jobTabsContainer" class="job-tabs-container"></div>
+                    
+                    <div id="jobDetailsContent">
+                        <div class="form-group">
+                            <label>Job Description*</label>
+                            <input type="text" id="jobDescription" placeholder="Describe the work" required>
                         </div>
-                        <div id="feesList"></div>
-                        <div class="discount-section">
-                            <h3>Discount</h3>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Estimated Days*</label>
+                                <input type="number" id="jobDays" min="0.5" step="0.5" value="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Number of Workers*</label>
+                                <input type="number" id="jobWorkers" min="1" value="1" required>
+                            </div>
+                            <div class="form-group checkbox-group">
+                                <input type="checkbox" id="hasApprentice">
+                                <label for="hasApprentice">Includes Apprentice</label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Labor Cost ($)*</label>
+                            <input type="number" id="jobLabor" min="0" step="0.01" value="0" required>
+                        </div>
+                        
+                        <div class="materials-section">
+                            <h3>Materials</h3>
+                            <div id="materialsList" class="materials-list">
+                                <p class="no-materials">No materials added yet</p>
+                            </div>
+                            <div class="material-form">
+                                <input type="text" id="materialName" placeholder="Material Name">
+                                <input type="number" id="materialPrice" placeholder="Price" min="0" step="0.01">
+                                <input type="number" id="materialQty" placeholder="Qty" min="1" value="1">
+                                <button id="addMaterial">Add Material</button>
+                            </div>
+                        </div>
+                        
+                        <div class="job-fees-section">
+                            <h3>Job Fees</h3>
+                            <div id="jobFeesList"></div>
+                            <div class="fee-form">
+                                <input type="text" id="jobFeeName" placeholder="Fee Name">
+                                <input type="number" id="jobFeeAmount" placeholder="Amount" min="0" step="0.01">
+                                <button onclick="addFeeToJob(currentJobId)">Add Fee</button>
+                            </div>
+                        </div>
+                        
+                        <div class="job-discount-section">
+                            <h3>Job Discount</h3>
                             <div class="discount-controls">
-                                <input type="number" id="discountPercentage" min="0" max="100" value="0" placeholder="Discount %">
-                                <button onclick="applyDiscount()">Apply Discount</button>
-                            </div>
-                            <div id="discountDisplay" class="discount-display">
-                                No discount applied
+                                <input type="number" id="jobDiscountPercentage" min="0" max="100" value="0" 
+                                       placeholder="Discount %" onchange="updateJobDiscount(currentJobId, this.value)">
+                                <span id="jobDiscountDisplay">No discount applied</span>
                             </div>
                         </div>
+                        
                         <div class="fee-waiver">
                             <button id="waiveEstimateFeeBtn" class="fee-waiver-btn">
                                 <i class="fas fa-dollar-sign"></i> Waive $75 Estimate Fee
                             </button>
                         </div>
                     </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn-prev" onclick="prevStep(1)">Previous</button>
+                        <button type="button" class="btn-next" onclick="nextStep(3)">Next</button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Review -->
+                <div id="reviewStep" class="estimate-step">
+                    <h2>Review Estimate</h2>
                     <div id="estimatePreview">
                         <!-- Estimate preview will be populated by JS -->
                     </div>
