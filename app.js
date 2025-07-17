@@ -248,6 +248,7 @@ function showJobDetails(jobId) {
         currentJob.labor = parseFloat(document.getElementById('jobLabor').value) || 0;
     }
 
+    // Set the new current job ID
     currentJobId = jobId;
     const job = currentEstimate.jobs.find(j => j.id === jobId);
     
@@ -275,6 +276,7 @@ function showJobDetails(jobId) {
     updateJobFeesList(jobId);
     updateJobDiscountDisplay(jobId);
     updateEstimatePreview();
+    updateJobTabs(); // Ensure tabs are updated after switching
 }
 
 
@@ -285,6 +287,7 @@ function updateJobTabs() {
     currentEstimate.jobs.forEach(job => {
         const tab = document.createElement('div');
         tab.className = `job-tab ${job.id === currentJobId ? 'active' : ''}`;
+        tab.dataset.jobId = job.id;
         tab.innerHTML = `
             <span>${job.name || 'Job ' + (currentEstimate.jobs.indexOf(job) + 1)}</span>
             ${currentEstimate.jobs.length > 1 ? `
@@ -292,18 +295,22 @@ function updateJobTabs() {
             ` : ''}
         `;
         
-        tab.onclick = (e) => {
-            if (!e.target.classList.contains('remove-job-btn')) {
-                showJobDetails(job.id);
+        // Add click handler for the tab
+        tab.addEventListener('click', function(e) {
+            if (!e.target.classList.contains('remove-job-btn') && 
+                !e.target.closest('.remove-job-btn')) {
+                const clickedJobId = parseInt(this.dataset.jobId);
+                showJobDetails(clickedJobId);
             }
-        };
+        });
         
+        // Add click handler for remove button if it exists
         if (currentEstimate.jobs.length > 1) {
             const removeBtn = tab.querySelector('.remove-job-btn');
-            removeBtn.onclick = (e) => {
+            removeBtn.addEventListener('click', function(e) {
                 e.stopPropagation();
                 removeJob(job.id);
-            };
+            });
         }
         
         jobTabsContainer.appendChild(tab);
@@ -313,7 +320,7 @@ function updateJobTabs() {
     const addTab = document.createElement('div');
     addTab.className = 'job-tab add-job-tab';
     addTab.innerHTML = '<i class="fas fa-plus"></i>';
-    addTab.onclick = addNewJob;
+    addTab.addEventListener('click', addNewJob);
     jobTabsContainer.appendChild(addTab);
 }
 // Update job details when typing

@@ -1,17 +1,24 @@
 /* Base Styles */
 :root {
-    --primary-color: #e63946;
-    --secondary-color: #457b9d;
-    --dark-color: #1d3557;
-    --light-color: #f1faee;
-    --accent-color: #a8dadc;
-    --success-color: #2a9d8f;
-    --warning-color: #e9c46a;
-    --danger-color: #e63946;
-    --gray-color: #6c757d;
-    --light-gray: #f8f9fa;
-    --white: #ffffff;
-    --black: #212529;
+    --primary-color: #D64045; /* Coral red */
+    --primary-light: #E9B44C; /* Mustard yellow */
+    --secondary-color: #1B9AAA; /* Teal blue */
+    --dark-color: #2D2D2A; /* Dark gray */
+    --light-color: #F7F7F2; /* Cream */
+    --accent-color: #98D2EB; /* Light blue */
+    --success-color: #4CAF50; /* Green */
+    --warning-color: #FFC107; /* Amber */
+    --danger-color: #F44336; /* Red */
+    --gray-color: #9E9E9E; /* Medium gray */
+    --light-gray: #E0E0E0; /* Light gray */
+    --white: #FFFFFF;
+    --black: #212121;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+    --shadow-lg: 0 10px 20px rgba(0,0,0,0.1);
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
 }
 
 * {
@@ -22,9 +29,10 @@
 
 body {
     font-family: 'Roboto', sans-serif;
-    background-color: var(--light-gray);
-    color: var(--black);
+    background-color: var(--light-color);
+    color: var(--dark-color);
     line-height: 1.6;
+    padding: 0;
 }
 
 .container {
@@ -33,49 +41,69 @@ body {
     padding: 20px;
 }
 
+/* Header Styles */
 header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 20px 0;
-    border-bottom: 1px solid #ddd;
     margin-bottom: 20px;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
 }
 
 header h1 {
     color: var(--primary-color);
-    font-size: 24px;
+    font-size: 1.8rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+nav {
+    display: flex;
+    gap: 10px;
 }
 
 nav button {
     background: none;
     border: none;
-    padding: 10px 15px;
-    margin-left: 10px;
+    padding: 10px 20px;
     cursor: pointer;
-    font-size: 16px;
-    border-radius: 4px;
-    transition: all 0.3s;
+    font-size: 1rem;
+    border-radius: var(--radius-md);
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
     gap: 8px;
+    color: var(--dark-color);
+}
+
+nav button i {
+    font-size: 1rem;
 }
 
 nav button.active {
     background-color: var(--primary-color);
-    color: white;
+    color: var(--white);
+    box-shadow: var(--shadow-sm);
 }
 
 nav button:hover:not(.active) {
-    background-color: var(--light-gray);
+    background-color: rgba(214, 64, 69, 0.1);
 }
 
+/* View Container */
 .view {
     display: none;
+    animation: fadeIn 0.3s ease;
 }
 
 .view.active-view {
     display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 /* Dashboard Styles */
@@ -83,12 +111,18 @@ nav button:hover:not(.active) {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    gap: 15px;
 }
 
 .estimates-counter {
-    font-size: 18px;
+    font-size: 1.1rem;
     font-weight: 500;
+    background: var(--white);
+    padding: 10px 15px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
 }
 
 .estimates-counter span {
@@ -99,47 +133,76 @@ nav button:hover:not(.active) {
 .dashboard-controls {
     display: flex;
     gap: 15px;
+    flex-wrap: wrap;
 }
 
 .search-container {
     display: flex;
+    min-width: 250px;
+    flex: 1;
 }
 
 .search-container input {
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px 0 0 4px;
-    width: 250px;
+    padding: 10px 15px;
+    border: 1px solid var(--light-gray);
+    border-radius: var(--radius-md) 0 0 var(--radius-md);
+    width: 100%;
+    font-size: 0.95rem;
+    transition: all 0.3s;
+}
+
+.search-container input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(214, 64, 69, 0.2);
 }
 
 .search-container button {
     background-color: var(--primary-color);
-    color: white;
+    color: var(--white);
     border: none;
-    padding: 8px 15px;
-    border-radius: 0 4px 4px 0;
+    padding: 0 15px;
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
     cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.search-container button:hover {
+    background-color: #c5394b;
+}
+
+.date-filters {
+    display: flex;
+    gap: 10px;
 }
 
 .date-filters select {
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background-color: white;
+    padding: 10px;
+    border: 1px solid var(--light-gray);
+    border-radius: var(--radius-md);
+    background-color: var(--white);
+    font-size: 0.95rem;
+    min-width: 120px;
+    cursor: pointer;
+}
+
+.date-filters select:focus {
+    outline: none;
+    border-color: var(--primary-color);
 }
 
 .estimates-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 25px;
-    padding: 15px;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 5px;
 }
 
 .estimate-card {
-    background: white;
-    border-radius: 12px;
-    padding: 25px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    background: var(--white);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    box-shadow: var(--shadow-sm);
     transition: all 0.3s ease;
     cursor: pointer;
     position: relative;
@@ -148,8 +211,8 @@ nav button:hover:not(.active) {
 }
 
 .estimate-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
 }
 
 .estimate-card::before {
@@ -157,348 +220,12 @@ nav button:hover:not(.active) {
     position: absolute;
     top: 0;
     left: 0;
-    width: 5px;
+    width: 4px;
     height: 100%;
-    background: linear-gradient(to bottom, var(--primary-color), var(--secondary-color));
+    background: linear-gradient(to bottom, var(--primary-color), var(--primary-light));
 }
 
-.estimate-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 10px;
-}
-
-.estimate-header h3 {
-    font-size: 18px;
-    color: var(--dark-color);
-}
-
-.estimate-date {
-    font-size: 14px;
-    color: var(--gray-color);
-}
-
-.estimate-location, .estimate-jobs {
-    font-size: 14px;
-    color: var(--gray-color);
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.estimate-total {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--primary-color);
-    margin-top: 10px;
-}
-
-.no-estimates {
-    text-align: center;
-    padding: 40px;
-    color: var(--gray-color);
-}
-
-
-
-.estimate-progress::before {
-    content: '';
-    position: absolute;
-    top: 15px;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background-color: #ddd;
-    z-index: 1;
-}
-
-.progress-step {
-    position: relative;
-    flex: 1;
-    text-align: center;
-    padding-bottom: 15px;
-}
-
-
-.progress-step:first-child::before {
-    display: none;
-}
-
-.estimate-step {
-    display: none;
-}
-
-.estimate-step.active-step {
-    display: block;
-}
-
-.form-group {
-    margin-bottom: 20px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: 500;
-}
-
-.form-group input, .form-group select, .form-group textarea {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 16px;
-}
-
-.form-row {
-    display: flex;
-    gap: 15px;
-}
-
-.form-row .form-group {
-    flex: 1;
-}
-
-.checkbox-group {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: 25px;
-}
-
-.checkbox-group input {
-    width: auto;
-}
-
-.form-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 30px;
-}
-
-.btn-prev, .btn-next, .btn-cancel, #saveEstimateBtn {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s;
-}
-
-.btn-prev {
-    background-color: var(--gray-color);
-    color: white;
-}
-
-.btn-next, #saveEstimateBtn {
-    background-color: var(--primary-color);
-    color: white;
-}
-
-.btn-cancel {
-    background-color: var(--light-gray);
-    color: var(--black);
-}
-
-.btn-prev:hover {
-    background-color: #5a6268;
-}
-
-.btn-next:hover, #saveEstimateBtn:hover {
-    background-color: #c1121f;
-}
-
-.btn-cancel:hover {
-    background-color: #d6d8d9;
-}
-
-/* Job Tabs */
-.job-tabs-container {
-    display: flex;
-    gap: 5px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-}
-
-.job-tab {
-    padding: 8px 15px;
-    background-color: var(--light-gray);
-    border-radius: 4px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-}
-
-.job-tab.active {
-    background-color: var(--primary-color);
-    color: white;
-}
-
-.job-tab .remove-job-btn {
-    background: none;
-    border: none;
-    color: inherit;
-    cursor: pointer;
-    padding: 0;
-    font-size: 12px;
-}
-
-.add-job-tab {
-    background-color: var(--accent-color);
-    color: var(--dark-color);
-}
-
-/* Materials and Fees Lists */
-.materials-list, #jobFeesList {
-    margin-bottom: 20px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    padding: 10px;
-    min-height: 50px;
-}
-
-.no-materials, .no-fees {
-    color: var(--gray-color);
-    text-align: center;
-    padding: 10px;
-}
-
-.material-item, .fee-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 0;
-    border-bottom: 1px solid #eee;
-}
-
-.material-item:last-child, .fee-item:last-child {
-    border-bottom: none;
-}
-
-.material-item button, .fee-item button {
-    background: none;
-    border: none;
-    color: var(--danger-color);
-    cursor: pointer;
-    font-size: 14px;
-}
-
-.material-form, .fee-form {
-    display: flex;
-    gap: 10px;
-    margin-top: 10px;
-}
-
-.material-form input, .fee-form input {
-    flex: 1;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
-.material-form button, .fee-form button {
-    padding: 8px 15px;
-    background-color: var(--secondary-color);
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-/* Discount Section */
-.job-discount-section {
-    margin: 20px 0;
-}
-
-.discount-controls {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.discount-controls input {
-    width: 80px;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
-/* Fee Waiver */
-.fee-waiver {
-    margin: 20px 0;
-}
-
-.fee-waiver-btn {
-    padding: 10px 15px;
-    background-color: var(--light-gray);
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.3s;
-}
-
-.fee-waiver-btn.active {
-    background-color: var(--success-color);
-    color: white;
-    border-color: var(--success-color);
-}
-
-/* Estimate Preview */
-#estimatePreview {
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.estimate-section {
-    margin-bottom: 30px;
-}
-
-.estimate-section h3 {
-    color: var(--primary-color);
-    margin-bottom: 15px;
-    padding-bottom: 5px;
-    border-bottom: 1px solid #eee;
-}
-
-.estimate-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 0;
-    border-bottom: 1px solid #eee;
-}
-
-.estimate-job-section {
-    margin-bottom: 20px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid #eee;
-}
-
-.estimate-job-section h4 {
-    color: var(--dark-color);
-    margin-bottom: 10px;
-}
-
-.estimate-job-total, .estimate-grand-total {
-    font-weight: bold;
-    margin-top: 10px;
-}
-
-.estimate-total-row {
-    font-weight: 500;
-}
-
-/* Hover Actions */
-.estimate-card .card-actions {
+.card-actions {
     position: absolute;
     top: 15px;
     right: 15px;
@@ -511,7 +238,7 @@ nav button:hover:not(.active) {
 }
 
 .card-actions button {
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.95);
     border: none;
     width: 30px;
     height: 30px;
@@ -520,8 +247,9 @@ nav button:hover:not(.active) {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    box-shadow: var(--shadow-sm);
     transition: all 0.2s;
+    color: var(--dark-color);
 }
 
 .card-actions button:hover {
@@ -540,25 +268,49 @@ nav button:hover:not(.active) {
     color: var(--success-color);
 }
 
-/* Modern Progress Steps */
+.estimate-location, .estimate-jobs {
+    font-size: 0.95rem;
+    color: var(--gray-color);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.estimate-location i, .estimate-jobs i {
+    font-size: 0.9rem;
+}
+
+.estimate-total {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-top: 15px;
+}
+
+.no-estimates {
+    text-align: center;
+    padding: 40px;
+    color: var(--gray-color);
+    grid-column: 1 / -1;
+}
+
+/* Estimate Progress Steps */
 .estimate-progress {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 40px;
+    margin-bottom: 30px;
     position: relative;
     counter-reset: step;
+    padding: 0 20px;
 }
 
-.progress-step.active {
-    background-color: var(--primary-color);
-    color: white;
-    box-shadow: 0 5px 15px rgba(233, 57, 70, 0.3);
-    transform: translateY(-2px);
-}
-
-.progress-step.completed {
-    background-color: var(--success-color);
-    color: white;
+.progress-step {
+    position: relative;
+    flex: 1;
+    text-align: center;
+    padding-bottom: 15px;
+    z-index: 1;
 }
 
 .progress-step::before {
@@ -567,69 +319,485 @@ nav button:hover:not(.active) {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 30px;
-    height: 30px;
+    width: 36px;
+    height: 36px;
     margin: 0 auto 10px;
     border-radius: 50%;
-    background-color: #e0e0e0;
-    color: #666;
+    background-color: var(--light-gray);
+    color: var(--gray-color);
     font-weight: bold;
+    transition: all 0.3s ease;
 }
 
 .progress-step::after {
     content: '';
     position: absolute;
-    top: 15px;
+    top: 18px;
     left: 50%;
     right: -50%;
     height: 2px;
-    background-color: #e0e0e0;
+    background-color: var(--light-gray);
     z-index: -1;
+    transition: all 0.3s ease;
 }
 
 .progress-step:last-child::after {
     display: none;
 }
 
-.progress-step.active::before,
-.progress-step.active::after {
-    background-color: var(--primary-color);
-    color: white;
+.progress-step.active {
+    color: var(--primary-color);
 }
 
-.progress-step.active::before,
-.progress-step.completed::before {
+.progress-step.active::before {
     background-color: var(--primary-color);
+    color: var(--white);
+    box-shadow: 0 0 0 4px rgba(214, 64, 69, 0.2);
+}
+
+.progress-step.active::after {
+    background-color: var(--primary-color);
+    opacity: 0.3;
 }
 
 .progress-step.completed::before {
     background-color: var(--success-color);
+    color: var(--white);
 }
 
-.progress-step .step-number {
-    display: inline-block;
-    width: 30px;
-    height: 30px;
-    line-height: 30px;
-    border-radius: 50%;
-    background-color: #eee;
-    margin-right: 8px;
-    color: var(--gray-color);
+.progress-step.completed::after {
+    background-color: var(--success-color);
 }
 
-.progress-step .step-title {
+.step-title {
     display: block;
-    font-size: 14px;
-    color: #666;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--gray-color);
+    transition: all 0.3s;
 }
 
-.progress-step.active .step-title {
+.progress-step.active .step-title,
+.progress-step.completed .step-title {
+    color: var(--dark-color);
+    font-weight: 600;
+}
+
+/* Form Styles */
+.estimate-step {
+    display: none;
+    animation: fadeIn 0.4s ease;
+}
+
+.estimate-step.active-step {
+    display: block;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--dark-color);
+    font-size: 0.95rem;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--light-gray);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    transition: all 0.3s;
+    background-color: var(--white);
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(214, 64, 69, 0.1);
+}
+
+.form-row {
+    display: flex;
+    gap: 15px;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.checkbox-group input {
+    width: auto;
+    margin: 0;
+}
+
+.checkbox-group label {
+    margin: 0;
+    font-weight: normal;
+    cursor: pointer;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 30px;
+}
+
+.btn-prev, .btn-next, .btn-cancel, #saveEstimateBtn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-prev {
+    background-color: var(--gray-color);
+    color: var(--white);
+}
+
+.btn-next, #saveEstimateBtn {
+    background-color: var(--primary-color);
+    color: var(--white);
+}
+
+.btn-cancel {
+    background-color: var(--light-gray);
+    color: var(--dark-color);
+}
+
+.btn-prev:hover {
+    background-color: #757575;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-next:hover, #saveEstimateBtn:hover {
+    background-color: #c5394b;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-cancel:hover {
+    background-color: #d5d5d5;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Job Tabs */
+.job-tabs-container {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    padding-bottom: 5px;
+    overflow-x: auto;
+}
+
+.job-tab {
+    padding: 10px 20px;
+    background-color: var(--light-gray);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    position: relative;
+    min-width: 120px;
+    justify-content: center;
+    border: 1px solid transparent;
+}
+
+.job-tab.active {
+    background-color: var(--primary-color);
+    color: var(--white);
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow-sm);
+}
+
+.job-tab:hover:not(.active) {
+    background-color: #e0e0e0;
+}
+
+.remove-job-btn {
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 8px;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.remove-job-btn:hover {
+    opacity: 1;
+}
+
+.add-job-tab {
+    background-color: var(--accent-color);
+    color: var(--dark-color);
+    min-width: 40px;
+    padding: 10px;
+    justify-content: center;
+}
+
+.add-job-tab:hover {
+    background-color: #89c9e8;
+}
+
+/* Materials and Fees Sections */
+.materials-section, .job-fees-section {
+    margin-bottom: 25px;
+    background-color: var(--white);
+    padding: 20px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+}
+
+.materials-section h3, .job-fees-section h3 {
+    margin-bottom: 15px;
+    color: var(--dark-color);
+    font-size: 1.1rem;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--light-gray);
+}
+
+.materials-list, #jobFeesList {
+    margin-bottom: 15px;
+    border: 1px solid var(--light-gray);
+    border-radius: var(--radius-sm);
+    padding: 10px;
+    min-height: 50px;
+    max-height: 200px;
+    overflow-y: auto;
+    background-color: var(--light-color);
+}
+
+.no-materials, .no-fees {
+    color: var(--gray-color);
+    text-align: center;
+    padding: 10px;
+    font-size: 0.9rem;
+}
+
+.material-item, .fee-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid var(--light-gray);
+    transition: all 0.2s;
+}
+
+.material-item:hover, .fee-item:hover {
+    background-color: rgba(255,255,255,0.7);
+}
+
+.material-item:last-child, .fee-item:last-child {
+    border-bottom: none;
+}
+
+.material-item button, .fee-item button {
+    background: none;
+    border: none;
+    color: var(--danger-color);
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 5px;
+    opacity: 0.7;
+    transition: all 0.2s;
+}
+
+.material-item button:hover, .fee-item button:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.material-form, .fee-form {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    flex-wrap: wrap;
+}
+
+.material-form input, .fee-form input {
+    flex: 1;
+    min-width: 120px;
+    padding: 10px;
+    border: 1px solid var(--light-gray);
+    border-radius: var(--radius-sm);
+    font-size: 0.95rem;
+}
+
+.material-form button, .fee-form button {
+    padding: 10px 20px;
+    background-color: var(--secondary-color);
+    color: var(--white);
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.material-form button:hover, .fee-form button:hover {
+    background-color: #168392;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Discount Section */
+.job-discount-section {
+    margin: 25px 0;
+    background-color: var(--white);
+    padding: 20px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+}
+
+.job-discount-section h3 {
+    margin-bottom: 15px;
+    color: var(--dark-color);
+    font-size: 1.1rem;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--light-gray);
+}
+
+.discount-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.discount-controls input {
+    width: 80px;
+    padding: 10px;
+    border: 1px solid var(--light-gray);
+    border-radius: var(--radius-sm);
+    font-size: 0.95rem;
+    text-align: center;
+}
+
+#jobDiscountDisplay {
+    font-size: 0.95rem;
+    color: var(--gray-color);
+    transition: all 0.3s;
+}
+
+/* Fee Waiver */
+.fee-waiver {
+    margin: 25px 0;
+    text-align: center;
+}
+
+#waiveEstimateFeeBtn {
+    padding: 12px 24px;
+    background-color: var(--light-gray);
+    border: 1px solid var(--light-gray);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#waiveEstimateFeeBtn.active {
+    background-color: var(--success-color);
+    color: var(--white);
+    border-color: var(--success-color);
+}
+
+#waiveEstimateFeeBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Estimate Preview */
+#estimatePreview {
+    background-color: var(--white);
+    padding: 25px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+}
+
+.estimate-section {
+    margin-bottom: 30px;
+}
+
+.estimate-section h3 {
     color: var(--primary-color);
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--light-gray);
+    font-size: 1.2rem;
+}
+
+.estimate-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--light-gray);
+}
+
+.estimate-job-section {
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--light-gray);
+}
+
+.estimate-job-section h4 {
+    color: var(--dark-color);
+    margin-bottom: 12px;
+    font-size: 1.1rem;
+}
+
+.estimate-job-total, .estimate-grand-total {
+    font-weight: bold;
+    margin-top: 15px;
+    font-size: 1.1rem;
+}
+
+.estimate-total-row {
     font-weight: 500;
 }
 
-.progress-step.completed .step-number {
-    color: var(--success-color);
+.estimate-grand-total {
+    color: var(--primary-color);
+    font-size: 1.3rem;
+    padding-top: 10px;
+    border-top: 2px solid var(--primary-color);
 }
 
 /* Modal Styles */
@@ -643,16 +811,24 @@ nav button:hover:not(.active) {
     background-color: rgba(0,0,0,0.5);
     z-index: 1000;
     overflow-y: auto;
+    animation: fadeIn 0.3s ease;
 }
 
 .modal-content {
-    background-color: white;
+    background-color: var(--white);
     margin: 50px auto;
     padding: 30px;
-    border-radius: 8px;
+    border-radius: var(--radius-lg);
     width: 90%;
     max-width: 800px;
     position: relative;
+    box-shadow: var(--shadow-lg);
+    animation: slideDown 0.4s ease;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .close-modal {
@@ -662,104 +838,163 @@ nav button:hover:not(.active) {
     font-size: 24px;
     cursor: pointer;
     color: var(--gray-color);
+    transition: all 0.2s;
+}
+
+.close-modal:hover {
+    color: var(--danger-color);
+    transform: rotate(90deg);
 }
 
 .modal-actions {
     display: flex;
     justify-content: flex-end;
-    gap: 10px;
-    margin-top: 20px;
+    gap: 12px;
+    margin-top: 25px;
 }
 
 .modal-actions button {
-    padding: 10px 20px;
+    padding: 12px 24px;
     border: none;
-    border-radius: 4px;
+    border-radius: var(--radius-md);
     cursor: pointer;
-    font-size: 16px;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 #editEstimateBtn {
     background-color: var(--warning-color);
-    color: var(--black);
+    color: var(--dark-color);
 }
 
 #deleteEstimateBtn {
     background-color: var(--danger-color);
-    color: white;
+    color: var(--white);
 }
 
 #exportEstimateBtn {
     background-color: var(--success-color);
-    color: white;
+    color: var(--white);
 }
 
 #saveChangesBtn {
     background-color: var(--primary-color);
-    color: white;
+    color: var(--white);
+}
+
+#editEstimateBtn:hover {
+    background-color: #e0a800;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+#deleteEstimateBtn:hover {
+    background-color: #d32f2f;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+#exportEstimateBtn:hover {
+    background-color: #388e3c;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+#saveChangesBtn:hover {
+    background-color: #c5394b;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
 }
 
 /* Password Modal */
 #passwordModal .modal-content {
     max-width: 400px;
     text-align: center;
-    padding: 30px;
-    border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    padding: 40px;
+    border-radius: var(--radius-lg);
 }
 
 #passwordModal .modal-header h2 {
     color: var(--primary-color);
     margin-bottom: 20px;
+    font-size: 1.5rem;
 }
 
 #passwordInput {
     width: 100%;
     padding: 12px 15px;
-    border: 2px solid #eee;
-    border-radius: 8px;
-    font-size: 16px;
+    border: 2px solid var(--light-gray);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
     transition: all 0.3s;
     margin-bottom: 15px;
+    text-align: center;
 }
 
 #passwordInput:focus {
-    border-color: var(--primary-color);
     outline: none;
-    box-shadow: 0 0 0 3px rgba(233, 57, 70, 0.2);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(214, 64, 69, 0.2);
+}
+
+#passwordError {
+    color: var(--danger-color);
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+    display: none;
 }
 
 #submitPassword {
     background-color: var(--primary-color);
-    color: white;
+    color: var(--white);
     border: none;
-    padding: 12px 25px;
-    border-radius: 8px;
-    font-size: 16px;
+    padding: 12px 24px;
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    font-weight: 500;
     cursor: pointer;
     transition: all 0.3s;
     width: 100%;
 }
 
 #submitPassword:hover {
-    background-color: #c1121f;
+    background-color: #c5394b;
     transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
 }
 
 /* Responsive Styles */
 @media (max-width: 768px) {
-    .dashboard-header {
+    .container {
+        padding: 15px;
+    }
+    
+    header {
         flex-direction: column;
+        align-items: flex-start;
         gap: 15px;
     }
     
-    .dashboard-controls {
-        flex-direction: column;
+    nav {
         width: 100%;
+        flex-wrap: wrap;
     }
     
-    .search-container input {
-        width: 100%;
+    .dashboard-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .search-container {
+        min-width: 100%;
+    }
+    
+    .estimates-grid {
+        grid-template-columns: 1fr;
     }
     
     .form-row {
@@ -771,8 +1006,40 @@ nav button:hover:not(.active) {
         flex-direction: column;
     }
     
+    .material-form button, .fee-form button {
+        width: 100%;
+        justify-content: center;
+    }
+    
     .modal-content {
         width: 95%;
         padding: 20px;
+    }
+    
+    .modal-actions {
+        flex-wrap: wrap;
+    }
+    
+    .modal-actions button {
+        flex: 1;
+        min-width: 120px;
+    }
+}
+
+@media (max-width: 480px) {
+    .progress-step .step-title {
+        display: none;
+    }
+    
+    .job-tab {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+        min-width: 100px;
+    }
+    
+    .btn-prev, .btn-next, .btn-cancel, #saveEstimateBtn,
+    .modal-actions button {
+        padding: 10px 15px;
+        font-size: 0.9rem;
     }
 }
