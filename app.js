@@ -73,39 +73,54 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 function setupEventListeners() {
-    dashboardBtn.addEventListener('click', showDashboard);
-    newEstimateBtn.addEventListener('click', showNewEstimate);
-   
-    searchInput.addEventListener('keyup', function(e) {
-        if (e.key === 'Enter') searchEstimates();
-    });
-    searchBtn.addEventListener('click', searchEstimates);
-   
-    closeModal.addEventListener('click', closeEstimateModal);
-    editEstimateBtn.addEventListener('click', editEstimate);
-    deleteEstimateBtn.addEventListener('click', deleteEstimate);
-    exportEstimateBtn.addEventListener('click', exportEstimateToWord);
-   
-    saveEstimateBtn.addEventListener('click', saveEstimate);
-    document.getElementById('jobDays').addEventListener('input', updateCurrentJobDetails);
-document.getElementById('jobHours').addEventListener('input', updateCurrentJobDetails);
-document.getElementById('jobWorkers').addEventListener('input', updateCurrentJobDetails);
-document.getElementById('apprenticeDays').addEventListener('input', updateCurrentJobDetails);
-document.getElementById('apprenticeHours').addEventListener('input', updateCurrentJobDetails);
-document.getElementById('apprenticeCount').addEventListener('input', updateCurrentJobDetails);
-    document.getElementById('addMaterial').addEventListener('click', addMaterialToJob);
-    document.getElementById('waiveEstimateFeeBtn').addEventListener('click', toggleEstimateFee);
-    document.getElementById('hasApprentice').addEventListener('change', function() {
-    const apprenticeLaborGroup = document.getElementById('apprenticeLaborGroup');
-    if (this.checked) {
-        apprenticeLaborGroup.style.display = 'block';
-    } else {
-        apprenticeLaborGroup.style.display = 'none';
-        document.getElementById('apprenticeLabor').value = '0';
+    // Dashboard elements
+    if (dashboardBtn) dashboardBtn.addEventListener('click', showDashboard);
+    if (newEstimateBtn) newEstimateBtn.addEventListener('click', showNewEstimate);
+    
+    // Search elements
+    if (searchInput) {
+        searchInput.addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') searchEstimates();
+        });
     }
-    updateCurrentJobDetails();
-    updateEstimatePreview();
-});
+    if (searchBtn) searchBtn.addEventListener('click', searchEstimates);
+    
+    // Modal elements
+    if (closeModal) closeModal.addEventListener('click', closeEstimateModal);
+    if (editEstimateBtn) editEstimateBtn.addEventListener('click', editEstimate);
+    if (deleteEstimateBtn) deleteEstimateBtn.addEventListener('click', deleteEstimate);
+    if (exportEstimateBtn) exportEstimateBtn.addEventListener('click', exportEstimateToWord);
+    
+    // Estimate form elements
+    if (saveEstimateBtn) saveEstimateBtn.addEventListener('click', saveEstimate);
+    
+    // Job calculation elements
+    const jobInputs = ['jobDays', 'jobHours', 'jobWorkers', 'apprenticeDays', 'apprenticeHours', 'apprenticeCount'];
+    jobInputs.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', updateCurrentJobDetails);
+    });
+
+    if (document.getElementById('addMaterial')) {
+        document.getElementById('addMaterial').addEventListener('click', addMaterialToJob);
+    }
+    if (document.getElementById('waiveEstimateFeeBtn')) {
+        document.getElementById('waiveEstimateFeeBtn').addEventListener('click', toggleEstimateFee);
+    }
+    if (document.getElementById('hasApprentice')) {
+        document.getElementById('hasApprentice').addEventListener('change', function() {
+            const apprenticeLaborGroup = document.getElementById('apprenticeLaborGroup');
+            if (this.checked) {
+                apprenticeLaborGroup.style.display = 'block';
+            } else {
+                apprenticeLaborGroup.style.display = 'none';
+                document.getElementById('apprenticeLabor').value = '0';
+            }
+            updateCurrentJobDetails();
+            updateEstimatePreview();
+        });
+    }
+    
     // Add global functions for HTML onclick handlers
     window.nextStep = nextStep;
     window.prevStep = prevStep;
@@ -191,9 +206,12 @@ function resetEstimateForm() {
     
     // Clear form inputs
     document.getElementById('customerInfoForm').reset();
-    document.getElementById('waiveEstimateFeeBtn').classList.remove('active');
-    document.getElementById('waiveEstimateFeeBtn').innerHTML = '<i class="fas fa-dollar-sign"></i> Waive $75 Estimate Fee';
+    const feeBtn = document.getElementById('waiveEstimateFeeBtn');
+    feeBtn.classList.remove('active');
+    feeBtn.innerHTML = '<i class="fas fa-dollar-sign"></i> Waive $75 Estimate Fee';
     document.getElementById('liveLaborTotal').textContent = '$0.00';
+    document.getElementById('hasApprentice').checked = false;
+    document.getElementById('apprenticeLaborGroup').style.display = 'none';
 }
 
 
@@ -249,7 +267,8 @@ function addNewJob() {
         materials: [],
         fees: [],
         discountPercentage: 0,
-        waiveEstimateFee: false
+        waiveEstimateFee: false,
+        hasApprentice: false
     };
     
     currentEstimate.jobs.push(newJob);
@@ -260,6 +279,9 @@ function addNewJob() {
     
     // Reset discount input
     document.getElementById('jobDiscountPercentage').value = 0;
+    
+    // Ensure apprentice fields are hidden for new job
+    document.getElementById('apprenticeLaborGroup').style.display = 'none';
 }
 
 
@@ -331,6 +353,8 @@ function showJobDetails(jobId) {
             currentJob.apprenticeDays = parseInt(document.getElementById('apprenticeDays').value) || 0;
             currentJob.apprenticeHours = parseInt(document.getElementById('apprenticeHours').value) || 0;
             currentJob.apprenticeCount = parseInt(document.getElementById('apprenticeCount').value) || 0;
+            currentJob.discountPercentage = parseFloat(document.getElementById('jobDiscountPercentage').value) || 0;
+            currentJob.waiveEstimateFee = document.getElementById('waiveEstimateFeeBtn').classList.contains('active');
         }
     }
 
@@ -339,7 +363,7 @@ function showJobDetails(jobId) {
     
     if (!job) return;
 
-    // Reset all fields to the job's values
+    // Update form fields with the job's values
     document.getElementById('jobDescription').value = job.name;
     document.getElementById('jobDays').value = job.days;
     document.getElementById('jobHours').value = job.hours;
@@ -348,6 +372,16 @@ function showJobDetails(jobId) {
     document.getElementById('apprenticeHours').value = job.apprenticeHours;
     document.getElementById('apprenticeCount').value = job.apprenticeCount;
     document.getElementById('jobDiscountPercentage').value = job.discountPercentage || 0;
+    
+    // Update estimate fee button state
+    const feeBtn = document.getElementById('waiveEstimateFeeBtn');
+    if (job.waiveEstimateFee) {
+        feeBtn.classList.add('active');
+        feeBtn.innerHTML = '<i class="fas fa-check"></i> Estimate Fee Waived';
+    } else {
+        feeBtn.classList.remove('active');
+        feeBtn.innerHTML = '<i class="fas fa-dollar-sign"></i> Waive $75 Estimate Fee';
+    }
     
     // Update labor calculations
     updateCurrentJobDetails();
