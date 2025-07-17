@@ -125,8 +125,9 @@ function checkPassword() {
         if (passwordInput.value.trim() === PASSWORD) {
             localStorage.setItem('authenticated', 'true');
             passwordModal.style.display = 'none';
-            passwordError.style.display = 'none';
+            passwordError.style.display = 'none'; // Add this line
             document.body.style.overflow = '';
+            passwordInput.value = ''; // Clear the input field
         } else {
             passwordError.style.display = 'block';
             passwordInput.value = '';

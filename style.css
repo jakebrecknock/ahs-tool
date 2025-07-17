@@ -674,16 +674,49 @@ nav button:hover:not(.active) {
 
 /* Password Modal */
 #passwordModal .modal-content {
+    max-width: 400px;
     text-align: center;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+#passwordModal .modal-header h2 {
+    color: var(--primary-color);
+    margin-bottom: 20px;
 }
 
 #passwordInput {
     width: 100%;
-    padding: 10px;
-    margin: 20px 0;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    padding: 12px 15px;
+    border: 2px solid #eee;
+    border-radius: 8px;
     font-size: 16px;
+    transition: all 0.3s;
+    margin-bottom: 15px;
+}
+
+#passwordInput:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(233, 57, 70, 0.2);
+}
+
+#submitPassword {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s;
+    width: 100%;
+}
+
+#submitPassword:hover {
+    background-color: #c1121f;
+    transform: translateY(-2px);
 }
 
 /* Responsive Styles */
