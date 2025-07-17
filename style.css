@@ -130,22 +130,36 @@ nav button:hover:not(.active) {
 
 .estimates-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 25px;
+    padding: 15px;
 }
 
 .estimate-card {
-    background-color: white;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    transition: transform 0.3s, box-shadow 0.3s;
+    background: linear-gradient(135deg, #fff9f9 0%, #fff 100%);
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: 0 4px 20px rgba(233, 57, 70, 0.1);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     cursor: pointer;
+    border: 1px solid rgba(233, 57, 70, 0.1);
+    position: relative;
+    overflow: hidden;
 }
 
 .estimate-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    box-shadow: 0 8px 25px rgba(233, 57, 70, 0.15);
+}
+
+.estimate-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background-color: var(--primary-color);
 }
 
 .estimate-header {
@@ -187,13 +201,7 @@ nav button:hover:not(.active) {
     color: var(--gray-color);
 }
 
-/* Estimate Form Styles */
-.estimate-progress {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 30px;
-    position: relative;
-}
+
 
 .estimate-progress::before {
     content: '';
@@ -209,30 +217,18 @@ nav button:hover:not(.active) {
 .progress-step {
     position: relative;
     z-index: 2;
-    background-color: var(--light-gray);
-    width: 30%;
-    padding: 10px;
+    background-color: white;
+    width: calc(33.33% - 20px);
+    padding: 15px 10px;
     text-align: center;
-    border-radius: 4px;
+    border-radius: 12px;
     font-weight: 500;
     color: var(--gray-color);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    border: 1px solid #eee;
+    transition: all 0.3s;
 }
 
-.progress-step.active {
-    background-color: var(--primary-color);
-    color: white;
-}
-
-.progress-step::before {
-    content: '';
-    position: absolute;
-    top: 15px;
-    left: -50%;
-    width: 100%;
-    height: 2px;
-    background-color: var(--primary-color);
-    z-index: 3;
-}
 
 .progress-step:first-child::before {
     display: none;
@@ -509,43 +505,6 @@ nav button:hover:not(.active) {
     font-weight: 500;
 }
 
-/* Add these to your existing CSS */
-
-/* Modern Dashboard Cards */
-.estimates-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 25px;
-    padding: 15px;
-}
-
-.estimate-card {
-    background: linear-gradient(135deg, #fff9f9 0%, #fff 100%);
-    border-radius: 16px;
-    padding: 25px;
-    box-shadow: 0 4px 20px rgba(233, 57, 70, 0.1);
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    cursor: pointer;
-    border: 1px solid rgba(233, 57, 70, 0.1);
-    position: relative;
-    overflow: hidden;
-}
-
-.estimate-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(233, 57, 70, 0.15);
-}
-
-.estimate-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 4px;
-    height: 100%;
-    background-color: var(--primary-color);
-}
-
 /* Hover Actions */
 .estimate-card .card-actions {
     position: absolute;
@@ -598,21 +557,6 @@ nav button:hover:not(.active) {
     padding: 0 20px;
 }
 
-.progress-step {
-    position: relative;
-    z-index: 2;
-    background-color: white;
-    width: calc(33.33% - 20px);
-    padding: 15px 10px;
-    text-align: center;
-    border-radius: 12px;
-    font-weight: 500;
-    color: var(--gray-color);
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    border: 1px solid #eee;
-    transition: all 0.3s;
-}
-
 .progress-step.active {
     background-color: var(--primary-color);
     color: white;
@@ -637,10 +581,6 @@ nav button:hover:not(.active) {
     transform: translateY(-50%);
 }
 
-.progress-step:first-child::before {
-    display: none;
-}
-
 .progress-step.active::before,
 .progress-step.completed::before {
     background-color: var(--primary-color);
@@ -659,12 +599,6 @@ nav button:hover:not(.active) {
     background-color: #eee;
     margin-right: 8px;
     color: var(--gray-color);
-}
-
-.progress-step.active .step-number,
-.progress-step.completed .step-number {
-    background-color: white;
-    color: var(--primary-color);
 }
 
 .progress-step.completed .step-number {
@@ -740,16 +674,49 @@ nav button:hover:not(.active) {
 
 /* Password Modal */
 #passwordModal .modal-content {
+    max-width: 400px;
     text-align: center;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+#passwordModal .modal-header h2 {
+    color: var(--primary-color);
+    margin-bottom: 20px;
 }
 
 #passwordInput {
     width: 100%;
-    padding: 10px;
-    margin: 20px 0;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    padding: 12px 15px;
+    border: 2px solid #eee;
+    border-radius: 8px;
     font-size: 16px;
+    transition: all 0.3s;
+    margin-bottom: 15px;
+}
+
+#passwordInput:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(233, 57, 70, 0.2);
+}
+
+#submitPassword {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s;
+    width: 100%;
+}
+
+#submitPassword:hover {
+    background-color: #c1121f;
+    transform: translateY(-2px);
 }
 
 /* Responsive Styles */
