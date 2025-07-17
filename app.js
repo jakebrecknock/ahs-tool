@@ -108,10 +108,9 @@ function setupEventListeners() {
 }
 
 
-// In app.js, update the checkPassword function
 function checkPassword() {
     // Check if already authenticated
-    if (localStorage.getItem('authenticated')) {
+    if (localStorage.getItem('authenticated') === 'true') {
         passwordModal.style.display = 'none';
         document.body.style.overflow = '';
         return;
@@ -120,9 +119,10 @@ function checkPassword() {
     // Show password modal
     passwordModal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
+    passwordInput.focus();
 
     function verifyPassword() {
-        if (passwordInput.value === PASSWORD) {
+        if (passwordInput.value.trim() === PASSWORD) {
             localStorage.setItem('authenticated', 'true');
             passwordModal.style.display = 'none';
             passwordError.style.display = 'none';
@@ -139,9 +139,6 @@ function checkPassword() {
     passwordInput.addEventListener('keyup', function(e) {
         if (e.key === 'Enter') verifyPassword();
     });
-    
-    // Focus the input field when modal opens
-    passwordInput.focus();
 }
 
 
