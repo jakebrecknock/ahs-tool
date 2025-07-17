@@ -267,7 +267,7 @@ function initDateFilters() {
 function addNewJob() {
     const newJob = {
         id: Date.now(),
-        name: "New Job " + (currentEstimate.jobs.length + 1),
+        name: "New Job",
         days: 0,
         hours: 0,
         workers: 1,
@@ -279,8 +279,7 @@ function addNewJob() {
         materials: [],
         fees: [],
         discountPercentage: 0,
-        waiveEstimateFee: false,
-        hasApprentice: false
+        waiveEstimateFee: false
     };
     
     currentEstimate.jobs.push(newJob);
@@ -290,7 +289,7 @@ function addNewJob() {
     updateEstimatePreview();
     
     // Reset form fields for the new job
-    document.getElementById('jobDescription').value = newJob.name;
+    document.getElementById('jobDescription').value = "";
     document.getElementById('jobDays').value = newJob.days;
     document.getElementById('jobHours').value = newJob.hours;
     document.getElementById('jobWorkers').value = newJob.workers;
@@ -298,12 +297,6 @@ function addNewJob() {
     document.getElementById('apprenticeHours').value = newJob.apprenticeHours;
     document.getElementById('apprenticeCount').value = newJob.apprenticeCount;
     document.getElementById('jobDiscountPercentage').value = newJob.discountPercentage;
-    
-    // Reset apprentice checkbox
-    const hasApprenticeCheckbox = document.getElementById('hasApprentice');
-    if (hasApprenticeCheckbox) {
-        hasApprenticeCheckbox.checked = false;
-    }
     
     // Reset estimate fee button
     const feeBtn = document.getElementById('waiveEstimateFeeBtn');
@@ -426,12 +419,12 @@ function updateJobTabs() {
     const jobTabsContainer = document.getElementById('jobTabsContainer');
     jobTabsContainer.innerHTML = '';
     
-    currentEstimate.jobs.forEach(job => {
+    currentEstimate.jobs.forEach((job, index) => {
         const tab = document.createElement('div');
         tab.className = `job-tab ${job.id === currentJobId ? 'active' : ''}`;
         tab.dataset.jobId = job.id;
         tab.innerHTML = `
-            <span>${job.name || 'Job ' + (currentEstimate.jobs.indexOf(job) + 1)}</span>
+            <span>${job.name || 'New Job'}</span>
             ${currentEstimate.jobs.length > 1 ? `
             <button class="remove-job-btn"><i class="fas fa-times"></i></button>
             ` : ''}
@@ -710,23 +703,19 @@ function nextStep(step) {
    
     // Update job details before checking
     if (step === 3) {
-        // Save current job details
-        const currentJob = currentEstimate.jobs.find(j => j.id === currentJobId);
-        if (currentJob) {
-            currentJob.name = document.getElementById('jobDescription').value || "New Job";
-            currentJob.days = parseFloat(document.getElementById('jobDays').value) || 1;
-            currentJob.hours = parseFloat(document.getElementById('jobHours').value) || 0;
-            currentJob.workers = parseInt(document.getElementById('jobWorkers').value) || 1;
-            
-            // Safely handle apprentice checkbox
-            const hasApprentice = document.getElementById('hasApprentice');
-            currentJob.hasApprentice = hasApprentice ? hasApprentice.checked : false;
-            
-            currentJob.labor = parseFloat(document.getElementById('jobLabor').value) || 0;
+        // Validate job descriptions
+        for (const job of currentEstimate.jobs) {
+            const description = job.name.trim();
+            if (!description || description === "New Job") {
+                alert('Please enter a description for all jobs');
+                // Focus on the first empty job description
+                document.getElementById('jobDescription').focus();
+                return;
+            }
         }
        
-        if (currentEstimate.jobs.length === 0 || currentEstimate.jobs.some(job => !job.name || job.name === "")) {
-            alert('Please add at least one job with a description');
+        if (currentEstimate.jobs.length === 0) {
+            alert('Please add at least one job');
             return;
         }
     }

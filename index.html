@@ -112,11 +112,11 @@
     <input type="text" id="jobDescription" placeholder="Describe the work" required>
 </div>
 <div id="apprenticeLaborGroup" style="display: none;"></div>
-<div class="form-group checkbox-group">
-    <input type="checkbox" id="hasApprentice">
-    <label for="hasApprentice">Includes Apprentice Labor</label>
-</div>
 <div class="form-row">
+    <div class="form-group">
+        <label>Number of Workers</label>
+        <input type="number" id="jobWorkers" min="1" value="1" required>
+    </div>
     <div class="form-group">
         <label>Worker Days</label>
         <input type="number" id="jobDays" min="0" value="0" required>
@@ -125,13 +125,13 @@
         <label>Worker Hours</label>
         <input type="number" id="jobHours" min="0" max="7" value="0" required>
     </div>
-    <div class="form-group">
-        <label>Number of Workers</label>
-        <input type="number" id="jobWorkers" min="1" value="1" required>
-    </div>
 </div>
 
 <div class="form-row">
+    <div class="form-group">
+        <label>Number of Apprentices</label>
+        <input type="number" id="apprenticeCount" min="0" value="0">
+    </div>
     <div class="form-group">
         <label>Apprentice Days</label>
         <input type="number" id="apprenticeDays" min="0" value="0">
@@ -139,10 +139,6 @@
     <div class="form-group">
         <label>Apprentice Hours</label>
         <input type="number" id="apprenticeHours" min="0" max="7" value="0">
-    </div>
-    <div class="form-group">
-        <label>Number of Apprentices</label>
-        <input type="number" id="apprenticeCount" min="0" value="0">
     </div>
 </div>
 
