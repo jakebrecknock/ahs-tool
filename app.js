@@ -66,7 +66,6 @@ let currentEstimate = {
 // Initialize the app
 document.addEventListener('DOMContentLoaded', function() {
     checkPassword();
-    setupEventListeners();
     loadEstimates();
     initPhoneNumberFormatting();
     initDateFilters();
