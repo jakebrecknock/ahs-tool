@@ -267,7 +267,7 @@ function initDateFilters() {
 function addNewJob() {
     const newJob = {
         id: Date.now(),
-        name: "Job " + (currentEstimate.jobs.length + 1), // Changed this line
+        name: "New Job", // Default name
         days: 0,
         hours: 0,
         workers: 1,
@@ -288,22 +288,12 @@ function addNewJob() {
     showJobDetails(newJob.id);
     updateEstimatePreview();
     
-    // Reset form fields for the new job
-    document.getElementById('jobDescription').value = "Job " + (currentEstimate.jobs.length); // Added this line
-    document.getElementById('jobDays').value = newJob.days;
-    document.getElementById('jobHours').value = newJob.hours;
-    document.getElementById('jobWorkers').value = newJob.workers;
-    document.getElementById('apprenticeDays').value = newJob.apprenticeDays;
-    document.getElementById('apprenticeHours').value = newJob.apprenticeHours;
-    document.getElementById('apprenticeCount').value = newJob.apprenticeCount;
-    document.getElementById('jobDiscountPercentage').value = newJob.discountPercentage;
+    // Clear the job description input for the new job
+    document.getElementById('jobDescription').value = "";
+    document.getElementById('jobDescription').placeholder = "Describe the work";
     
-    // Reset estimate fee button
-    const feeBtn = document.getElementById('waiveEstimateFeeBtn');
-    if (feeBtn) {
-        feeBtn.classList.remove('active');
-        feeBtn.innerHTML = '<i class="fas fa-dollar-sign"></i> Waive $75 Estimate Fee';
-    }
+    // Focus on the description field
+    document.getElementById('jobDescription').focus();
 }
 
 
@@ -386,7 +376,13 @@ function showJobDetails(jobId) {
     if (!job) return;
 
     // Update form fields with the job's values
-    document.getElementById('jobDescription').value = job.name;
+    document.getElementById('jobDescription').addEventListener('input', function(e) {
+    const job = currentEstimate.jobs.find(j => j.id === currentJobId);
+    if (job) {
+        job.name = e.target.value || 'New Job'; // Fallback to 'New Job' if empty
+        updateJobTabs();
+    }
+});
     document.getElementById('jobDays').value = job.days;
     document.getElementById('jobHours').value = job.hours;
     document.getElementById('jobWorkers').value = job.workers;
@@ -424,7 +420,7 @@ function updateJobTabs() {
         tab.className = `job-tab ${job.id === currentJobId ? 'active' : ''}`;
         tab.dataset.jobId = job.id;
         tab.innerHTML = `
-            <span>${job.name || 'New Job'}</span>
+            <span>${job.name}</span>
             ${currentEstimate.jobs.length > 1 ? `
             <button class="remove-job-btn"><i class="fas fa-times"></i></button>
             ` : ''}
@@ -467,7 +463,7 @@ tab.addEventListener('click', function(e) {
 document.getElementById('jobDescription').addEventListener('input', function(e) {
     const job = currentEstimate.jobs.find(j => j.id === currentJobId);
     if (job) {
-        job.name = e.target.value || 'Job ' + (currentEstimate.jobs.indexOf(job) + 1);
+        job.name = e.target.value || 'New Job'; // Fallback to 'New Job' if empty
         updateJobTabs();
     }
 });
