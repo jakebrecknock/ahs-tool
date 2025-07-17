@@ -185,9 +185,18 @@ function initPhoneNumberFormatting() {
     if (!phoneInput) return;
     
     phoneInput.addEventListener('input', function(e) {
-        let input = e.target.value.replace(/\D/g,'').substring(0,10);
-        let formatted = input.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
-        e.target.value = formatted;
+        const input = e.target.value.replace(/\D/g,'').substring(0,10);
+        const areaCode = input.substring(0,3);
+        const middle = input.substring(3,6);
+        const last = input.substring(6,10);
+        
+        if (input.length > 6) {
+            e.target.value = `(${areaCode}) ${middle}-${last}`;
+        } else if (input.length > 3) {
+            e.target.value = `(${areaCode}) ${middle}`;
+        } else if (input.length > 0) {
+            e.target.value = `(${areaCode}`;
+        }
     });
 }
 
@@ -210,8 +219,8 @@ function initDateFilters() {
 
 function addNewJob() {
     const newJob = {
-        id: currentJobId++,
-        name: "New Job " + (currentJobId - 1),
+        id: Date.now(), // Use timestamp for unique IDs
+        name: "New Job",
         days: 1,
         workers: 1,
         hasApprentice: false,
@@ -222,27 +231,28 @@ function addNewJob() {
         waiveEstimateFee: false
     };
     currentEstimate.jobs.push(newJob);
-    showJobDetails(newJob.id);
+    currentJobId = newJob.id; // Set the new job as active
     updateJobTabs();
+    showJobDetails(newJob.id);
     updateEstimatePreview();
 }
-
 
 function showJobDetails(jobId) {
     // Save current job details before switching
     const currentJob = currentEstimate.jobs.find(j => j.id === currentJobId);
     if (currentJob) {
-        currentJob.name = document.getElementById('jobDescription').value || "New Job " + currentJob.id;
+        currentJob.name = document.getElementById('jobDescription').value || "New Job";
         currentJob.days = parseFloat(document.getElementById('jobDays').value) || 1;
         currentJob.workers = parseInt(document.getElementById('jobWorkers').value) || 1;
         currentJob.hasApprentice = document.getElementById('hasApprentice').checked;
         currentJob.labor = parseFloat(document.getElementById('jobLabor').value) || 0;
     }
 
-
     currentJobId = jobId;
     const job = currentEstimate.jobs.find(j => j.id === jobId);
-   
+    
+    if (!job) return;
+
     // Update form with selected job's data
     document.getElementById('jobDescription').value = job.name;
     document.getElementById('jobDays').value = job.days;
@@ -250,7 +260,7 @@ function showJobDetails(jobId) {
     document.getElementById('hasApprentice').checked = job.hasApprentice;
     document.getElementById('jobLabor').value = job.labor;
     document.getElementById('jobDiscountPercentage').value = job.discountPercentage;
-   
+    
     // Update estimate fee button
     const feeBtn = document.getElementById('waiveEstimateFeeBtn');
     if (job.waiveEstimateFee) {
@@ -260,8 +270,7 @@ function showJobDetails(jobId) {
         feeBtn.classList.remove('active');
         feeBtn.innerHTML = '<i class="fas fa-dollar-sign"></i> Waive $75 Estimate Fee';
     }
-   
-    // Update materials and fees lists
+    
     updateMaterialsList();
     updateJobFeesList(jobId);
     updateJobDiscountDisplay(jobId);

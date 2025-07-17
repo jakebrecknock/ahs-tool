@@ -136,20 +136,20 @@ nav button:hover:not(.active) {
 }
 
 .estimate-card {
-    background: linear-gradient(135deg, #fff9f9 0%, #fff 100%);
-    border-radius: 16px;
+    background: white;
+    border-radius: 12px;
     padding: 25px;
-    box-shadow: 0 4px 20px rgba(233, 57, 70, 0.1);
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
     cursor: pointer;
-    border: 1px solid rgba(233, 57, 70, 0.1);
     position: relative;
     overflow: hidden;
+    border: none;
 }
 
 .estimate-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(233, 57, 70, 0.15);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
 }
 
 .estimate-card::before {
@@ -157,9 +157,9 @@ nav button:hover:not(.active) {
     position: absolute;
     top: 0;
     left: 0;
-    width: 4px;
+    width: 5px;
     height: 100%;
-    background-color: var(--primary-color);
+    background: linear-gradient(to bottom, var(--primary-color), var(--secondary-color));
 }
 
 .estimate-header {
@@ -182,10 +182,10 @@ nav button:hover:not(.active) {
 .estimate-location, .estimate-jobs {
     font-size: 14px;
     color: var(--gray-color);
-    margin-bottom: 5px;
+    margin-bottom: 8px;
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 8px;
 }
 
 .estimate-total {
@@ -216,17 +216,9 @@ nav button:hover:not(.active) {
 
 .progress-step {
     position: relative;
-    z-index: 2;
-    background-color: white;
-    width: calc(33.33% - 20px);
-    padding: 15px 10px;
+    flex: 1;
     text-align: center;
-    border-radius: 12px;
-    font-weight: 500;
-    color: var(--gray-color);
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    border: 1px solid #eee;
-    transition: all 0.3s;
+    padding-bottom: 15px;
 }
 
 
@@ -554,7 +546,7 @@ nav button:hover:not(.active) {
     justify-content: space-between;
     margin-bottom: 40px;
     position: relative;
-    padding: 0 20px;
+    counter-reset: step;
 }
 
 .progress-step.active {
@@ -570,15 +562,39 @@ nav button:hover:not(.active) {
 }
 
 .progress-step::before {
+    content: counter(step);
+    counter-increment: step;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    margin: 0 auto 10px;
+    border-radius: 50%;
+    background-color: #e0e0e0;
+    color: #666;
+    font-weight: bold;
+}
+
+.progress-step::after {
     content: '';
     position: absolute;
-    top: 50%;
-    left: -50%;
-    width: 100%;
-    height: 3px;
-    background-color: #eee;
+    top: 15px;
+    left: 50%;
+    right: -50%;
+    height: 2px;
+    background-color: #e0e0e0;
     z-index: -1;
-    transform: translateY(-50%);
+}
+
+.progress-step:last-child::after {
+    display: none;
+}
+
+.progress-step.active::before,
+.progress-step.active::after {
+    background-color: var(--primary-color);
+    color: white;
 }
 
 .progress-step.active::before,
@@ -599,6 +615,17 @@ nav button:hover:not(.active) {
     background-color: #eee;
     margin-right: 8px;
     color: var(--gray-color);
+}
+
+.progress-step .step-title {
+    display: block;
+    font-size: 14px;
+    color: #666;
+}
+
+.progress-step.active .step-title {
+    color: var(--primary-color);
+    font-weight: 500;
 }
 
 .progress-step.completed .step-number {
