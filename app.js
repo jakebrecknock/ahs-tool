@@ -267,7 +267,7 @@ function initDateFilters() {
 function addNewJob() {
     const newJob = {
         id: Date.now(),
-        name: "New Job",
+        name: "Job " + (currentEstimate.jobs.length + 1), // Changed this line
         days: 0,
         hours: 0,
         workers: 1,
@@ -289,7 +289,7 @@ function addNewJob() {
     updateEstimatePreview();
     
     // Reset form fields for the new job
-    document.getElementById('jobDescription').value = "";
+    document.getElementById('jobDescription').value = "Job " + (currentEstimate.jobs.length); // Added this line
     document.getElementById('jobDays').value = newJob.days;
     document.getElementById('jobHours').value = newJob.hours;
     document.getElementById('jobWorkers').value = newJob.workers;
@@ -368,7 +368,7 @@ function showJobDetails(jobId) {
     if (currentJobId) {
         const currentJob = currentEstimate.jobs.find(j => j.id === currentJobId);
         if (currentJob) {
-            currentJob.name = document.getElementById('jobDescription').value || "New Job " + currentJob.id;
+            currentJob.name = document.getElementById('jobDescription').value || "Job " + (currentEstimate.jobs.findIndex(j => j.id === currentJobId) + 1);
             currentJob.days = parseInt(document.getElementById('jobDays').value) || 0;
             currentJob.hours = parseInt(document.getElementById('jobHours').value) || 0;
             currentJob.workers = parseInt(document.getElementById('jobWorkers').value) || 1;
@@ -430,14 +430,19 @@ function updateJobTabs() {
             ` : ''}
         `;
         
-        // Add click handler for the tab
-        tab.addEventListener('click', function(e) {
-            if (!e.target.classList.contains('remove-job-btn') && 
-                !e.target.closest('.remove-job-btn')) {
-                const clickedJobId = parseInt(this.dataset.jobId);
-                showJobDetails(clickedJobId);
-            }
-        });
+// In the updateJobTabs function, modify the click handler:
+tab.addEventListener('click', function(e) {
+    if (!e.target.classList.contains('remove-job-btn') && 
+        !e.target.closest('.remove-job-btn')) {
+        const clickedJobId = parseInt(this.dataset.jobId);
+        // Save current job details before switching
+        const currentJob = currentEstimate.jobs.find(j => j.id === currentJobId);
+        if (currentJob) {
+            currentJob.name = document.getElementById('jobDescription').value || "Job " + (currentEstimate.jobs.findIndex(j => j.id === currentJobId) + 1);
+        }
+        showJobDetails(clickedJobId);
+    }
+});
         
         // Add click handler for remove button if it exists
         if (currentEstimate.jobs.length > 1) {
@@ -994,20 +999,22 @@ function displayEstimates(estimates) {
         estimateCard.className = 'estimate-card';
         estimateCard.innerHTML = `
            <div class="estimate-card">
-    <div class="card-actions">
-        <button class="edit" onclick="event.stopPropagation(); editEstimateFromCard('${estimate.id}')">
-            <i class="fas fa-edit"></i>
-        </button>
-        <button class="delete" onclick="event.stopPropagation(); deleteEstimateFromCard('${estimate.id}')">
-            <i class="fas fa-trash"></i>
-        </button>
-        <button class="export" onclick="event.stopPropagation(); exportEstimateFromCard('${estimate.id}')">
-            <i class="fas fa-file-export"></i>
-        </button>
-    </div>
-            <p class="estimate-location"><i class="fas fa-map-marker-alt"></i> ${estimate.customer.location}</p>
-            <p class="estimate-jobs"><i class="fas fa-tools"></i> ${estimate.jobs.map(job => job.name).join(', ')}</p>
-            <p class="estimate-total">$${formatAccounting(estimate.total)}</p>
+                <div class="card-actions">
+                    <button class="edit" onclick="event.stopPropagation(); editEstimateFromCard('${estimate.id}')">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="delete" onclick="event.stopPropagation(); deleteEstimateFromCard('${estimate.id}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    <button class="export" onclick="event.stopPropagation(); exportEstimateFromCard('${estimate.id}')">
+                        <i class="fas fa-file-export"></i>
+                    </button>
+                </div>
+                <p class="estimate-customer"><i class="fas fa-user"></i> ${estimate.customer.name}</p>
+                <p class="estimate-location"><i class="fas fa-map-marker-alt"></i> ${estimate.customer.location}</p>
+                <p class="estimate-jobs"><i class="fas fa-tools"></i> ${estimate.jobs.map(job => job.name).join(', ')}</p>
+                <p class="estimate-total">$${formatAccounting(estimate.total)}</p>
+            </div>
         `;
        
         estimateCard.addEventListener('click', () => openEstimateModal(estimate));

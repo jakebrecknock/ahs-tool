@@ -224,9 +224,9 @@ nav button:hover:not(.active) {
     position: absolute;
     top: 0;
     left: 0;
-    width: 4px;
+    width: 6px;
     height: 100%;
-    background: linear-gradient(to bottom, var(--primary-color), var(--primary-light));
+    background: linear-gradient(to bottom, var(--primary-color), #D64045);
 }
 
 .card-actions {
@@ -961,6 +961,29 @@ nav button:hover:not(.active) {
     transition: all 0.3s;
     margin-bottom: 15px;
     text-align: center;
+}
+
+#passwordModal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0,0,0,0.9);
+    z-index: 9999;
+}
+
+#passwordModal .modal-content {
+    background-color: var(--white);
+    padding: 30px;
+    border-radius: var(--radius-lg);
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.estimate-customer {
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: var(--dark-color);
 }
 
 #passwordInput:focus {
