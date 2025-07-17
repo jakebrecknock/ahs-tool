@@ -25,15 +25,6 @@ let currentJobId = 1;
 let autocomplete;
 
 
-// Initialize Google Maps Autocomplete
-function initAutocomplete() {
-    autocomplete = new google.maps.places.Autocomplete(
-        document.getElementById('jobLocation'),
-        { types: ['geocode'] }
-    );
-}
-
-
 function formatAccounting(num) {
     return num.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
 }
@@ -69,7 +60,15 @@ document.addEventListener('DOMContentLoaded', function() {
     loadEstimates();
     initPhoneNumberFormatting();
     initDateFilters();
-    addNewJob(); // Start with one job by default
+    addNewJob();
+    setupEventListeners();
+    // Add this line to set up the password submit listener
+    submitPassword.addEventListener('click', verifyPassword);
+    
+    // Also add keypress listener for Enter key
+    passwordInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') verifyPassword();
+    });
 });
 
 
@@ -108,15 +107,17 @@ function setupEventListeners() {
 function verifyPassword() {
     const password = passwordInput.value.trim();
     if (password === PASSWORD) {
-        sessionStorage.setItem('ahs-authenticated', 'true'); // Use sessionStorage instead
+        sessionStorage.setItem('ahs-authenticated', 'true');
         passwordModal.style.display = 'none';
         passwordError.style.display = 'none';
         passwordInput.value = '';
         document.body.style.overflow = '';
+        return true;
     } else {
         passwordError.style.display = 'block';
         passwordInput.value = '';
         passwordInput.focus();
+        return false;
     }
 }
 
