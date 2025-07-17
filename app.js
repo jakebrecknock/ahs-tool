@@ -207,11 +207,23 @@ function resetEstimateForm() {
     // Clear form inputs
     document.getElementById('customerInfoForm').reset();
     const feeBtn = document.getElementById('waiveEstimateFeeBtn');
-    feeBtn.classList.remove('active');
-    feeBtn.innerHTML = '<i class="fas fa-dollar-sign"></i> Waive $75 Estimate Fee';
+    if (feeBtn) {
+        feeBtn.classList.remove('active');
+        feeBtn.innerHTML = '<i class="fas fa-dollar-sign"></i> Waive $75 Estimate Fee';
+    }
     document.getElementById('liveLaborTotal').textContent = '$0.00';
-    document.getElementById('hasApprentice').checked = false;
-    document.getElementById('apprenticeLaborGroup').style.display = 'none';
+    
+    // Safely handle apprentice checkbox
+    const hasApprentice = document.getElementById('hasApprentice');
+    if (hasApprentice) {
+        hasApprentice.checked = false;
+    }
+    
+    // Safely handle apprentice labor group
+    const apprenticeLaborGroup = document.getElementById('apprenticeLaborGroup');
+    if (apprenticeLaborGroup) {
+        apprenticeLaborGroup.style.display = 'none';
+    }
 }
 
 
@@ -277,13 +289,27 @@ function addNewJob() {
     showJobDetails(newJob.id);
     updateEstimatePreview();
     
-    // Reset discount input
-    document.getElementById('jobDiscountPercentage').value = 0;
+    // Reset form fields for the new job
+    document.getElementById('jobDescription').value = newJob.name;
+    document.getElementById('jobDays').value = newJob.days;
+    document.getElementById('jobHours').value = newJob.hours;
+    document.getElementById('jobWorkers').value = newJob.workers;
+    document.getElementById('apprenticeDays').value = newJob.apprenticeDays;
+    document.getElementById('apprenticeHours').value = newJob.apprenticeHours;
+    document.getElementById('apprenticeCount').value = newJob.apprenticeCount;
+    document.getElementById('jobDiscountPercentage').value = newJob.discountPercentage;
     
-    // Safely handle apprentice fields
-    const apprenticeLaborGroup = document.getElementById('apprenticeLaborGroup');
-    if (apprenticeLaborGroup) {
-        apprenticeLaborGroup.style.display = 'none';
+    // Reset apprentice checkbox
+    const hasApprenticeCheckbox = document.getElementById('hasApprentice');
+    if (hasApprenticeCheckbox) {
+        hasApprenticeCheckbox.checked = false;
+    }
+    
+    // Reset estimate fee button
+    const feeBtn = document.getElementById('waiveEstimateFeeBtn');
+    if (feeBtn) {
+        feeBtn.classList.remove('active');
+        feeBtn.innerHTML = '<i class="fas fa-dollar-sign"></i> Waive $75 Estimate Fee';
     }
 }
 
@@ -687,10 +713,15 @@ function nextStep(step) {
         // Save current job details
         const currentJob = currentEstimate.jobs.find(j => j.id === currentJobId);
         if (currentJob) {
-            currentJob.name = document.getElementById('jobDescription').value || "New Job " + currentJob.id;
+            currentJob.name = document.getElementById('jobDescription').value || "New Job";
             currentJob.days = parseFloat(document.getElementById('jobDays').value) || 1;
+            currentJob.hours = parseFloat(document.getElementById('jobHours').value) || 0;
             currentJob.workers = parseInt(document.getElementById('jobWorkers').value) || 1;
-            currentJob.hasApprentice = document.getElementById('hasApprentice').checked;
+            
+            // Safely handle apprentice checkbox
+            const hasApprentice = document.getElementById('hasApprentice');
+            currentJob.hasApprentice = hasApprentice ? hasApprentice.checked : false;
+            
             currentJob.labor = parseFloat(document.getElementById('jobLabor').value) || 0;
         }
        
