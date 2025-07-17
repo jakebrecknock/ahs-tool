@@ -188,20 +188,11 @@ function resetEstimateForm() {
 function initPhoneNumberFormatting() {
     const phoneInput = document.getElementById('customerPhone');
     if (!phoneInput) return;
-   
+    
     phoneInput.addEventListener('input', function(e) {
-        const input = e.target.value.replace(/\D/g, '').substring(0, 10);
-        const areaCode = input.substring(0, 3);
-        const middle = input.substring(3, 6);
-        const last = input.substring(6, 10);
-       
-        if (input.length > 6) {
-            e.target.value = `(${areaCode}) ${middle}-${last}`;
-        } else if (input.length > 3) {
-            e.target.value = `(${areaCode}) ${middle}`;
-        } else if (input.length > 0) {
-            e.target.value = `(${areaCode}`;
-        }
+        let input = e.target.value.replace(/\D/g,'').substring(0,10);
+        let formatted = input.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
+        e.target.value = formatted;
     });
 }
 
@@ -286,23 +277,23 @@ function showJobDetails(jobId) {
 function updateJobTabs() {
     const jobTabsContainer = document.getElementById('jobTabsContainer');
     jobTabsContainer.innerHTML = '';
-   
+    
     currentEstimate.jobs.forEach(job => {
         const tab = document.createElement('div');
         tab.className = `job-tab ${job.id === currentJobId ? 'active' : ''}`;
         tab.innerHTML = `
-            <span>${job.name || 'Job ' + job.id}</span>
+            <span>${job.name || 'Job ' + (currentEstimate.jobs.indexOf(job) + 1)}</span>
             ${currentEstimate.jobs.length > 1 ? `
             <button class="remove-job-btn"><i class="fas fa-times"></i></button>
             ` : ''}
         `;
-       
+        
         tab.onclick = (e) => {
             if (!e.target.classList.contains('remove-job-btn')) {
                 showJobDetails(job.id);
             }
         };
-       
+        
         if (currentEstimate.jobs.length > 1) {
             const removeBtn = tab.querySelector('.remove-job-btn');
             removeBtn.onclick = (e) => {
@@ -310,10 +301,10 @@ function updateJobTabs() {
                 removeJob(job.id);
             };
         }
-       
+        
         jobTabsContainer.appendChild(tab);
     });
-   
+    
     // Add "+" tab for new jobs
     const addTab = document.createElement('div');
     addTab.className = 'job-tab add-job-tab';
@@ -321,7 +312,65 @@ function updateJobTabs() {
     addTab.onclick = addNewJob;
     jobTabsContainer.appendChild(addTab);
 }
+// Update job details when typing
+document.getElementById('jobDescription').addEventListener('input', function(e) {
+    const job = currentEstimate.jobs.find(j => j.id === currentJobId);
+    if (job) {
+        job.name = e.target.value || 'Job ' + (currentEstimate.jobs.indexOf(job) + 1);
+        updateJobTabs();
+    }
+});
 
+// Update the progress steps in HTML
+<div class="estimate-progress">
+    <div class="progress-step active" data-step="1">
+        <span class="step-number">1</span>
+        <span class="step-title">Customer Info</span>
+    </div>
+    <div class="progress-step" data-step="2">
+        <span class="step-number">2</span>
+        <span class="step-title">Jobs</span>
+    </div>
+    <div class="progress-step" data-step="3">
+        <span class="step-number">3</span>
+        <span class="step-title">Review</span>
+    </div>
+</div>
+
+
+function editEstimateFromCard(estimateId) {
+    db.collection("estimates").doc(estimateId).get()
+        .then(doc => {
+            if (doc.exists) {
+                const estimateData = doc.data();
+                currentEstimate = {
+                    id: doc.id,
+                    ...estimateData
+                };
+                showNewEstimate();
+                showJobDetails(currentEstimate.jobs[0].id);
+                nextStep(2);
+            }
+        });
+}
+
+function deleteEstimateFromCard(estimateId) {
+    if (confirm('Are you sure you want to delete this estimate?')) {
+        db.collection("estimates").doc(estimateId).delete()
+            .then(() => {
+                loadEstimates();
+            });
+    }
+}
+
+function exportEstimateFromCard(estimateId) {
+    db.collection("estimates").doc(estimateId).get()
+        .then(doc => {
+            if (doc.exists) {
+                exportEstimate(doc.data());
+            }
+        });
+}
 
 function removeJob(jobId) {
     if (currentEstimate.jobs.length <= 1) {
@@ -719,14 +768,19 @@ function saveEstimate() {
         return;
     }
 
-
     // Add timestamp
-    currentEstimate.createdAt = new Date().toISOString();
-    currentEstimate.updatedAt = currentEstimate.createdAt;
+    const now = new Date().toISOString();
+    currentEstimate.updatedAt = now;
+    
+    if (!currentEstimate.id) {
+        currentEstimate.createdAt = now;
+    }
 
+    const estimateRef = currentEstimate.id ? 
+        db.collection("estimates").doc(currentEstimate.id) :
+        db.collection("estimates").doc();
 
-    // Save to Firestore
-    db.collection("estimates").add(currentEstimate)
+    estimateRef.set(currentEstimate)
         .then(() => {
             alert('Estimate saved successfully!');
             showDashboard();
@@ -787,10 +841,18 @@ function displayEstimates(estimates) {
         const estimateCard = document.createElement('div');
         estimateCard.className = 'estimate-card';
         estimateCard.innerHTML = `
-            <div class="estimate-header">
-                <h3>${estimate.customer.name}</h3>
-                <span class="estimate-date">${formattedDate}</span>
-            </div>
+           <div class="estimate-card">
+    <div class="card-actions">
+        <button class="edit" onclick="event.stopPropagation(); editEstimateFromCard('${estimate.id}')">
+            <i class="fas fa-edit"></i>
+        </button>
+        <button class="delete" onclick="event.stopPropagation(); deleteEstimateFromCard('${estimate.id}')">
+            <i class="fas fa-trash"></i>
+        </button>
+        <button class="export" onclick="event.stopPropagation(); exportEstimateFromCard('${estimate.id}')">
+            <i class="fas fa-file-export"></i>
+        </button>
+    </div>
             <p class="estimate-location"><i class="fas fa-map-marker-alt"></i> ${estimate.customer.location}</p>
             <p class="estimate-jobs"><i class="fas fa-tools"></i> ${estimate.jobs.map(job => job.name).join(', ')}</p>
             <p class="estimate-total">$${formatAccounting(estimate.total)}</p>
