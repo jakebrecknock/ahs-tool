@@ -77,7 +77,6 @@ document.addEventListener('DOMContentLoaded', function() {
 function setupEventListeners() {
     dashboardBtn.addEventListener('click', showDashboard);
     newEstimateBtn.addEventListener('click', showNewEstimate);
-    saveChangesBtn.addEventListener('click', saveEstimateChanges);
    
     searchInput.addEventListener('keyup', function(e) {
         if (e.key === 'Enter') searchEstimates();
