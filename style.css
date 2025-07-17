@@ -210,6 +210,10 @@ nav button:hover:not(.active) {
     border: none;
 }
 
+.estimate-card .estimate-card {
+    all: unset;
+}
+
 .estimate-card:hover {
     transform: translateY(-3px);
     box-shadow: var(--shadow-md);
@@ -227,14 +231,16 @@ nav button:hover:not(.active) {
 
 .card-actions {
     position: absolute;
-    top: 15px;
-    right: 15px;
-    display: none;
+    top: 10px;
+    right: 10px;
+    display: flex;
     gap: 8px;
+    opacity: 0;
+    transition: opacity 0.3s;
 }
 
 .estimate-card:hover .card-actions {
-    display: flex;
+    opacity: 1;
 }
 
 .card-actions button {
@@ -268,13 +274,10 @@ nav button:hover:not(.active) {
     color: var(--success-color);
 }
 
-.estimate-location, .estimate-jobs {
-    font-size: 0.95rem;
-    color: var(--gray-color);
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+.estimate-location, 
+.estimate-jobs {
+    margin-right: 40px; /* Make space for actions */
+    margin-bottom: 10px;
 }
 
 .estimate-location i, .estimate-jobs i {
@@ -282,10 +285,8 @@ nav button:hover:not(.active) {
 }
 
 .estimate-total {
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: var(--primary-color);
     margin-top: 15px;
+    font-size: 1.5rem;
 }
 
 .no-estimates {

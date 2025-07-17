@@ -231,7 +231,7 @@ function addNewJob() {
         waiveEstimateFee: false
     };
     currentEstimate.jobs.push(newJob);
-    currentJobId = newJob.id; // Set the new job as active
+    currentJobId = newJob.id;
     updateJobTabs();
     showJobDetails(newJob.id);
     updateEstimatePreview();
@@ -276,7 +276,7 @@ function showJobDetails(jobId) {
     updateJobFeesList(jobId);
     updateJobDiscountDisplay(jobId);
     updateEstimatePreview();
-    updateJobTabs(); // Ensure tabs are updated after switching
+    updateJobTabs();
 }
 
 
@@ -341,8 +341,18 @@ function editEstimateFromCard(estimateId) {
                     id: doc.id,
                     ...estimateData
                 };
+                
+                // Populate customer info
+                document.getElementById('customerName').value = currentEstimate.customer.name || '';
+                document.getElementById('customerEmail').value = currentEstimate.customer.email || '';
+                document.getElementById('customerPhone').value = currentEstimate.customer.phone || '';
+                document.getElementById('jobLocation').value = currentEstimate.customer.location || '';
+                
                 showNewEstimate();
-                showJobDetails(currentEstimate.jobs[0].id);
+                if (currentEstimate.jobs.length > 0) {
+                    currentJobId = currentEstimate.jobs[0].id;
+                    showJobDetails(currentJobId);
+                }
                 nextStep(2);
             }
         });
