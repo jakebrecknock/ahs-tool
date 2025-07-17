@@ -280,8 +280,11 @@ function addNewJob() {
     // Reset discount input
     document.getElementById('jobDiscountPercentage').value = 0;
     
-    // Ensure apprentice fields are hidden for new job
-    document.getElementById('apprenticeLaborGroup').style.display = 'none';
+    // Safely handle apprentice fields
+    const apprenticeLaborGroup = document.getElementById('apprenticeLaborGroup');
+    if (apprenticeLaborGroup) {
+        apprenticeLaborGroup.style.display = 'none';
+    }
 }
 
 
