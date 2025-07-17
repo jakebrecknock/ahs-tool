@@ -279,6 +279,15 @@ nav button:hover:not(.active) {
     min-width: 120px;
 }
 
+.live-total-display {
+    padding: 12px;
+    background-color: #f8f9fa;
+    border-radius: var(--radius-md);
+    font-weight: bold;
+    color: var(--primary-color);
+    border: 1px solid var(--light-gray);
+}
+
 /* This ensures the days and hours inputs stay on the same line on mobile */
 @media (max-width: 768px) {
     .form-row {
