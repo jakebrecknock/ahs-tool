@@ -257,6 +257,9 @@ function addNewJob() {
     updateJobTabs();
     showJobDetails(newJob.id);
     updateEstimatePreview();
+    
+    // Reset discount input
+    document.getElementById('jobDiscountPercentage').value = 0;
 }
 
 
@@ -321,7 +324,7 @@ function showJobDetails(jobId) {
     if (currentJobId) {
         const currentJob = currentEstimate.jobs.find(j => j.id === currentJobId);
         if (currentJob) {
-            currentJob.name = document.getElementById('jobDescription').value || "New Job";
+            currentJob.name = document.getElementById('jobDescription').value || "New Job " + currentJob.id;
             currentJob.days = parseInt(document.getElementById('jobDays').value) || 0;
             currentJob.hours = parseInt(document.getElementById('jobHours').value) || 0;
             currentJob.workers = parseInt(document.getElementById('jobWorkers').value) || 1;
@@ -344,6 +347,7 @@ function showJobDetails(jobId) {
     document.getElementById('apprenticeDays').value = job.apprenticeDays;
     document.getElementById('apprenticeHours').value = job.apprenticeHours;
     document.getElementById('apprenticeCount').value = job.apprenticeCount;
+    document.getElementById('jobDiscountPercentage').value = job.discountPercentage || 0;
     
     // Update labor calculations
     updateCurrentJobDetails();

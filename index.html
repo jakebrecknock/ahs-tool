@@ -108,42 +108,44 @@
                     
                     <div id="jobDetailsContent">
                         <div class="form-group">
-                            <label>Job Description*</label>
-                            <input type="text" id="jobDescription" placeholder="Describe the work" required>
-                        </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-<div class="form-group">
-    <label>Estimated Days*</label>
-    <input type="number" id="jobDays" min="0" value="0" required>
+    <label>Job Description*</label>
+    <input type="text" id="jobDescription" placeholder="Describe the work" required>
 </div>
-<div class="form-group">
-    <label>Estimated Hours*</label>
-    <input type="number" id="jobHours" min="0" max="7" value="0" required>
+
+<div class="form-row">
+    <div class="form-group">
+        <label>Worker Days</label>
+        <input type="number" id="jobDays" min="0" value="0" required>
+    </div>
+    <div class="form-group">
+        <label>Worker Hours</label>
+        <input type="number" id="jobHours" min="0" max="7" value="0" required>
+    </div>
+    <div class="form-group">
+        <label>Number of Workers</label>
+        <input type="number" id="jobWorkers" min="1" value="1" required>
+    </div>
 </div>
-<div class="form-group">
-    <label>Estimated Labor Total</label>
-    <div id="liveLaborTotal" class="live-total-display">$0.00</div>
-</div>
-                            <div class="form-group">
-                                <label>Number of Workers*</label>
-                                <input type="number" id="jobWorkers" min="1" value="1" required>
-                            </div>
+
 <div class="form-row">
     <div class="form-group">
         <label>Apprentice Days</label>
-        <input type="number" id="apprenticeDays" min="0" value="0" onchange="updateCurrentJobDetails()">
+        <input type="number" id="apprenticeDays" min="0" value="0">
     </div>
     <div class="form-group">
         <label>Apprentice Hours</label>
-        <input type="number" id="apprenticeHours" min="0" max="7" value="0" onchange="updateCurrentJobDetails()">
+        <input type="number" id="apprenticeHours" min="0" max="7" value="0">
     </div>
     <div class="form-group">
         <label>Number of Apprentices</label>
-        <input type="number" id="apprenticeCount" min="0" value="0" onchange="updateCurrentJobDetails()">
+        <input type="number" id="apprenticeCount" min="0" value="0">
     </div>
-</div>              
+</div>
+
+<div class="form-group">
+    <label>Estimated Labor Total</label>
+    <div id="liveLaborTotal" class="live-total-display">$0.00</div>
+</div>             
                         <div class="materials-section">
                             <h3>Materials - PLEASE ADD 50 % MARKUP!</h3>
                             <div id="materialsList" class="materials-list">
