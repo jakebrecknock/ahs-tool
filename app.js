@@ -89,7 +89,17 @@ function setupEventListeners() {
     saveEstimateBtn.addEventListener('click', saveEstimate);
     document.getElementById('addMaterial').addEventListener('click', addMaterialToJob);
     document.getElementById('waiveEstimateFeeBtn').addEventListener('click', toggleEstimateFee);
-   
+    document.getElementById('hasApprentice').addEventListener('change', function() {
+    const apprenticeLaborGroup = document.getElementById('apprenticeLaborGroup');
+    if (this.checked) {
+        apprenticeLaborGroup.style.display = 'block';
+    } else {
+        apprenticeLaborGroup.style.display = 'none';
+        document.getElementById('apprenticeLabor').value = '0';
+    }
+    updateCurrentJobDetails();
+    updateEstimatePreview();
+});
     // Add global functions for HTML onclick handlers
     window.nextStep = nextStep;
     window.prevStep = prevStep;
@@ -219,12 +229,14 @@ function initDateFilters() {
 
 function addNewJob() {
     const newJob = {
-        id: Date.now(), // Use timestamp for unique IDs
+        id: Date.now(),
         name: "New Job",
-        days: 1,
+        days: 0,
+        hours: 0,
         workers: 1,
         hasApprentice: false,
         labor: 0,
+        apprenticeLabor: 0,
         materials: [],
         fees: [],
         discountPercentage: 0,
@@ -235,34 +247,97 @@ function addNewJob() {
     updateJobTabs();
     showJobDetails(newJob.id);
     updateEstimatePreview();
+    document.getElementById('jobDescription').value = "New Job";
 }
 
+function calculateLaborCost(days, hours, workers, hasApprentice, apprenticeHours) {
+    const WORKER_RATE = 135;
+    const APPRENTICE_RATE = 65;
+    const SERVICE_FEE = 65;
+    
+    // Calculate worker labor
+    const workerFullDays = days * 8 * WORKER_RATE * workers;
+    const workerPartialDay = hours * WORKER_RATE * workers;
+    
+    // Calculate apprentice labor if applicable
+    let apprenticeFullDays = 0;
+    let apprenticePartialDay = 0;
+    if (hasApprentice) {
+        apprenticeFullDays = days * 8 * APPRENTICE_RATE;
+        apprenticePartialDay = hours * APPRENTICE_RATE;
+    }
+    
+    // Calculate service fees (one per worker per day, including partial days)
+    const totalDays = hours > 0 ? days + 1 : days;
+    const serviceFees = totalDays * SERVICE_FEE * workers;
+    const apprenticeServiceFees = hasApprentice ? totalDays * SERVICE_FEE : 0;
+    
+    return {
+        workerLabor: workerFullDays + workerPartialDay + serviceFees,
+        apprenticeLabor: apprenticeFullDays + apprenticePartialDay + apprenticeServiceFees
+    };
+}
+
+function updateCurrentJobDetails() {
+    const job = currentEstimate.jobs.find(j => j.id === currentJobId);
+    if (job) {
+        job.name = document.getElementById('jobDescription').value || "New Job";
+        job.days = parseInt(document.getElementById('jobDays').value) || 0;
+        job.hours = parseInt(document.getElementById('jobHours').value) || 0;
+        job.workers = parseInt(document.getElementById('jobWorkers').value) || 1;
+        job.hasApprentice = document.getElementById('hasApprentice').checked;
+        
+        // Calculate labor costs
+        const laborCosts = calculateLaborCost(
+            job.days, 
+            job.hours, 
+            job.workers, 
+            job.hasApprentice
+        );
+        job.labor = laborCosts.workerLabor;
+        job.apprenticeLabor = laborCosts.apprenticeLabor;
+    }
+}
+
+
 function showJobDetails(jobId) {
-    // Save current job details before switching
     const currentJob = currentEstimate.jobs.find(j => j.id === currentJobId);
     if (currentJob) {
-        currentJob.name = document.getElementById('jobDescription').value || "New Job";
-        currentJob.days = parseFloat(document.getElementById('jobDays').value) || 1;
+        const descInput = document.getElementById('jobDescription');
+        currentJob.name = descInput.value || "New Job";
+        currentJob.days = parseInt(document.getElementById('jobDays').value) || 0;
+        currentJob.hours = parseInt(document.getElementById('jobHours').value) || 0;
         currentJob.workers = parseInt(document.getElementById('jobWorkers').value) || 1;
         currentJob.hasApprentice = document.getElementById('hasApprentice').checked;
-        currentJob.labor = parseFloat(document.getElementById('jobLabor').value) || 0;
+        
+        const laborCosts = calculateLaborCost(
+            currentJob.days,
+            currentJob.hours,
+            currentJob.workers,
+            currentJob.hasApprentice
+        );
+        currentJob.labor = laborCosts.workerLabor;
+        currentJob.apprenticeLabor = laborCosts.apprenticeLabor;
     }
 
-    // Set the new current job ID
     currentJobId = jobId;
     const job = currentEstimate.jobs.find(j => j.id === jobId);
     
     if (!job) return;
 
-    // Update form with selected job's data
     document.getElementById('jobDescription').value = job.name;
     document.getElementById('jobDays').value = job.days;
+    document.getElementById('jobHours').value = job.hours;
     document.getElementById('jobWorkers').value = job.workers;
     document.getElementById('hasApprentice').checked = job.hasApprentice;
-    document.getElementById('jobLabor').value = job.labor;
-    document.getElementById('jobDiscountPercentage').value = job.discountPercentage;
     
-    // Update estimate fee button
+    const apprenticeLaborGroup = document.getElementById('apprenticeLaborGroup');
+    if (job.hasApprentice) {
+        apprenticeLaborGroup.style.display = 'block';
+    } else {
+        apprenticeLaborGroup.style.display = 'none';
+    }
+    
     const feeBtn = document.getElementById('waiveEstimateFeeBtn');
     if (job.waiveEstimateFee) {
         feeBtn.classList.add('active');
@@ -644,25 +719,27 @@ function validateCustomerInfo() {
 
 function updateEstimatePreview() {
     let laborTotal = 0;
+    let apprenticeLaborTotal = 0;
     let materialsTotal = 0;
     let feesTotal = 0;
     let discountTotal = 0;
     let estimateFeeTotal = 0;
-   
+    
     const jobsHTML = currentEstimate.jobs.map(job => {
         const jobMaterialsTotal = job.materials.reduce((sum, mat) => sum + mat.total, 0);
         const jobFeesTotal = job.fees.reduce((sum, fee) => sum + fee.amount, 0);
-        const jobSubtotal = job.labor + jobMaterialsTotal + jobFeesTotal;
+        const jobSubtotal = job.labor + (job.apprenticeLabor || 0) + jobMaterialsTotal + jobFeesTotal;
         const jobDiscount = jobSubtotal * (job.discountPercentage / 100);
         const jobEstimateFee = job.waiveEstimateFee ? -75 : 75;
         const jobTotal = jobSubtotal - jobDiscount + jobEstimateFee;
-       
+        
         laborTotal += job.labor || 0;
+        apprenticeLaborTotal += job.apprenticeLabor || 0;
         materialsTotal += jobMaterialsTotal;
         feesTotal += jobFeesTotal;
         discountTotal += jobDiscount;
         estimateFeeTotal += jobEstimateFee;
-       
+        
         return `
             <div class="estimate-job-section">
                 <h4>${job.name || 'New Job'} (${job.days} days, ${job.workers} worker${job.workers > 1 ? 's' : ''}${job.hasApprentice ? ' (includes apprentice)' : ''})</h4>
@@ -670,33 +747,36 @@ function updateEstimatePreview() {
                     <span>Labor:</span>
                     <span>$${formatAccounting(job.labor)}</span>
                 </div>
-               
+                    <div class="estimate-job-section">
+        <h4>${job.name || 'New Job'} (${job.days}d ${job.hours}h, ${job.workers} worker${job.workers > 1 ? 's' : ''}${job.hasApprentice ? ' (includes apprentice)' : ''})</h4>
+                ${job.hasApprentice ? `
+                <div class="estimate-row">
+                    <span>Apprentice Labor:</span>
+                    <span>$${formatAccounting(job.apprenticeLabor || 0)}</span>
+                </div>
+                ` : ''}
                 ${job.materials.map(mat => `
                 <div class="estimate-row">
                     <span>${mat.name} (${mat.quantity} @ $${formatAccounting(mat.price)})</span>
                     <span>$${formatAccounting(mat.total)}</span>
                 </div>
                 `).join('')}
-               
                 ${job.fees.map(fee => `
                 <div class="estimate-row">
                     <span>${fee.name}</span>
                     <span>$${formatAccounting(fee.amount)}</span>
                 </div>
                 `).join('')}
-               
                 ${job.discountPercentage > 0 ? `
                 <div class="estimate-row">
                     <span>Discount (${job.discountPercentage}%)</span>
                     <span>-$${formatAccounting(jobDiscount)}</span>
                 </div>
                 ` : ''}
-               
                 <div class="estimate-row">
                     <span>Estimate Fee:</span>
                     <span>${job.waiveEstimateFee ? 'Waived (-$75.00)' : '$75.00'}</span>
                 </div>
-               
                 <div class="estimate-job-total">
                     <span>Job Total:</span>
                     <span>$${formatAccounting(jobTotal)}</span>
@@ -704,10 +784,10 @@ function updateEstimatePreview() {
             </div>
         `;
     }).join('');
-   
-    const grandTotal = laborTotal + materialsTotal + feesTotal - discountTotal + estimateFeeTotal;
+    
+    const grandTotal = laborTotal + apprenticeLaborTotal + materialsTotal + feesTotal - discountTotal + estimateFeeTotal;
     currentEstimate.total = grandTotal;
-   
+    
     const html = `
         <div class="estimate-section">
             <h3>Customer Information</h3>
@@ -730,15 +810,22 @@ function updateEstimatePreview() {
         </div>
        
         <div class="estimate-section">
+   <div class="estimate-section">
             <h3>Jobs Breakdown</h3>
             ${jobsHTML}
         </div>
-       
+        
         <div class="estimate-section">
             <div class="estimate-row estimate-total-row">
                 <span>Total Labor:</span>
                 <span>$${formatAccounting(laborTotal)}</span>
             </div>
+            ${apprenticeLaborTotal > 0 ? `
+            <div class="estimate-row estimate-total-row">
+                <span>Total Apprentice Labor:</span>
+                <span>$${formatAccounting(apprenticeLaborTotal)}</span>
+            </div>
+            ` : ''}
             <div class="estimate-row estimate-total-row">
                 <span>Total Materials:</span>
                 <span>$${formatAccounting(materialsTotal)}</span>
@@ -761,7 +848,7 @@ function updateEstimatePreview() {
             </div>
         </div>
     `;
-   
+    
     estimatePreview.innerHTML = html;
 }
 
@@ -1086,20 +1173,22 @@ function exportEstimate(estimate) {
    
     // Calculate totals
     let laborTotal = 0;
+    let apprenticeLaborTotal = 0;
     let materialsTotal = 0;
     let feesTotal = 0;
     let discountTotal = 0;
     let estimateFeeTotal = 0;
-   
+    
     estimate.jobs.forEach(job => {
         laborTotal += job.labor || 0;
+        apprenticeLaborTotal += job.apprenticeLabor || 0;
         materialsTotal += job.materials.reduce((sum, mat) => sum + mat.total, 0);
         feesTotal += job.fees.reduce((sum, fee) => sum + fee.amount, 0);
-        discountTotal += (job.labor + materialsTotal + feesTotal) * (job.discountPercentage / 100);
+        discountTotal += (job.labor + (job.apprenticeLabor || 0) + materialsTotal + feesTotal) * (job.discountPercentage / 100);
         estimateFeeTotal += job.waiveEstimateFee ? -75 : 75;
     });
-   
-    const total = laborTotal + materialsTotal + feesTotal - discountTotal + estimateFeeTotal;
+    
+    const total = laborTotal + apprenticeLaborTotal + materialsTotal + feesTotal - discountTotal + estimateFeeTotal;
 
 
     // Payment terms
@@ -1273,135 +1362,145 @@ function exportEstimate(estimate) {
     <p>Dear ${estimate.customer.name.split(' ')[0]},</p>
     <p>Thank you for considering Ace Handyman Services for your repair needs. Based on our assessment, we are pleased to provide the following estimate for the project(s) at ${estimate.customer.location}.</p>
    
-    ${estimate.jobs.map((job, index) => {
-        const jobMaterialsTotal = job.materials.reduce((sum, mat) => sum + mat.total, 0);
-        const jobFeesTotal = job.fees.reduce((sum, fee) => sum + fee.amount, 0);
-        const jobSubtotal = job.labor + jobMaterialsTotal + jobFeesTotal;
-        const jobDiscount = jobSubtotal * (job.discountPercentage / 100);
-        const jobEstimateFee = job.waiveEstimateFee ? -75 : 75;
-        const jobTotal = jobSubtotal - jobDiscount + jobEstimateFee;
-       
-        return `
-            <div class="section">
-                <div class="section-title">${index + 1}. Scope of Work</div>
-                <p><strong>Project:</strong> ${job.name}</p>
-                <p><strong>Duration:</strong> ${job.days} days with ${job.workers} worker${job.workers > 1 ? 's' : ''}${job.hasApprentice ? ' (includes apprentice)' : ''}</p>
-                <p><strong>Repair Work:</strong></p>
-                <p>${job.name}</p>
-               
-                <p><strong>Materials:</strong></p>
-                <ul>
-                    ${job.materials.map(mat => `<li>${mat.name} (${mat.quantity} @ $${formatAccounting(mat.price)})</li>`).join('')}
-                </ul>
-               
-                <table>  
-                    <tr>
-                        <th>Description</th>
-                        <th>Details</th>
-                        <th>Quantity</th>
-                        <th>Unit Price</th>
-                        <th>Total</th>
-                    </tr>
-                    <tr>
-                        <td>Labor</td>
-                        <td>${job.name} (${job.days} days)</td>
-                        <td>1</td>
-                        <td>$${formatAccounting(job.labor)}</td>
-                        <td>$${formatAccounting(job.labor)}</td>
-                    </tr>
-                    ${job.materials.map(mat => `
-                    <tr>
-                        <td>Material</td>
-                        <td>${mat.name}</td>
-                        <td>${mat.quantity}</td>
-                        <td>$${formatAccounting(mat.price)}</td>
-                        <td>$${formatAccounting(mat.total)}</td>
-                    </tr>
-                    `).join('')}
-                    ${job.fees.map(fee => `
-                    <tr>
-                        <td>Fee</td>
-                        <td>${fee.name}</td>
-                        <td>1</td>
-                        <td>$${formatAccounting(fee.amount)}</td>
-                        <td>$${formatAccounting(fee.amount)}</td>
-                    </tr>
-                    `).join('')}
-                    ${job.waiveEstimateFee ? `
-                    <tr>
-                        <td>Fee</td>
-                        <td>Estimate Fee Removed</td>
-                        <td>1</td>
-                        <td>($75.00)</td>
-                        <td>($75.00)</td>
-                    </tr>
-                    ` : `
-                    <tr>
-                        <td>Fee</td>
-                        <td>Estimate Fee</td>
-                        <td>1</td>
-                        <td>$75.00</td>
-                        <td>$75.00</td>
-                    </tr>
-                    `}
-                    ${job.discountPercentage > 0 ? `
-                    <tr>
-                        <td colspan="4" style="text-align: right;">Subtotal:</td>
-                        <td>$${formatAccounting(jobSubtotal)}</td>
-                    </tr>
-                    <tr>
-                        <td colspan="4" style="text-align: right;">Discount (${job.discountPercentage}%):</td>
-                        <td>-$${formatAccounting(jobDiscount)}</td>
-                    </tr>
-                    ` : ''}
-                    <tr class="total-row">
-                        <td colspan="4" style="text-align: right;">Total:</td>
-                        <td>$${formatAccounting(jobTotal)}</td>
-                    </tr>
-                </table>
-            </div>
-        `;
-    }).join('')}
-   
-    <div class="page-break"></div>
-   
-    <div class="section">
-        <div class="section-title">Payment Summary</div>
-        <table>
-            <tr>
-                <td style="text-align: right; font-weight: bold;">Labor Total:</td>
-                <td>$${formatAccounting(laborTotal)}</td>
-            </tr>
-            <tr>
-                <td style="text-align: right; font-weight: bold;">Materials Total:</td>
-                <td>$${formatAccounting(materialsTotal)}</td>
-            </tr>
-            ${feesTotal > 0 ? `
-            <tr>
-                <td style="text-align: right; font-weight: bold;">Fees Total:</td>
-                <td>$${formatAccounting(feesTotal)}</td>
-            </tr>
-            ` : ''}
-            <tr>
-                <td style="text-align: right; font-weight: bold;">Subtotal:</td>
-                <td>$${formatAccounting(laborTotal + materialsTotal + feesTotal)}</td>
-            </tr>
-            ${discountTotal > 0 ? `
-            <tr>
-                <td style="text-align: right; font-weight: bold;">Discount:</td>
-                <td>-$${formatAccounting(discountTotal)}</td>
-            </tr>
-            ` : ''}
-            <tr>
-                <td style="text-align: right; font-weight: bold;">Estimate Fee:</td>
-                <td>$${formatAccounting(estimateFeeTotal)}</td>
-            </tr>
-            <tr class="highlight-green">
-                <td style="text-align: right; font-weight: bold; font-size: 1.1em;">Final Total:</td>
-                <td style="font-weight: bold; font-size: 1.1em;">$${formatAccounting(total)}</td>
-            </tr>
-        </table>
-    </div>
+${estimate.jobs.map((job, index) => {
+            const jobMaterialsTotal = job.materials.reduce((sum, mat) => sum + mat.total, 0);
+            const jobFeesTotal = job.fees.reduce((sum, fee) => sum + fee.amount, 0);
+            const jobSubtotal = job.labor + (job.apprenticeLabor || 0) + jobMaterialsTotal + jobFeesTotal;
+            const jobDiscount = jobSubtotal * (job.discountPercentage / 100);
+            const jobEstimateFee = job.waiveEstimateFee ? -75 : 75;
+            const jobTotal = jobSubtotal - jobDiscount + jobEstimateFee;
+            
+            return `
+                <div class="section">
+                    <div class="section-title">${index + 1}. Scope of Work</div>
+                    <p><strong>Project:</strong> ${job.name}</p>
+                    <p><strong>Duration:</strong> ${job.days} days with ${job.workers} worker${job.workers > 1 ? 's' : ''}${job.hasApprentice ? ' (includes apprentice)' : ''}</p>
+                    <p><strong>Repair Work:</strong></p>
+                    <p>${job.name}</p>
+                    
+                    <table>  
+                        <tr>
+                            <th>Description</th>
+                            <th>Details</th>
+                            <th>Quantity</th>
+                            <th>Unit Price</th>
+                            <th>Total</th>
+                        </tr>
+                        <tr>
+                            <td>Labor</td>
+                            <td>${job.name} (${job.days} days)</td>
+                            <td>1</td>
+                            <td>$${formatAccounting(job.labor)}</td>
+                            <td>$${formatAccounting(job.labor)}</td>
+                        </tr>
+                        ${job.hasApprentice ? `
+                        <tr>
+                            <td>Apprentice Labor</td>
+                            <td>${job.name} (${job.days} days)</td>
+                            <td>1</td>
+                            <td>$${formatAccounting(job.apprenticeLabor || 0)}</td>
+                            <td>$${formatAccounting(job.apprenticeLabor || 0)}</td>
+                        </tr>
+                        ` : ''}
+                        ${job.materials.map(mat => `
+                        <tr>
+                            <td>Material</td>
+                            <td>${mat.name}</td>
+                            <td>${mat.quantity}</td>
+                            <td>$${formatAccounting(mat.price)}</td>
+                            <td>$${formatAccounting(mat.total)}</td>
+                        </tr>
+                        `).join('')}
+                        ${job.fees.map(fee => `
+                        <tr>
+                            <td>Fee</td>
+                            <td>${fee.name}</td>
+                            <td>1</td>
+                            <td>$${formatAccounting(fee.amount)}</td>
+                            <td>$${formatAccounting(fee.amount)}</td>
+                        </tr>
+                        `).join('')}
+                        ${job.waiveEstimateFee ? `
+                        <tr>
+                            <td>Fee</td>
+                            <td>Estimate Fee Removed</td>
+                            <td>1</td>
+                            <td>($75.00)</td>
+                            <td>($75.00)</td>
+                        </tr>
+                        ` : `
+                        <tr>
+                            <td>Fee</td>
+                            <td>Estimate Fee</td>
+                            <td>1</td>
+                            <td>$75.00</td>
+                            <td>$75.00</td>
+                        </tr>
+                        `}
+                        ${job.discountPercentage > 0 ? `
+                        <tr>
+                            <td colspan="4" style="text-align: right;">Subtotal:</td>
+                            <td>$${formatAccounting(jobSubtotal)}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="4" style="text-align: right;">Discount (${job.discountPercentage}%):</td>
+                            <td>-$${formatAccounting(jobDiscount)}</td>
+                        </tr>
+                        ` : ''}
+                        <tr class="total-row">
+                            <td colspan="4" style="text-align: right;">Total:</td>
+                            <td>$${formatAccounting(jobTotal)}</td>
+                        </tr>
+                    </table>
+                </div>
+            `;
+        }).join('')}
+        
+        <!-- ... existing payment summary section ... -->
+        
+        <div class="section">
+            <div class="section-title">Payment Summary</div>
+            <table>
+                <tr>
+                    <td style="text-align: right; font-weight: bold;">Labor Total:</td>
+                    <td>$${formatAccounting(laborTotal)}</td>
+                </tr>
+                ${apprenticeLaborTotal > 0 ? `
+                <tr>
+                    <td style="text-align: right; font-weight: bold;">Apprentice Labor Total:</td>
+                    <td>$${formatAccounting(apprenticeLaborTotal)}</td>
+                </tr>
+                ` : ''}
+                <tr>
+                    <td style="text-align: right; font-weight: bold;">Materials Total:</td>
+                    <td>$${formatAccounting(materialsTotal)}</td>
+                </tr>
+                ${feesTotal > 0 ? `
+                <tr>
+                    <td style="text-align: right; font-weight: bold;">Fees Total:</td>
+                    <td>$${formatAccounting(feesTotal)}</td>
+                </tr>
+                ` : ''}
+                <tr>
+                    <td style="text-align: right; font-weight: bold;">Subtotal:</td>
+                    <td>$${formatAccounting(laborTotal + apprenticeLaborTotal + materialsTotal + feesTotal)}</td>
+                </tr>
+                ${discountTotal > 0 ? `
+                <tr>
+                    <td style="text-align: right; font-weight: bold;">Discount:</td>
+                    <td>-$${formatAccounting(discountTotal)}</td>
+                </tr>
+                ` : ''}
+                <tr>
+                    <td style="text-align: right; font-weight: bold;">Estimate Fee:</td>
+                    <td>$${formatAccounting(estimateFeeTotal)}</td>
+                </tr>
+                <tr class="highlight-green">
+                    <td style="text-align: right; font-weight: bold; font-size: 1.1em;">Final Total:</td>
+                    <td style="font-weight: bold; font-size: 1.1em;">$${formatAccounting(total)}</td>
+                </tr>
+            </table>
+        </div>
    
     <div class="payment-terms">
         <h3>Payment Terms</h3>
