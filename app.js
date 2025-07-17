@@ -107,20 +107,6 @@ function setupEventListeners() {
     window.updateJobDiscount = updateJobDiscount;
 }
 
-
-function checkPassword() {
-    // Check if already authenticated
-    if (localStorage.getItem('authenticated') === 'true') {
-        passwordModal.style.display = 'none';
-        document.body.style.overflow = '';
-        return;
-    }
-
-    // Show password modal
-    passwordModal.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-    passwordInput.focus();
-
     function verifyPassword() {
         if (passwordInput.value.trim() === PASSWORD) {
             localStorage.setItem('authenticated', 'true');
@@ -135,11 +121,21 @@ function checkPassword() {
         }
     }
 
-    // Set up event listeners
-    submitPassword.addEventListener('click', verifyPassword);
-    passwordInput.addEventListener('keyup', function(e) {
-        if (e.key === 'Enter') verifyPassword();
-    });
+submitPassword.addEventListener('click', verifyPassword);
+passwordInput.addEventListener('keyup', function(e) {
+    if (e.key === 'Enter') verifyPassword();
+});
+
+function checkPassword() {
+    if (localStorage.getItem('authenticated') === 'true') {
+        passwordModal.style.display = 'none';
+        document.body.style.overflow = '';
+        return;
+    }
+
+    passwordModal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    passwordInput.focus();
 }
 
 
