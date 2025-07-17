@@ -107,32 +107,28 @@ function setupEventListeners() {
     window.updateJobDiscount = updateJobDiscount;
 }
 
-    function verifyPassword() {
-        if (passwordInput.value.trim() === PASSWORD) {
-            localStorage.setItem('authenticated', 'true');
-            passwordModal.style.display = 'none';
-            passwordError.style.display = 'none'; // Add this line
-            document.body.style.overflow = '';
-            passwordInput.value = ''; // Clear the input field
-        } else {
-            passwordError.style.display = 'block';
-            passwordInput.value = '';
-            passwordInput.focus();
-        }
+function verifyPassword() {
+    const password = passwordInput.value.trim();
+    if (password === PASSWORD) {
+        sessionStorage.setItem('ahs-authenticated', 'true'); // Use sessionStorage instead
+        passwordModal.style.display = 'none';
+        passwordError.style.display = 'none';
+        passwordInput.value = '';
+        document.body.style.overflow = '';
+    } else {
+        passwordError.style.display = 'block';
+        passwordInput.value = '';
+        passwordInput.focus();
     }
-
-submitPassword.addEventListener('click', verifyPassword);
-passwordInput.addEventListener('keyup', function(e) {
-    if (e.key === 'Enter') verifyPassword();
-});
+}
 
 function checkPassword() {
-    if (localStorage.getItem('authenticated') === 'true') {
+    if (sessionStorage.getItem('ahs-authenticated') === 'true') {
         passwordModal.style.display = 'none';
         document.body.style.overflow = '';
         return;
     }
-
+    
     passwordModal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
     passwordInput.focus();
@@ -320,23 +316,6 @@ document.getElementById('jobDescription').addEventListener('input', function(e) 
         updateJobTabs();
     }
 });
-
-// Update the progress steps in HTML
-<div class="estimate-progress">
-    <div class="progress-step active" data-step="1">
-        <span class="step-number">1</span>
-        <span class="step-title">Customer Info</span>
-    </div>
-    <div class="progress-step" data-step="2">
-        <span class="step-number">2</span>
-        <span class="step-title">Jobs</span>
-    </div>
-    <div class="progress-step" data-step="3">
-        <span class="step-number">3</span>
-        <span class="step-title">Review</span>
-    </div>
-</div>
-
 
 function editEstimateFromCard(estimateId) {
     db.collection("estimates").doc(estimateId).get()
