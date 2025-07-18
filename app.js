@@ -267,7 +267,7 @@ function initDateFilters() {
 function addNewJob() {
     const newJob = {
         id: Date.now(),
-        name: "New Job", // Default name
+        name: `Job ${currentEstimate.jobs.length + 1}`, // Default name with sequence number
         days: 0,
         hours: 0,
         workers: 1,
@@ -284,16 +284,17 @@ function addNewJob() {
     
     currentEstimate.jobs.push(newJob);
     currentJobId = newJob.id;
+    
+    // Clear and focus the job description field
+    const jobDescInput = document.getElementById('jobDescription');
+    jobDescInput.value = "";
+    jobDescInput.placeholder = "Describe the work";
+    jobDescInput.focus();
+    
+    // Update UI after job is fully initialized
     updateJobTabs();
     showJobDetails(newJob.id);
     updateEstimatePreview();
-    
-    // Clear the job description input for the new job
-    document.getElementById('jobDescription').value = "";
-    document.getElementById('jobDescription').placeholder = "Describe the work";
-    
-    // Focus on the description field
-    document.getElementById('jobDescription').focus();
 }
 
 
@@ -358,7 +359,7 @@ function showJobDetails(jobId) {
     if (currentJobId) {
         const currentJob = currentEstimate.jobs.find(j => j.id === currentJobId);
         if (currentJob) {
-            currentJob.name = document.getElementById('jobDescription').value || "Job " + (currentEstimate.jobs.findIndex(j => j.id === currentJobId) + 1);
+            currentJob.name = document.getElementById('jobDescription').value || `Job ${currentEstimate.jobs.findIndex(j => j.id === currentJobId) + 1}`;
             currentJob.days = parseInt(document.getElementById('jobDays').value) || 0;
             currentJob.hours = parseInt(document.getElementById('jobHours').value) || 0;
             currentJob.workers = parseInt(document.getElementById('jobWorkers').value) || 1;
@@ -366,7 +367,9 @@ function showJobDetails(jobId) {
             currentJob.apprenticeHours = parseInt(document.getElementById('apprenticeHours').value) || 0;
             currentJob.apprenticeCount = parseInt(document.getElementById('apprenticeCount').value) || 0;
             currentJob.discountPercentage = parseFloat(document.getElementById('jobDiscountPercentage').value) || 0;
-            currentJob.waiveEstimateFee = document.getElementById('waiveEstimateFeeBtn').classList.contains('active');
+            
+            const feeBtn = document.getElementById('waiveEstimateFeeBtn');
+            currentJob.waiveEstimateFee = feeBtn.classList.contains('active');
         }
     }
 
@@ -376,13 +379,7 @@ function showJobDetails(jobId) {
     if (!job) return;
 
     // Update form fields with the job's values
-    document.getElementById('jobDescription').addEventListener('input', function(e) {
-    const job = currentEstimate.jobs.find(j => j.id === currentJobId);
-    if (job) {
-        job.name = e.target.value || 'New Job'; // Fallback to 'New Job' if empty
-        updateJobTabs();
-    }
-});
+    document.getElementById('jobDescription').value = job.name;
     document.getElementById('jobDays').value = job.days;
     document.getElementById('jobHours').value = job.hours;
     document.getElementById('jobWorkers').value = job.workers;
@@ -420,25 +417,33 @@ function updateJobTabs() {
         tab.className = `job-tab ${job.id === currentJobId ? 'active' : ''}`;
         tab.dataset.jobId = job.id;
         tab.innerHTML = `
-            <span>${job.name}</span>
+            <span>${job.name || `Job ${index + 1}`}</span>
             ${currentEstimate.jobs.length > 1 ? `
             <button class="remove-job-btn"><i class="fas fa-times"></i></button>
             ` : ''}
         `;
         
-// In the updateJobTabs function, modify the click handler:
-tab.addEventListener('click', function(e) {
-    if (!e.target.classList.contains('remove-job-btn') && 
-        !e.target.closest('.remove-job-btn')) {
-        const clickedJobId = parseInt(this.dataset.jobId);
-        // Save current job details before switching
-        const currentJob = currentEstimate.jobs.find(j => j.id === currentJobId);
-        if (currentJob) {
-            currentJob.name = document.getElementById('jobDescription').value || "Job " + (currentEstimate.jobs.findIndex(j => j.id === currentJobId) + 1);
-        }
-        showJobDetails(clickedJobId);
-    }
-});
+        // Improved click handler
+        tab.addEventListener('click', function(e) {
+            if (!e.target.classList.contains('remove-job-btn') && 
+                !e.target.closest('.remove-job-btn')) {
+                const clickedJobId = parseInt(this.dataset.jobId);
+                
+                // Save current job details before switching
+                const currentJob = currentEstimate.jobs.find(j => j.id === currentJobId);
+                if (currentJob) {
+                    currentJob.name = document.getElementById('jobDescription').value || `Job ${currentEstimate.jobs.findIndex(j => j.id === currentJobId) + 1}`;
+                    currentJob.days = parseInt(document.getElementById('jobDays').value) || 0;
+                    currentJob.hours = parseInt(document.getElementById('jobHours').value) || 0;
+                    currentJob.workers = parseInt(document.getElementById('jobWorkers').value) || 1;
+                    currentJob.apprenticeDays = parseInt(document.getElementById('apprenticeDays').value) || 0;
+                    currentJob.apprenticeHours = parseInt(document.getElementById('apprenticeHours').value) || 0;
+                    currentJob.apprenticeCount = parseInt(document.getElementById('apprenticeCount').value) || 0;
+                }
+                
+                showJobDetails(clickedJobId);
+            }
+        });
         
         // Add click handler for remove button if it exists
         if (currentEstimate.jobs.length > 1) {
@@ -460,10 +465,11 @@ tab.addEventListener('click', function(e) {
     jobTabsContainer.appendChild(addTab);
 }
 // Update job details when typing
+
 document.getElementById('jobDescription').addEventListener('input', function(e) {
     const job = currentEstimate.jobs.find(j => j.id === currentJobId);
     if (job) {
-        job.name = e.target.value || 'New Job'; // Fallback to 'New Job' if empty
+        job.name = e.target.value || `Job ${currentEstimate.jobs.findIndex(j => j.id === currentJobId) + 1}`;
         updateJobTabs();
     }
 });
@@ -485,11 +491,36 @@ function editEstimateFromCard(estimateId) {
                 document.getElementById('jobLocation').value = currentEstimate.customer.location || '';
                 
                 showNewEstimate();
+                
                 if (currentEstimate.jobs.length > 0) {
                     currentJobId = currentEstimate.jobs[0].id;
                     showJobDetails(currentJobId);
+                    
+                    // Populate all job fields for the first job
+                    const firstJob = currentEstimate.jobs[0];
+                    document.getElementById('jobDescription').value = firstJob.name;
+                    document.getElementById('jobDays').value = firstJob.days;
+                    document.getElementById('jobHours').value = firstJob.hours;
+                    document.getElementById('jobWorkers').value = firstJob.workers;
+                    document.getElementById('apprenticeDays').value = firstJob.apprenticeDays;
+                    document.getElementById('apprenticeHours').value = firstJob.apprenticeHours;
+                    document.getElementById('apprenticeCount').value = firstJob.apprenticeCount;
+                    document.getElementById('jobDiscountPercentage').value = firstJob.discountPercentage || 0;
+                    
+                    // Update estimate fee button state
+                    const feeBtn = document.getElementById('waiveEstimateFeeBtn');
+                    if (firstJob.waiveEstimateFee) {
+                        feeBtn.classList.add('active');
+                        feeBtn.innerHTML = '<i class="fas fa-check"></i> Estimate Fee Waived';
+                    }
+                    
+                    // Update materials and fees lists
+                    updateMaterialsList();
+                    updateJobFeesList(currentJobId);
+                    updateJobDiscountDisplay(currentJobId);
                 }
-                nextStep(2);
+                
+                nextStep(2); // Skip to jobs step
             }
         });
 }
