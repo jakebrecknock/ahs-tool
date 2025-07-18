@@ -95,9 +95,19 @@ function setupEventListeners() {
     if (saveEstimateBtn) saveEstimateBtn.addEventListener('click', saveEstimate);
     
         const laborInputs = [
-        'jobDays', 'jobHours', 'jobWorkers', 
-        'apprenticeDays', 'apprenticeHours', 'apprenticeCount'
-    ];
+    'jobDays', 'jobHours', 'jobWorkers', 
+    'apprenticeDays', 'apprenticeHours', 'apprenticeCount'
+];
+
+laborInputs.forEach(id => {
+    const input = document.getElementById(id);
+    if (input) {
+        input.addEventListener('input', function() {
+            updateCurrentJobDetails();
+            updateEstimatePreview();
+        });
+    }
+});
     
     laborInputs.forEach(id => {
         const input = document.getElementById(id);
