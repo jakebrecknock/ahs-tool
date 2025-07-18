@@ -1787,15 +1787,6 @@ function exportEstimate(estimate) {
         </ul>
     </div>
     
-    <div class="insurance-info">
-        <h3>Insurance Information</h3>
-        <ul>
-            <li><strong>General Liability:</strong> ${insurance.generalLiability}</li>
-            <li><strong>Workers Compensation:</strong> ${insurance.workersComp}</li>
-            <li><strong>Additional Insured:</strong> ${insurance.additionalInsured}</li>
-        </ul>
-    </div>
-    
     <div class="page-break"></div>
     
     <div class="section">
@@ -1823,6 +1814,7 @@ function exportEstimate(estimate) {
             <p><strong>Client Acceptance:</strong></p>
             <p>${estimate.customer.name}</p>
             <div class="signature-line"></div>
+            <p>X _________________________</p>
             <p>Date: _________________________</p>
         </div>
     </div>
@@ -1837,10 +1829,10 @@ function exportEstimate(estimate) {
 `;
 
     // Create and download the Word document
-    const blob = new Blob([html], { type: 'application/msword' });
+    const blob = new Blob([html], { type: 'text/html' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = `AHS_Estimate_${estimate.customer.name.replace(/\s+/g, '_')}_${formattedDate.replace(/\s+/g, '_')}.doc`;
+    link.download = `AHS_Estimate_${estimate.customer.name.replace(/\s+/g, '_')}_${formattedDate.replace(/\s+/g, '_')}.html`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
