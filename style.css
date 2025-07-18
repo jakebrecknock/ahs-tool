@@ -967,7 +967,7 @@ nav button:hover:not(.active) {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: rgba(0,0,0,0.9);
+    background-color: rgb(119, 78, 78, 0.98);
     z-index: 9999;
 }
 
