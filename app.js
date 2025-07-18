@@ -484,7 +484,7 @@ function editEstimateFromCard(estimateId) {
                     ...estimateData
                 };
                 
-                // Populate customer info
+                // Populate all customer info fields
                 document.getElementById('customerName').value = currentEstimate.customer.name || '';
                 document.getElementById('customerEmail').value = currentEstimate.customer.email || '';
                 document.getElementById('customerPhone').value = currentEstimate.customer.phone || '';
@@ -492,32 +492,44 @@ function editEstimateFromCard(estimateId) {
                 
                 showNewEstimate();
                 
+                // Update job tabs and details for all jobs
                 if (currentEstimate.jobs.length > 0) {
+                    // Clear any existing jobs
+                    currentEstimate.jobs = [...estimateData.jobs];
                     currentJobId = currentEstimate.jobs[0].id;
+                    
+                    // Update UI for all jobs
+                    updateJobTabs();
                     showJobDetails(currentJobId);
                     
-                    // Populate all job fields for the first job
+                    // Force update of all fields
                     const firstJob = currentEstimate.jobs[0];
-                    document.getElementById('jobDescription').value = firstJob.name;
-                    document.getElementById('jobDays').value = firstJob.days;
-                    document.getElementById('jobHours').value = firstJob.hours;
-                    document.getElementById('jobWorkers').value = firstJob.workers;
-                    document.getElementById('apprenticeDays').value = firstJob.apprenticeDays;
-                    document.getElementById('apprenticeHours').value = firstJob.apprenticeHours;
-                    document.getElementById('apprenticeCount').value = firstJob.apprenticeCount;
-                    document.getElementById('jobDiscountPercentage').value = firstJob.discountPercentage || 0;
-                    
-                    // Update estimate fee button state
-                    const feeBtn = document.getElementById('waiveEstimateFeeBtn');
-                    if (firstJob.waiveEstimateFee) {
-                        feeBtn.classList.add('active');
-                        feeBtn.innerHTML = '<i class="fas fa-check"></i> Estimate Fee Waived';
+                    if (firstJob) {
+                        document.getElementById('jobDescription').value = firstJob.name || '';
+                        document.getElementById('jobDays').value = firstJob.days || 0;
+                        document.getElementById('jobHours').value = firstJob.hours || 0;
+                        document.getElementById('jobWorkers').value = firstJob.workers || 1;
+                        document.getElementById('apprenticeDays').value = firstJob.apprenticeDays || 0;
+                        document.getElementById('apprenticeHours').value = firstJob.apprenticeHours || 0;
+                        document.getElementById('apprenticeCount').value = firstJob.apprenticeCount || 0;
+                        document.getElementById('jobDiscountPercentage').value = firstJob.discountPercentage || 0;
+                        
+                        // Update estimate fee button state
+                        const feeBtn = document.getElementById('waiveEstimateFeeBtn');
+                        if (firstJob.waiveEstimateFee) {
+                            feeBtn.classList.add('active');
+                            feeBtn.innerHTML = '<i class="fas fa-check"></i> Estimate Fee Waived';
+                        } else {
+                            feeBtn.classList.remove('active');
+                            feeBtn.innerHTML = '<i class="fas fa-dollar-sign"></i> Waive $75 Estimate Fee';
+                        }
+                        
+                        // Update materials and fees lists
+                        updateMaterialsList();
+                        updateJobFeesList(currentJobId);
+                        updateJobDiscountDisplay(currentJobId);
+                        updateCurrentJobDetails();
                     }
-                    
-                    // Update materials and fees lists
-                    updateMaterialsList();
-                    updateJobFeesList(currentJobId);
-                    updateJobDiscountDisplay(currentJobId);
                 }
                 
                 nextStep(2); // Skip to jobs step
@@ -826,25 +838,16 @@ function updateEstimatePreview() {
         const jobEstimateFee = job.waiveEstimateFee ? -75 : 75;
         const jobTotal = jobSubtotal - jobDiscount + jobEstimateFee;
         
-        laborTotal += job.labor || 0;
-        apprenticeLaborTotal += job.apprenticeLabor || 0;
-        materialsTotal += jobMaterialsTotal;
-        feesTotal += jobFeesTotal;
-        discountTotal += jobDiscount;
-        estimateFeeTotal += jobEstimateFee;
-        
         return `
             <div class="estimate-job-section">
-                <h4>${job.name || 'New Job'} (${job.days} days, ${job.workers} worker${job.workers > 1 ? 's' : ''}${job.hasApprentice ? ' (includes apprentice)' : ''})</h4>
+                <h4>${job.name || 'New Job'} (${job.days}d ${job.hours}h, ${job.workers} worker${job.workers > 1 ? 's' : ''}${job.apprenticeCount > 0 ? `, ${job.apprenticeCount} apprentice${job.apprenticeCount > 1 ? 's' : ''}` : ''})</h4>
                 <div class="estimate-row">
-                    <span>Labor:</span>
+                    <span>Skilled Labor:</span>
                     <span>$${formatAccounting(job.labor)}</span>
                 </div>
-                    <div class="estimate-job-section">
-        <h4>${job.name || 'New Job'} (${job.days}d ${job.hours}h, ${job.workers} worker${job.workers > 1 ? 's' : ''}${job.hasApprentice ? ' (includes apprentice)' : ''})</h4>
-                ${job.hasApprentice ? `
+                ${job.apprenticeCount > 0 ? `
                 <div class="estimate-row">
-                    <span>Apprentice Labor:</span>
+                    <span>Apprentice Labor (${job.apprenticeCount} apprentice${job.apprenticeCount > 1 ? 's' : ''}):</span>
                     <span>$${formatAccounting(job.apprenticeLabor || 0)}</span>
                 </div>
                 ` : ''}
@@ -1235,24 +1238,6 @@ function deleteEstimate() {
 }
 
 
-function exportEstimateToWord() {
-    const estimateId = modalContent.dataset.estimateId;
-   
-    db.collection("estimates").doc(estimateId).get()
-        .then(doc => {
-            if (doc.exists) {
-                exportEstimate(doc.data());
-            } else {
-                alert('Estimate not found');
-            }
-        })
-        .catch(error => {
-            console.error('Error loading estimate for export:', error);
-            alert('Error loading estimate for export');
-        });
-}
-
-
 function exportEstimate(estimate) {
     const date = new Date(estimate.createdAt);
     const formattedDate = date.toLocaleDateString('en-US', {
@@ -1265,7 +1250,7 @@ function exportEstimate(estimate) {
         month: 'long',
         day: 'numeric'
     });
-   
+
     // Calculate totals
     let laborTotal = 0;
     let apprenticeLaborTotal = 0;
@@ -1285,16 +1270,30 @@ function exportEstimate(estimate) {
     
     const total = laborTotal + apprenticeLaborTotal + materialsTotal + feesTotal - discountTotal + estimateFeeTotal;
 
-
     // Payment terms
     const paymentTerms = {
         depositRequired: true,
         depositPercentage: 50,
         progressPayments: true,
         finalPaymentDue: "upon completion",
-        paymentMethods: ["Check", "Credit Card", "Bank Transfer"]
+        paymentMethods: ["Check", "Credit Card", "Bank Transfer"],
+        lateFee: "1.5% monthly (18% APR) on balances over 30 days",
+        changeOrders: "Any changes to scope require written approval"
     };
 
+    // Warranty information
+    const warranty = {
+        labor: "12 months on all workmanship",
+        materials: "Manufacturer's warranty applies to all materials",
+        limitations: "Does not cover damage from misuse, neglect, or acts of nature"
+    };
+
+    // Insurance information
+    const insurance = {
+        generalLiability: "$2,000,000 coverage",
+        workersComp: "Fully insured",
+        additionalInsured: "Available upon request with 48 hours notice"
+    };
 
     let html = `
 <!DOCTYPE html>
@@ -1316,23 +1315,24 @@ function exportEstimate(estimate) {
         .header {
             text-align: center;
             margin-bottom: 30px;
-            border-bottom: 2px solid #e63946;
+            border-bottom: 2px solid #D64045;
             padding-bottom: 20px;
         }
         .header h1 {
-            color: #e63946;
-            font-size: 28px;
+            color: #D64045;
+            font-size: 24pt;
             margin-bottom: 5px;
         }
         .header h2 {
             color: #333;
-            font-size: 18px;
+            font-size: 14pt;
             margin-top: 0;
             margin-bottom: 10px;
         }
         .header p {
             margin: 5px 0;
             color: #666;
+            font-size: 11pt;
         }
         .client-info {
             display: flex;
@@ -1341,20 +1341,24 @@ function exportEstimate(estimate) {
         }
         .info-block {
             width: 48%;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
         }
         .info-block h3 {
             border-bottom: 1px solid #ddd;
             padding-bottom: 5px;
-            color: #e63946;
-            font-size: 16px;
+            color: #D64045;
+            font-size: 12pt;
+            margin-top: 0;
         }
         .section {
             margin-bottom: 30px;
             page-break-inside: avoid;
         }
         .section-title {
-            color: #e63946;
-            font-size: 18px;
+            color: #D64045;
+            font-size: 14pt;
             border-bottom: 1px solid #ddd;
             padding-bottom: 5px;
             margin-bottom: 15px;
@@ -1363,23 +1367,31 @@ function exportEstimate(estimate) {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
+            font-size: 11pt;
         }
         th {
-            background-color: #e63946;
+            background-color: #D64045;
             color: white;
             text-align: left;
             padding: 8px;
+            font-weight: bold;
         }
         td {
             padding: 8px;
             border-bottom: 1px solid #ddd;
+            vertical-align: top;
         }
         .total-row {
             font-weight: bold;
             background-color: #f8f9fa;
         }
-        .highlight-green {
-            background-color: #d4edda;
+        .highlight {
+            background-color: #f0f8ff;
+        }
+        .grand-total {
+            font-weight: bold;
+            background-color: #D64045;
+            color: white;
         }
         .signature-section {
             margin-top: 50px;
@@ -1392,13 +1404,13 @@ function exportEstimate(estimate) {
             padding-top: 5px;
         }
         .terms {
-            font-size: 0.9em;
+            font-size: 10pt;
             margin-top: 30px;
         }
         .footer {
             text-align: center;
             margin-top: 30px;
-            font-size: 0.8em;
+            font-size: 9pt;
             color: #666;
             border-top: 1px solid #ddd;
             padding-top: 10px;
@@ -1411,21 +1423,40 @@ function exportEstimate(estimate) {
             margin-bottom: 20px;
         }
         .logo img {
-            max-width: 50px;
+            max-width: 150px;
             height: auto;
         }
-        .payment-terms {
-            margin-top: 30px;
+        .payment-terms, .warranty-info, .insurance-info {
+            margin-top: 20px;
             padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 8px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            font-size: 10pt;
         }
-        .payment-terms h3 {
-            color: #e63946;
+        .payment-terms h3, .warranty-info h3, .insurance-info h3 {
+            color: #D64045;
             margin-top: 0;
+            font-size: 12pt;
         }
-        .payment-terms ul {
+        ul {
             margin-bottom: 0;
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 5px;
+        }
+        .project-summary {
+            margin-bottom: 20px;
+            font-size: 11pt;
+        }
+        .note {
+            font-style: italic;
+            color: #666;
+            font-size: 10pt;
+        }
+        .material-markup {
+            font-size: 9pt;
+            color: #666;
         }
     </style>
 </head>
@@ -1433,31 +1464,43 @@ function exportEstimate(estimate) {
     <div class="logo">
         <img src="${base64Image}" alt="Ace Handyman Services Logo">
     </div>
+    
     <div class="header">
-        <h2>Ace Handyman Services Oak Park River Forest</h2>
+        <h1>ACE HANDYMAN SERVICES</h1>
+        <h2>Detailed Estimate</h2>
         <p>207 N Harlem Ave. Oak Park, IL 60302 | (708) 773-0218</p>
-        <h3>ESTIMATE: Home Repair Projects</h3>
-        <p>Date: ${formattedDate}</p>
+        <p>Estimate Date: ${formattedDate} | Valid Until: ${validUntilDate}</p>
     </div>
-   
+    
     <div class="client-info">
         <div class="info-block">
-            <h3>Bill To:</h3>
-            <p>${estimate.customer.name}</p>
-            <p>${estimate.customer.location}</p>
-            <p>${estimate.customer.email}</p>
-            <p>${estimate.customer.phone}</p>
+            <h3>Customer Information</h3>
+            <p><strong>Name:</strong> ${estimate.customer.name}</p>
+            <p><strong>Address:</strong> ${estimate.customer.location}</p>
+            <p><strong>Email:</strong> ${estimate.customer.email}</p>
+            <p><strong>Phone:</strong> ${estimate.customer.phone}</p>
         </div>
         <div class="info-block">
-            <h3>Service Address:</h3>
-            <p>${estimate.customer.location}</p>
+            <h3>Project Summary</h3>
+            <p><strong>Project ID:</strong> ${estimate.id || 'N/A'}</p>
+            <p><strong>Total Jobs:</strong> ${estimate.jobs.length}</p>
+            <p><strong>Total Estimate:</strong> $${formatAccounting(total)}</p>
+            <p><strong>Priority:</strong> Standard</p>
         </div>
     </div>
-   
-    <p>Dear ${estimate.customer.name.split(' ')[0]},</p>
-    <p>Thank you for considering Ace Handyman Services for your repair needs. Based on our assessment, we are pleased to provide the following estimate for the project(s) at ${estimate.customer.location}.</p>
-   
-${estimate.jobs.map((job, index) => {
+    
+    <div class="section">
+        <div class="section-title">Project Overview</div>
+        <div class="project-summary">
+            <p>This estimate outlines the proposed work to be completed at ${estimate.customer.location}. The scope includes all labor, materials, and incidentals required to complete the project to industry standards.</p>
+            <p class="note">Note: This estimate is based on our initial assessment. Final costs may vary if project scope changes or unforeseen conditions are encountered.</p>
+        </div>
+    </div>
+    
+    <div class="section">
+        <div class="section-title">Detailed Scope of Work</div>
+        
+        ${estimate.jobs.map((job, index) => {
             const jobMaterialsTotal = job.materials.reduce((sum, mat) => sum + mat.total, 0);
             const jobFeesTotal = job.fees.reduce((sum, fee) => sum + fee.amount, 0);
             const jobSubtotal = job.labor + (job.apprenticeLabor || 0) + jobMaterialsTotal + jobFeesTotal;
@@ -1466,196 +1509,226 @@ ${estimate.jobs.map((job, index) => {
             const jobTotal = jobSubtotal - jobDiscount + jobEstimateFee;
             
             return `
-                <div class="section">
-                    <div class="section-title">${index + 1}. Scope of Work</div>
-                    <p><strong>Project:</strong> ${job.name}</p>
-                    <p><strong>Duration:</strong> ${job.days} days with ${job.workers} worker${job.workers > 1 ? 's' : ''}${job.hasApprentice ? ' (includes apprentice)' : ''}</p>
-                    <p><strong>Repair Work:</strong></p>
-                    <p>${job.name}</p>
-                    
-                    <table>  
+                <h4>Job ${index + 1}: ${job.name}</h4>
+                <p><strong>Work Description:</strong> ${job.name}</p>
+                <p><strong>Duration:</strong> ${job.days} days (${job.hours} hours) with ${job.workers} skilled worker${job.workers > 1 ? 's' : ''} 
+                ${job.apprenticeCount > 0 ? `and ${job.apprenticeCount} apprentice${job.apprenticeCount > 1 ? 's' : ''}` : ''}</p>
+                
+                <table>
+                    <thead>
                         <tr>
+                            <th>Item</th>
                             <th>Description</th>
-                            <th>Details</th>
-                            <th>Quantity</th>
+                            <th>Qty</th>
                             <th>Unit Price</th>
-                            <th>Total</th>
+                            <th>Amount</th>
                         </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Skilled Labor -->
                         <tr>
-                            <td>Labor</td>
-                            <td>${job.name} (${job.days} days)</td>
-                            <td>1</td>
-                            <td>$${formatAccounting(job.labor)}</td>
+                            <td>1.1</td>
+                            <td>Skilled Labor (${job.workers} worker${job.workers > 1 ? 's' : ''})</td>
+                            <td>${job.days} days</td>
+                            <td>$${formatAccounting(job.labor/job.days)}/day</td>
                             <td>$${formatAccounting(job.labor)}</td>
                         </tr>
-                        ${job.hasApprentice ? `
+                        
+                        <!-- Apprentice Labor -->
+                        ${job.apprenticeCount > 0 ? `
                         <tr>
-                            <td>Apprentice Labor</td>
-                            <td>${job.name} (${job.days} days)</td>
-                            <td>1</td>
-                            <td>$${formatAccounting(job.apprenticeLabor || 0)}</td>
-                            <td>$${formatAccounting(job.apprenticeLabor || 0)}</td>
+                            <td>1.2</td>
+                            <td>Apprentice Labor (${job.apprenticeCount} apprentice${job.apprenticeCount > 1 ? 's' : ''})</td>
+                            <td>${job.apprenticeDays} days</td>
+                            <td>$${formatAccounting(job.apprenticeLabor/job.apprenticeDays)}/day</td>
+                            <td>$${formatAccounting(job.apprenticeLabor)}</td>
                         </tr>
                         ` : ''}
-                        ${job.materials.map(mat => `
+                        
+                        <!-- Materials -->
+                        ${job.materials.map((mat, matIndex) => `
                         <tr>
-                            <td>Material</td>
-                            <td>${mat.name}</td>
+                            <td>2.${matIndex + 1}</td>
+                            <td>${mat.name} <span class="material-markup">(includes 50% markup)</span></td>
                             <td>${mat.quantity}</td>
                             <td>$${formatAccounting(mat.price)}</td>
                             <td>$${formatAccounting(mat.total)}</td>
                         </tr>
                         `).join('')}
-                        ${job.fees.map(fee => `
+                        
+                        <!-- Fees -->
+                        ${job.fees.map((fee, feeIndex) => `
                         <tr>
-                            <td>Fee</td>
+                            <td>3.${feeIndex + 1}</td>
                             <td>${fee.name}</td>
                             <td>1</td>
                             <td>$${formatAccounting(fee.amount)}</td>
                             <td>$${formatAccounting(fee.amount)}</td>
                         </tr>
                         `).join('')}
-                        ${job.waiveEstimateFee ? `
+                        
+                        <!-- Estimate Fee -->
                         <tr>
-                            <td>Fee</td>
-                            <td>Estimate Fee Removed</td>
-                            <td>1</td>
-                            <td>($75.00)</td>
-                            <td>($75.00)</td>
-                        </tr>
-                        ` : `
-                        <tr>
-                            <td>Fee</td>
+                            <td>4.1</td>
                             <td>Estimate Fee</td>
                             <td>1</td>
-                            <td>$75.00</td>
-                            <td>$75.00</td>
+                            <td>${job.waiveEstimateFee ? '($75.00)' : '$75.00'}</td>
+                            <td>${job.waiveEstimateFee ? '($75.00)' : '$75.00'}</td>
                         </tr>
-                        `}
-                        ${job.discountPercentage > 0 ? `
-                        <tr>
+                        
+                        <!-- Subtotal -->
+                        <tr class="total-row">
                             <td colspan="4" style="text-align: right;">Subtotal:</td>
                             <td>$${formatAccounting(jobSubtotal)}</td>
                         </tr>
+                        
+                        <!-- Discount -->
+                        ${job.discountPercentage > 0 ? `
                         <tr>
                             <td colspan="4" style="text-align: right;">Discount (${job.discountPercentage}%):</td>
                             <td>-$${formatAccounting(jobDiscount)}</td>
                         </tr>
                         ` : ''}
-                        <tr class="total-row">
-                            <td colspan="4" style="text-align: right;">Total:</td>
-                            <td>$${formatAccounting(jobTotal)}</td>
+                        
+                        <!-- Job Total -->
+                        <tr class="highlight">
+                            <td colspan="4" style="text-align: right;"><strong>Job Total:</strong></td>
+                            <td><strong>$${formatAccounting(jobTotal)}</strong></td>
                         </tr>
-                    </table>
-                </div>
+                    </tbody>
+                </table>
             `;
         }).join('')}
-        
-        <!-- ... existing payment summary section ... -->
-        
-        <div class="section">
-            <div class="section-title">Payment Summary</div>
-            <table>
+    </div>
+    
+    <div class="page-break"></div>
+    
+    <div class="section">
+        <div class="section-title">Summary of Costs</div>
+        <table>
+            <thead>
                 <tr>
-                    <td style="text-align: right; font-weight: bold;">Labor Total:</td>
+                    <th>Category</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Total Skilled Labor</td>
                     <td>$${formatAccounting(laborTotal)}</td>
                 </tr>
                 ${apprenticeLaborTotal > 0 ? `
                 <tr>
-                    <td style="text-align: right; font-weight: bold;">Apprentice Labor Total:</td>
+                    <td>Total Apprentice Labor</td>
                     <td>$${formatAccounting(apprenticeLaborTotal)}</td>
                 </tr>
                 ` : ''}
                 <tr>
-                    <td style="text-align: right; font-weight: bold;">Materials Total:</td>
+                    <td>Total Materials</td>
                     <td>$${formatAccounting(materialsTotal)}</td>
                 </tr>
                 ${feesTotal > 0 ? `
                 <tr>
-                    <td style="text-align: right; font-weight: bold;">Fees Total:</td>
+                    <td>Total Fees</td>
                     <td>$${formatAccounting(feesTotal)}</td>
                 </tr>
                 ` : ''}
                 <tr>
-                    <td style="text-align: right; font-weight: bold;">Subtotal:</td>
+                    <td>Subtotal</td>
                     <td>$${formatAccounting(laborTotal + apprenticeLaborTotal + materialsTotal + feesTotal)}</td>
                 </tr>
                 ${discountTotal > 0 ? `
                 <tr>
-                    <td style="text-align: right; font-weight: bold;">Discount:</td>
+                    <td>Total Discounts</td>
                     <td>-$${formatAccounting(discountTotal)}</td>
                 </tr>
                 ` : ''}
                 <tr>
-                    <td style="text-align: right; font-weight: bold;">Estimate Fee:</td>
+                    <td>Estimate Fee</td>
                     <td>$${formatAccounting(estimateFeeTotal)}</td>
                 </tr>
-                <tr class="highlight-green">
-                    <td style="text-align: right; font-weight: bold; font-size: 1.1em;">Final Total:</td>
-                    <td style="font-weight: bold; font-size: 1.1em;">$${formatAccounting(total)}</td>
+                <tr class="grand-total">
+                    <td><strong>GRAND TOTAL</strong></td>
+                    <td><strong>$${formatAccounting(total)}</strong></td>
                 </tr>
-            </table>
-        </div>
-   
+            </tbody>
+        </table>
+    </div>
+    
     <div class="payment-terms">
-        <h3>Payment Terms</h3>
+        <h3>Payment Terms & Schedule</h3>
         <ul>
-            <li><strong>Deposit Required:</strong> ${paymentTerms.depositPercentage}% deposit to schedule work</li>
-            ${paymentTerms.progressPayments ? `
-            <li><strong>Progress Payments:</strong> Payments due at agreed milestones during project</li>
-            ` : ''}
-            <li><strong>Final Payment:</strong> Due ${paymentTerms.finalPaymentDue}</li>
+            <li><strong>Deposit:</strong> ${paymentTerms.depositPercentage}% deposit ($${formatAccounting(total * paymentTerms.depositPercentage/100)}) required to secure start date</li>
+            <li><strong>Progress Payments:</strong> ${paymentTerms.progressPayments ? 'Due at agreed milestones' : 'Not applicable'}</li>
+            <li><strong>Final Payment:</strong> Due ${paymentTerms.finalPaymentDue} ($${formatAccounting(total * (100-paymentTerms.depositPercentage)/100)})</li>
             <li><strong>Accepted Payment Methods:</strong> ${paymentTerms.paymentMethods.join(", ")}</li>
+            <li><strong>Late Fees:</strong> ${paymentTerms.lateFee}</li>
+            <li><strong>Change Orders:</strong> ${paymentTerms.changeOrders}</li>
         </ul>
     </div>
-   
-    <div class="page-break"></div>
-   
-    <div class="section terms">
-        <div class="section-title">Terms and Conditions</div>
+    
+    <div class="warranty-info">
+        <h3>Warranty Information</h3>
         <ul>
-            <li><strong>Validity:</strong> this estimate is valid until ${validUntilDate}</li>
-            <li><strong>Payment Terms:</strong> invoiced for time and material daily</li>
-            <li><strong>Project Timeline:</strong> to be determined between owner and Ace Handyman Services</li>
-            <li><strong>Warranty:</strong> 12 Months: labor and materials provided by Ace Handyman Services</li>
-            <li><strong>Disclosure:</strong> Ace Handyman Services operates on a time and materials model. The above estimate is subject to change.</li>
-            <li><strong>Change Orders:</strong> Any changes to scope of work will require a signed change order</li>
+            <li><strong>Labor Warranty:</strong> ${warranty.labor}</li>
+            <li><strong>Materials Warranty:</strong> ${warranty.materials}</li>
+            <li><strong>Limitations:</strong> ${warranty.limitations}</li>
         </ul>
     </div>
-   
-    <div class="section">
-        <div class="section-title">Additional Notes</div>
-        <p>We look forward to the opportunity to work with you.</p>
-        <p>Please review this estimate and let us know if you have any questions or require any modifications.</p>
-        <p>To accept this estimate, please sign and return a copy or contact us to confirm your acceptance.</p>
-        <p>Thank you for your consideration.</p>
+    
+    <div class="insurance-info">
+        <h3>Insurance Information</h3>
+        <ul>
+            <li><strong>General Liability:</strong> ${insurance.generalLiability}</li>
+            <li><strong>Workers Compensation:</strong> ${insurance.workersComp}</li>
+            <li><strong>Additional Insured:</strong> ${insurance.additionalInsured}</li>
+        </ul>
     </div>
-   
-    <div class="signature-section">
-        <p>Sincerely,</p>
-        <p><strong>Samuel Cundari</strong><br>
-        Operations Manager<br>
-        Ace Handyman Services Oak Park River Forest<br>
-        scund@acehandymanservices.com<br>
-        O: 708-773-0218</p>
-       
-        <div style="margin-top: 50px;">
-            <p><strong>Client Acceptance</strong></p>
-            <p>I, ${estimate.customer.name}, accept the terms and scope of the estimate provided above.</p>
-            <div style="margin-top: 30px;">
-                <p>Signature: ___________________________________________</p>
-                <p>Date: ____________________</p>
-            </div>
+    
+    <div class="page-break"></div>
+    
+    <div class="section">
+        <div class="section-title">Terms & Conditions</div>
+        <div class="terms">
+            <p><strong>1. Acceptance:</strong> This estimate is valid for 30 days from the date above. Work will commence upon receipt of signed agreement and deposit.</p>
+            <p><strong>2. Pricing:</strong> Prices are based on current material costs and labor rates. Significant changes may require adjustment.</p>
+            <p><strong>3. Change Orders:</strong> Any changes to the scope of work must be approved in writing and may affect timeline and budget.</p>
+            <p><strong>4. Access:</strong> Client agrees to provide uninterrupted access to the work area during scheduled work hours.</p>
+            <p><strong>5. Cleanup:</strong> Daily job site cleanup is included. Final cleanup will be completed upon project conclusion.</p>
+            <p><strong>6. Permits:</strong> Client is responsible for obtaining all necessary permits unless otherwise agreed in writing.</p>
+            <p><strong>7. Scheduling:</strong> While we make every effort to adhere to the proposed schedule, unforeseen circumstances may cause delays.</p>
+            <p><strong>8. Termination:</strong> Either party may terminate this agreement with 7 days written notice.</p>
         </div>
     </div>
-   
+    
+    <div class="signature-section">
+        <h3>Acceptance of Estimate</h3>
+        <p>By signing below, I acknowledge that I have reviewed and accept this estimate in its entirety, including all terms and conditions.</p>
+        
+        <div style="margin-top: 40px;">
+            <p><strong>For Ace Handyman Services:</strong></p>
+            <p>Samuel Cundari, Operations Manager</p>
+            <div class="signature-line"></div>
+            <p>Date: _________________________</p>
+        </div>
+        
+        <div style="margin-top: 60px;">
+            <p><strong>Client Acceptance:</strong></p>
+            <p>${estimate.customer.name}</p>
+            <div class="signature-line"></div>
+            <p>Date: _________________________</p>
+        </div>
+    </div>
+    
     <div class="footer">
-        <p>207 N Harlem Ave Oak Park IL 60302 | AceHandymanServices.com | 708.773.0218 | OakParkRiverForest@AceHandymanServices.com</p>
+        <p>Ace Handyman Services Oak Park River Forest | 207 N Harlem Ave, Oak Park, IL 60302</p>
+        <p>Phone: (708) 773-0218 | Email: OakParkRiverForest@AceHandymanServices.com</p>
+        <p>License #: 123456 | Insured and Bonded</p>
     </div>
 </body>
 </html>
 `;
-   
+
     // Create and download the Word document
     const blob = new Blob([html], { type: 'application/msword' });
     const link = document.createElement('a');
