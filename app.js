@@ -117,7 +117,8 @@ laborInputs.forEach(id => {
     // Material and fee buttons
     document.getElementById('addMaterial')?.addEventListener('click', addMaterialToJob);
     document.getElementById('waiveEstimateFeeBtn')?.addEventListener('click', toggleEstimateFee);
-    
+    document.getElementById('pdfEstimateBtn')?.addEventListener('click', exportEstimateToPDF);
+
     // Add global functions for HTML onclick handlers
     window.nextStep = nextStep;
     window.prevStep = prevStep;
@@ -440,59 +441,55 @@ function showJobDetails(jobId) {
 function updateJobTabs() {
     const jobTabsContainer = document.getElementById('jobTabsContainer');
     jobTabsContainer.innerHTML = '';
-    
+
     currentEstimate.jobs.forEach((job, index) => {
         const tab = document.createElement('div');
         tab.className = `job-tab ${job.id === currentJobId ? 'active' : ''}`;
         tab.dataset.jobId = job.id;
+
         tab.innerHTML = `
             <span>${job.name || `Job ${index + 1}`}</span>
             ${currentEstimate.jobs.length > 1 ? `
-            <button class="remove-job-btn"><i class="fas fa-times"></i></button>
+                <button class="remove-job-btn" data-job-id="${job.id}">
+                    <i class="fas fa-times"></i>
+                </button>
             ` : ''}
         `;
-        
-        // Improved click handler
+
+        // Click tab to switch jobs (unless click was on the remove button)
         tab.addEventListener('click', function(e) {
-            if (!e.target.classList.contains('remove-job-btn') && 
+            if (!e.target.classList.contains('remove-job-btn') &&
                 !e.target.closest('.remove-job-btn')) {
                 const clickedJobId = parseInt(this.dataset.jobId);
-                
-                // Save current job details before switching
                 const currentJob = currentEstimate.jobs.find(j => j.id === currentJobId);
                 if (currentJob) {
-                    currentJob.name = document.getElementById('jobDescription').value || `Job ${currentEstimate.jobs.findIndex(j => j.id === currentJobId) + 1}`;
-                    currentJob.days = parseInt(document.getElementById('jobDays').value) || 0;
-                    currentJob.hours = parseInt(document.getElementById('jobHours').value) || 0;
-                    currentJob.workers = parseInt(document.getElementById('jobWorkers').value) || 1;
-                    currentJob.apprenticeDays = parseInt(document.getElementById('apprenticeDays').value) || 0;
-                    currentJob.apprenticeHours = parseInt(document.getElementById('apprenticeHours').value) || 0;
-                    currentJob.apprenticeCount = parseInt(document.getElementById('apprenticeCount').value) || 0;
+                    updateCurrentJobDetails(); // Save before switch
                 }
-                
                 showJobDetails(clickedJobId);
             }
         });
-        
-        // Add click handler for remove button if it exists
-        if (currentEstimate.jobs.length > 1) {
-            const removeBtn = tab.querySelector('.remove-job-btn');
+
+        // Handle remove button
+        const removeBtn = tab.querySelector('.remove-job-btn');
+        if (removeBtn) {
             removeBtn.addEventListener('click', function(e) {
                 e.stopPropagation();
-                removeJob(job.id);
+                const jobId = parseInt(this.dataset.jobId);
+                removeJob(jobId);
             });
         }
-        
+
         jobTabsContainer.appendChild(tab);
     });
-    
-    // Add "+" tab for new jobs
+
+    // "+" tab to add a new job
     const addTab = document.createElement('div');
     addTab.className = 'job-tab add-job-tab';
     addTab.innerHTML = '<i class="fas fa-plus"></i>';
     addTab.addEventListener('click', addNewJob);
     jobTabsContainer.appendChild(addTab);
 }
+
 // Update job details when typing
 
 document.getElementById('jobDescription')?.addEventListener('input', function(e) {
@@ -580,6 +577,25 @@ function exportEstimateFromCard(estimateId) {
             }
         });
 }
+
+function exportEstimateToPDF() {
+    const previewElement = document.getElementById('estimatePreview');
+    if (!previewElement) {
+        alert("Preview not available.");
+        return;
+    }
+
+    const opt = {
+        margin:       0.25,
+        filename:     `Estimate-${currentEstimate.customer.name || 'Export'}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true },
+        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+
+    html2pdf().set(opt).from(previewElement).save();
+}
+
 
 function removeJob(jobId) {
     if (currentEstimate.jobs.length <= 1) {
