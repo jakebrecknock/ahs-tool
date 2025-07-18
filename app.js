@@ -526,11 +526,22 @@ function editEstimateFromCard(estimateId) {
                     ...estimateData
                 };
                 
-                // Populate all customer info fields
-                document.getElementById('customerName').value = currentEstimate.customer.name || '';
-                document.getElementById('customerEmail').value = currentEstimate.customer.email || '';
-                document.getElementById('customerPhone').value = currentEstimate.customer.phone || '';
-                document.getElementById('jobLocation').value = currentEstimate.customer.location || '';
+                // Properly populate all customer info fields
+                const customerInfoForm = document.getElementById('customerInfoForm');
+                if (customerInfoForm) {
+                    document.getElementById('customerName').value = currentEstimate.customer.name || '';
+                    document.getElementById('customerEmail').value = currentEstimate.customer.email || '';
+                    document.getElementById('customerPhone').value = currentEstimate.customer.phone || '';
+                    document.getElementById('jobLocation').value = currentEstimate.customer.location || '';
+                    
+                    // Explicitly save customer info to currentEstimate
+                    currentEstimate.customer = {
+                        name: currentEstimate.customer.name || '',
+                        email: currentEstimate.customer.email || '',
+                        phone: currentEstimate.customer.phone || '',
+                        location: currentEstimate.customer.location || ''
+                    };
+                }
                 
                 showNewEstimate();
                 
