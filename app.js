@@ -269,7 +269,7 @@ function initDateFilters() {
 function addNewJob() {
     const newJob = {
         id: Date.now(),
-        name: '',
+        name: 'Job description required!', // Default text
         days: 0,
         hours: 0,
         workers: 1, // Default to 1 worker
@@ -289,7 +289,7 @@ function addNewJob() {
     
     // Set placeholder text for job description
     const jobDescInput = document.getElementById('jobDescription');
-    jobDescInput.value = "";
+    jobDescInput.value = "Job description required!";
     jobDescInput.placeholder = "Describe the work (required)";
     jobDescInput.focus();
     
@@ -372,7 +372,7 @@ function showJobDetails(jobId) {
     if (currentJobId) {
         const currentJob = currentEstimate.jobs.find(j => j.id === currentJobId);
         if (currentJob) {
-            currentJob.name = document.getElementById('jobDescription').value || `Job ${currentEstimate.jobs.findIndex(j => j.id === currentJobId) + 1}`;
+            currentJob.name = document.getElementById('jobDescription').value || 'Job description required!';
             currentJob.days = parseInt(document.getElementById('jobDays').value) || 0;
             currentJob.hours = parseInt(document.getElementById('jobHours').value) || 0;
             currentJob.workers = parseInt(document.getElementById('jobWorkers').value) || 1;
@@ -392,7 +392,7 @@ function showJobDetails(jobId) {
     if (!job) return;
 
     // Update form fields with the job's values
-    document.getElementById('jobDescription').value = job.name;
+    document.getElementById('jobDescription').value = job.name === 'Job description required!' ? '' : job.name;
     document.getElementById('jobDays').value = job.days;
     document.getElementById('jobHours').value = job.hours;
     document.getElementById('jobWorkers').value = job.workers;
@@ -519,7 +519,7 @@ function editEstimateFromCard(estimateId) {
                     // Force update of all fields
                     const firstJob = currentEstimate.jobs[0];
                     if (firstJob) {
-                        document.getElementById('jobDescription').value = firstJob.name || '';
+                        document.getElementById('jobDescription').value = firstJob.name || 'Job description required!';
                         document.getElementById('jobDays').value = firstJob.days || 0;
                         document.getElementById('jobHours').value = firstJob.hours || 0;
                         document.getElementById('jobWorkers').value = firstJob.workers || 1;
