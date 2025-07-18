@@ -89,7 +89,10 @@ function setupEventListeners() {
     closeModal.addEventListener('click', closeEstimateModal);
     editEstimateBtn.addEventListener('click', editEstimate);
     deleteEstimateBtn.addEventListener('click', deleteEstimate);
-    exportEstimateBtn.addEventListener('click', exportEstimate);
+    exportEstimateBtn.addEventListener('click', function() {
+        const estimateData = JSON.parse(modalContent.dataset.estimateData);
+        exportEstimate(estimateData);
+    });
     
     // Estimate form elements
     saveEstimateBtn.addEventListener('click', saveEstimate);
@@ -573,8 +576,13 @@ function exportEstimateFromCard(estimateId) {
     db.collection("estimates").doc(estimateId).get()
         .then(doc => {
             if (doc.exists) {
-                exportEstimate(doc.data());
+                const estimateData = doc.data();
+                exportEstimate(estimateData);
             }
+        })
+        .catch(error => {
+            console.error('Error exporting estimate:', error);
+            alert('Error exporting estimate. Please try again.');
         });
 }
 
@@ -1134,9 +1142,9 @@ function displayEstimates(estimates) {
                     <button class="delete" onclick="event.stopPropagation(); deleteEstimateFromCard('${estimate.id}')">
                         <i class="fas fa-trash"></i>
                     </button>
-                    <button class="export-html-btn" onclick="exportEstimate(estimate)">
-  <i class="fas fa-file-alt"></i>
-</button>
+                    <button class="export" onclick="event.stopPropagation(); exportEstimateFromCard('${estimate.id}')">
+                        <i class="fas fa-file-export"></i>
+                    </button>
                 </div>
                 <p class="estimate-customer"><i class="fas fa-user"></i> ${estimate.customer.name}</p>
                 <p class="estimate-location"><i class="fas fa-map-marker-alt"></i> ${estimate.customer.location}</p>
