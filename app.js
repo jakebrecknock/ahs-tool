@@ -74,40 +74,29 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function setupEventListeners() {
     // Dashboard elements
-    if (dashboardBtn) dashboardBtn.addEventListener('click', showDashboard);
-    if (newEstimateBtn) newEstimateBtn.addEventListener('click', showNewEstimate);
+    dashboardBtn.addEventListener('click', showDashboard);
+    newEstimateBtn.addEventListener('click', showNewEstimate);
     
     // Search elements
-    if (searchInput) {
-        searchInput.addEventListener('keyup', function(e) {
-            if (e.key === 'Enter') searchEstimates();
-        });
-    }
-    if (searchBtn) searchBtn.addEventListener('click', searchEstimates);
+    searchInput.addEventListener('keyup', function(e) {
+        if (e.key === 'Enter') searchEstimates();
+    });
+    searchBtn.addEventListener('click', searchEstimates);
     
     // Modal elements
-    if (closeModal) closeModal.addEventListener('click', closeEstimateModal);
-    if (editEstimateBtn) editEstimateBtn.addEventListener('click', editEstimate);
-    if (deleteEstimateBtn) deleteEstimateBtn.addEventListener('click', deleteEstimate);
-    if (exportEstimateBtn) exportEstimateBtn.addEventListener('click', exportEstimateToWord);
+    closeModal.addEventListener('click', closeEstimateModal);
+    editEstimateBtn.addEventListener('click', editEstimate);
+    deleteEstimateBtn.addEventListener('click', deleteEstimate);
+    exportEstimateBtn.addEventListener('click', exportEstimateToWord);
     
     // Estimate form elements
-    if (saveEstimateBtn) saveEstimateBtn.addEventListener('click', saveEstimate);
+    saveEstimateBtn.addEventListener('click', saveEstimate);
     
-        const laborInputs = [
-    'jobDays', 'jobHours', 'jobWorkers', 
-    'apprenticeDays', 'apprenticeHours', 'apprenticeCount'
-];
-
-laborInputs.forEach(id => {
-    const input = document.getElementById(id);
-    if (input) {
-        input.addEventListener('input', function() {
-            updateCurrentJobDetails();
-            updateEstimatePreview();
-        });
-    }
-});
+    // Labor calculation inputs
+    const laborInputs = [
+        'jobDays', 'jobHours', 'jobWorkers', 
+        'apprenticeDays', 'apprenticeHours', 'apprenticeCount'
+    ];
     
     laborInputs.forEach(id => {
         const input = document.getElementById(id);
@@ -119,32 +108,9 @@ laborInputs.forEach(id => {
         }
     });
 
-    // Job calculation elements
-    const jobInputs = ['jobDays', 'jobHours', 'jobWorkers', 'apprenticeDays', 'apprenticeHours', 'apprenticeCount'];
-    jobInputs.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.addEventListener('input', updateCurrentJobDetails);
-    });
-
-    if (document.getElementById('addMaterial')) {
-        document.getElementById('addMaterial').addEventListener('click', addMaterialToJob);
-    }
-    if (document.getElementById('waiveEstimateFeeBtn')) {
-        document.getElementById('waiveEstimateFeeBtn').addEventListener('click', toggleEstimateFee);
-    }
-    if (document.getElementById('hasApprentice')) {
-        document.getElementById('hasApprentice').addEventListener('change', function() {
-            const apprenticeLaborGroup = document.getElementById('apprenticeLaborGroup');
-            if (this.checked) {
-                apprenticeLaborGroup.style.display = 'block';
-            } else {
-                apprenticeLaborGroup.style.display = 'none';
-                document.getElementById('apprenticeLabor').value = '0';
-            }
-            updateCurrentJobDetails();
-            updateEstimatePreview();
-        });
-    }
+    // Material and fee buttons
+    document.getElementById('addMaterial')?.addEventListener('click', addMaterialToJob);
+    document.getElementById('waiveEstimateFeeBtn')?.addEventListener('click', toggleEstimateFee);
     
     // Add global functions for HTML onclick handlers
     window.nextStep = nextStep;
@@ -196,8 +162,9 @@ function showDashboard() {
     dashboardBtn.classList.add('active');
     newEstimateBtn.classList.remove('active');
     loadEstimates();
+    document.getElementById('dashboardView').style.display = 'block';
+    document.getElementById('newEstimateView').style.display = 'none';
 }
-
 
 function showNewEstimate() {
     dashboardView.classList.remove('active-view');
@@ -205,6 +172,8 @@ function showNewEstimate() {
     dashboardBtn.classList.remove('active');
     newEstimateBtn.classList.add('active');
     resetEstimateForm();
+    document.getElementById('dashboardView').style.display = 'none';
+    document.getElementById('newEstimateView').style.display = 'block';
 }
 
 
@@ -324,11 +293,11 @@ function addNewJob() {
 
 
 function calculateLaborCost(days, hours, workers, apprenticeDays, apprenticeHours, apprenticeCount) {
-    const WORKER_RATE = 135;
-    const APPRENTICE_RATE = 65;
-    const SERVICE_FEE = 65;
+    const WORKER_RATE = 135; // $135/hour for skilled workers
+    const APPRENTICE_RATE = 65; // $65/hour for apprentices
+    const SERVICE_FEE = 65; // $65 service fee per worker per day
     
-    // Calculate worker labor
+    // Calculate worker labor (days are 8-hour packages)
     const workerFullDays = days * 8 * WORKER_RATE * workers;
     const workerPartialDay = hours * WORKER_RATE * workers;
     
@@ -337,14 +306,16 @@ function calculateLaborCost(days, hours, workers, apprenticeDays, apprenticeHour
     const apprenticePartialDay = apprenticeHours * APPRENTICE_RATE * apprenticeCount;
     
     // Calculate service fees (one per worker per day, including partial days)
-    const totalDays = hours > 0 ? days + 1 : days;
-    const serviceFees = totalDays * SERVICE_FEE * workers;
-    const apprenticeServiceFees = apprenticeCount > 0 ? 
-        (apprenticeHours > 0 ? apprenticeDays + 1 : apprenticeDays) * SERVICE_FEE * apprenticeCount : 0;
+    const totalWorkerDays = hours > 0 ? days + 1 : days;
+    const serviceFees = totalWorkerDays * SERVICE_FEE * workers;
+    
+    const totalApprenticeDays = apprenticeHours > 0 ? apprenticeDays + 1 : apprenticeDays;
+    const apprenticeServiceFees = apprenticeCount > 0 ? totalApprenticeDays * SERVICE_FEE * apprenticeCount : 0;
     
     return {
         workerLabor: workerFullDays + workerPartialDay + serviceFees,
-        apprenticeLabor: apprenticeFullDays + apprenticePartialDay + apprenticeServiceFees
+        apprenticeLabor: apprenticeFullDays + apprenticePartialDay + apprenticeServiceFees,
+        total: workerFullDays + workerPartialDay + serviceFees + apprenticeFullDays + apprenticePartialDay + apprenticeServiceFees
     };
 }
 
@@ -372,9 +343,11 @@ function updateCurrentJobDetails() {
         job.labor = laborCosts.workerLabor;
         job.apprenticeLabor = laborCosts.apprenticeLabor;
         
-        // Update live display
-        document.getElementById('liveLaborTotal').textContent = 
-            `$${formatAccounting(job.labor + job.apprenticeLabor)}`;
+        // Update live display immediately
+        const liveLaborDisplay = document.getElementById('liveLaborTotal');
+        if (liveLaborDisplay) {
+            liveLaborDisplay.textContent = `$${formatAccounting(laborCosts.total)}`;
+        }
     }
 }
 
@@ -491,11 +464,12 @@ function updateJobTabs() {
 }
 // Update job details when typing
 
-document.getElementById('jobDescription').addEventListener('input', function(e) {
+document.getElementById('jobDescription')?.addEventListener('input', function(e) {
     const job = currentEstimate.jobs.find(j => j.id === currentJobId);
     if (job) {
         job.name = e.target.value || `Job ${currentEstimate.jobs.findIndex(j => j.id === currentJobId) + 1}`;
         updateJobTabs();
+        updateEstimatePreview();
     }
 });
 
@@ -863,9 +837,13 @@ function updateEstimatePreview() {
         const jobEstimateFee = job.waiveEstimateFee ? -75 : 75;
         const jobTotal = jobSubtotal - jobDiscount + jobEstimateFee;
         
-    
-        const grandTotal = laborTotal + apprenticeLaborTotal + materialsTotal + feesTotal - discountTotal + estimateFeeTotal;
-        currentEstimate.total = grandTotal;
+        // Accumulate totals
+        laborTotal += job.labor || 0;
+        apprenticeLaborTotal += job.apprenticeLabor || 0;
+        materialsTotal += jobMaterialsTotal;
+        feesTotal += jobFeesTotal;
+        discountTotal += jobDiscount;
+        estimateFeeTotal += jobEstimateFee;
 
         return `
             <div class="estimate-job-section">
@@ -910,29 +888,31 @@ function updateEstimatePreview() {
         `;
     }).join('');
     
+    const grandTotal = laborTotal + apprenticeLaborTotal + materialsTotal + feesTotal - discountTotal + estimateFeeTotal;
+    currentEstimate.total = grandTotal;
+
     const html = `
         <div class="estimate-section">
             <h3>Customer Information</h3>
             <div class="estimate-row">
                 <span>Name:</span>
-                <span>${currentEstimate.customer.name}</span>
+                <span>${currentEstimate.customer.name || 'Not specified'}</span>
             </div>
             <div class="estimate-row">
                 <span>Email:</span>
-                <span>${currentEstimate.customer.email}</span>
+                <span>${currentEstimate.customer.email || 'Not specified'}</span>
             </div>
             <div class="estimate-row">
                 <span>Phone:</span>
-                <span>${currentEstimate.customer.phone}</span>
+                <span>${currentEstimate.customer.phone || 'Not specified'}</span>
             </div>
             <div class="estimate-row">
                 <span>Location:</span>
-                <span>${currentEstimate.customer.location}</span>
+                <span>${currentEstimate.customer.location || 'Not specified'}</span>
             </div>
         </div>
        
         <div class="estimate-section">
-   <div class="estimate-section">
             <h3>Jobs Breakdown</h3>
             ${jobsHTML}
         </div>
@@ -956,10 +936,12 @@ function updateEstimatePreview() {
                 <span>Total Fees:</span>
                 <span>$${formatAccounting(feesTotal)}</span>
             </div>
+            ${discountTotal > 0 ? `
             <div class="estimate-row estimate-total-row">
                 <span>Total Discounts:</span>
                 <span>-$${formatAccounting(discountTotal)}</span>
             </div>
+            ` : ''}
             <div class="estimate-row estimate-total-row">
                 <span>Total Estimate Fees:</span>
                 <span>$${formatAccounting(estimateFeeTotal)}</span>
@@ -971,7 +953,10 @@ function updateEstimatePreview() {
         </div>
     `;
     
-    estimatePreview.innerHTML = html;
+    const estimatePreview = document.getElementById('estimatePreview');
+    if (estimatePreview) {
+        estimatePreview.innerHTML = html;
+    }
 }
 
 
