@@ -204,14 +204,18 @@ function resetEstimateForm() {
     
     // Clear form inputs
     document.getElementById('customerInfoForm').reset();
+    
+    // Set fee waiver to active by default
     const feeBtn = document.getElementById('waiveEstimateFeeBtn');
     if (feeBtn) {
-        feeBtn.classList.remove('active');
-        feeBtn.innerHTML = '<i class="fas fa-dollar-sign"></i> Waive $75 Estimate Fee';
+        feeBtn.classList.add('active');
+        feeBtn.innerHTML = '<i class="fas fa-check"></i> Estimate Fee Waived';
     }
-    document.getElementById('liveLaborTotal').textContent = '$0.00';
     
-    // Safely handle apprentice checkbox
+    document.getElementById('liveLaborTotal').textContent = '$0.00';
+}
+    
+/*    // Safely handle apprentice checkbox
     const hasApprentice = document.getElementById('hasApprentice');
     if (hasApprentice) {
         hasApprentice.checked = false;
@@ -222,7 +226,7 @@ function resetEstimateForm() {
     if (apprenticeLaborGroup) {
         apprenticeLaborGroup.style.display = 'none';
     }
-}
+}*/
 
 
 function initPhoneNumberFormatting() {
@@ -268,7 +272,7 @@ function addNewJob() {
         name: '',
         days: 0,
         hours: 0,
-        workers: 1,
+        workers: 1, // Default to 1 worker
         apprenticeDays: 0,
         apprenticeHours: 0,
         apprenticeCount: 0,
@@ -277,24 +281,29 @@ function addNewJob() {
         materials: [],
         fees: [],
         discountPercentage: 0,
-        waiveEstimateFee: false
+        waiveEstimateFee: true // Default to waived
     };
     
     currentEstimate.jobs.push(newJob);
     currentJobId = newJob.id;
     
-    // Clear and focus the job description field
+    // Set placeholder text for job description
     const jobDescInput = document.getElementById('jobDescription');
-jobDescInput.value = "";
-jobDescInput.placeholder = "Describe the work (required)"
     jobDescInput.value = "";
-    jobDescInput.placeholder = "Describe the work";
+    jobDescInput.placeholder = "Describe the work (required)";
     jobDescInput.focus();
     
     // Update UI after job is fully initialized
     updateJobTabs();
     showJobDetails(newJob.id);
     updateEstimatePreview();
+    
+    // Set fee waiver button to active by default
+    const feeBtn = document.getElementById('waiveEstimateFeeBtn');
+    if (feeBtn) {
+        feeBtn.classList.add('active');
+        feeBtn.innerHTML = '<i class="fas fa-check"></i> Estimate Fee Waived';
+    }
 }
 
 
