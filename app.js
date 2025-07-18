@@ -17,6 +17,7 @@ const modalContent = document.getElementById('modalContent');
 const editFieldsContainer = document.getElementById('editFieldsContainer');
 const saveChangesBtn = document.getElementById('saveChangesBtn');
 let isEditing = false;
+let isEditingExistingEstimate = false;
 const PASSWORD = "AHS!";
 const passwordModal = document.getElementById('passwordModal');
 const passwordInput = document.getElementById('passwordInput');
@@ -176,11 +177,13 @@ function showNewEstimate() {
     newEstimateView.classList.add('active-view');
     dashboardBtn.classList.remove('active');
     newEstimateBtn.classList.add('active');
-    resetEstimateForm();
+        if (!isEditingExistingEstimate) {
+        resetEstimateForm();
+    }
+
     document.getElementById('dashboardView').style.display = 'none';
     document.getElementById('newEstimateView').style.display = 'block';
 }
-
 
 function resetEstimateForm() {
     currentEstimate = {
@@ -506,6 +509,9 @@ function editEstimateFromCard(estimateId) {
         .then(doc => {
             if (doc.exists) {
                 const estimateData = doc.data();
+
+                isEditingExistingEstimate = true; // ✅ Set before switching views
+
                 currentEstimate = {
                     id: doc.id,
                     customer: estimateData.customer || {},
@@ -515,15 +521,16 @@ function editEstimateFromCard(estimateId) {
                     updatedAt: estimateData.updatedAt
                 };
 
+                // Now show the edit view without resetting
+                showNewEstimate();
+
                 // Populate customer fields
                 document.getElementById('customerName').value = currentEstimate.customer.name || '';
                 document.getElementById('customerEmail').value = currentEstimate.customer.email || '';
                 document.getElementById('customerPhone').value = currentEstimate.customer.phone || '';
                 document.getElementById('jobLocation').value = currentEstimate.customer.location || '';
 
-                showNewEstimate();
-
-                // Rebuild all job tabs and data
+                // Load all jobs
                 (estimateData.jobs || []).forEach((jobData, index) => {
                     const newJob = {
                         ...jobData,
@@ -553,6 +560,7 @@ function editEstimateFromCard(estimateId) {
             alert('Error loading estimate. Please try again.');
         });
 }
+
 
 
 function deleteEstimateFromCard(estimateId) {
@@ -1050,6 +1058,7 @@ function saveEstimate() {
             console.error('Error saving estimate:', error);
             alert('Error saving estimate. Please try again.');
         });
+    isEditingExistingEstimate = false;
 }
 
 
