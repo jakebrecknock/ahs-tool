@@ -64,13 +64,15 @@ document.addEventListener('DOMContentLoaded', function() {
     initDateFilters();
     addNewJob();
     setupEventListeners();
-    // Add this line to set up the password submit listener
     submitPassword.addEventListener('click', verifyPassword);
-    
-    // Also add keypress listener for Enter key
     passwordInput.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') verifyPassword();
     });
+    
+    // Initialize autocomplete when the page loads
+    if (typeof google !== 'undefined') {
+        initAutocomplete();
+    }
 });
 
 
@@ -325,7 +327,23 @@ function addNewJob() {
     updateEstimatePreview();
 }
 
-
+function initAutocomplete() {
+    const locationInput = document.getElementById('jobLocation');
+    
+    if (locationInput) {
+        autocomplete = new google.maps.places.Autocomplete(locationInput, {
+            types: ['address'],  // restrict to addresses
+            componentRestrictions: { country: 'us' }  // restrict to US addresses if desired
+        });
+        
+        // Prevent form submission when pressing Enter on the autocomplete field
+        locationInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+            }
+        });
+    }
+}
 
 function calculateLaborCost(days, hours, workers, apprenticeDays, apprenticeHours, apprenticeCount) {
     const WORKER_RATE = 135; // $135/hour for skilled workers
