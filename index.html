@@ -108,41 +108,39 @@
                     
                     <div id="jobDetailsContent">
                         <div class="form-group">
+   <div class="form-group">
     <label>Job Description*</label>
-    <input type="text" id="jobDescription" placeholder="Describe the work" required>
+    <input type="text" id="jobDescription" placeholder="Job description required!" required>
+</div>
 </div>
 <div id="apprenticeLaborGroup" style="display: none;"></div>
-<div class="form-group checkbox-group">
-    <input type="checkbox" id="hasApprentice">
-    <label for="hasApprentice">Includes Apprentice Labor</label>
-</div>
 <div class="form-row">
     <div class="form-group">
-        <label>Worker Days</label>
+        <label>Number of Workers</label>
+        <input type="number" id="jobWorkers" min="1" value="1" required>
+    </div>
+    <div class="form-group">
+        <label>Worker Days (8 hour package)</label>
         <input type="number" id="jobDays" min="0" value="0" required>
     </div>
     <div class="form-group">
         <label>Worker Hours</label>
         <input type="number" id="jobHours" min="0" max="7" value="0" required>
     </div>
-    <div class="form-group">
-        <label>Number of Workers</label>
-        <input type="number" id="jobWorkers" min="1" value="1" required>
-    </div>
 </div>
 
 <div class="form-row">
     <div class="form-group">
-        <label>Apprentice Days</label>
+        <label>Number of Apprentices</label>
+        <input type="number" id="apprenticeCount" min="0" value="0">
+    </div>
+    <div class="form-group">
+        <label>Apprentice Days (8 hour package)</label>
         <input type="number" id="apprenticeDays" min="0" value="0">
     </div>
     <div class="form-group">
         <label>Apprentice Hours</label>
         <input type="number" id="apprenticeHours" min="0" max="7" value="0">
-    </div>
-    <div class="form-group">
-        <label>Number of Apprentices</label>
-        <input type="number" id="apprenticeCount" min="0" value="0">
     </div>
 </div>
 
@@ -151,7 +149,7 @@
     <div id="liveLaborTotal" class="live-total-display">$0.00</div>
 </div>             
                         <div class="materials-section">
-                            <h3>Materials - PLEASE ADD 50 % MARKUP!</h3>
+                            <h3>Materials - PLEASE ADD 50 % MARKUP! (see <a href="https://www.homedepot.com" target="_blank" rel="noopener noreferrer">homedepot.com</a> if unsure on pricing)</h3>
                             <div id="materialsList" class="materials-list">
                                 <p class="no-materials">No materials added yet</p>
                             </div>
