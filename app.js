@@ -1411,82 +1411,96 @@ function exportEstimate(estimate) {
     <style>
         @page {
             size: letter;
-            margin: 1in;
+            margin: 0.5in;
         }
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: 'Times New Roman', Times, serif;
             color: #333;
-            line-height: 1.6;
+            line-height: 1.4;
             margin: 0;
             padding: 0;
+            font-size: 11pt;
         }
         .header {
             text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #D64045;
-            padding-bottom: 20px;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #D64045;
+        }
+        .header img {
+            height: 60px;
+            margin-bottom: 5px;
         }
         .header h1 {
             color: #D64045;
-            font-size: 24pt;
-            margin-bottom: 5px;
+            font-size: 16pt;
+            margin: 5px 0;
+            font-weight: bold;
         }
         .header h2 {
             color: #333;
-            font-size: 14pt;
-            margin-top: 0;
-            margin-bottom: 10px;
+            font-size: 12pt;
+            margin: 5px 0;
+            font-weight: normal;
         }
         .header p {
-            margin: 5px 0;
+            margin: 2px 0;
             color: #666;
-            font-size: 11pt;
+            font-size: 10pt;
         }
         .client-info {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 30px;
+            margin-bottom: 15px;
+            page-break-inside: avoid;
         }
         .info-block {
             width: 48%;
-            padding: 15px;
-            background-color: #f9f9f9;
-            border-radius: 5px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
         }
         .info-block h3 {
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 5px;
             color: #D64045;
-            font-size: 12pt;
-            margin-top: 0;
+            font-size: 11pt;
+            margin: 0 0 8px 0;
+            padding-bottom: 3px;
+            border-bottom: 1px solid #ddd;
+        }
+        .info-block p {
+            margin: 5px 0;
+            font-size: 10pt;
         }
         .section {
-            margin-bottom: 30px;
+            margin-bottom: 15px;
             page-break-inside: avoid;
         }
         .section-title {
             color: #D64045;
-            font-size: 14pt;
+            font-size: 12pt;
+            font-weight: bold;
+            margin-bottom: 8px;
+            padding-bottom: 3px;
             border-bottom: 1px solid #ddd;
-            padding-bottom: 5px;
-            margin-bottom: 15px;
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
-            font-size: 11pt;
+            margin-bottom: 15px;
+            font-size: 10pt;
+            page-break-inside: avoid;
         }
         th {
             background-color: #D64045;
             color: white;
             text-align: left;
-            padding: 8px;
+            padding: 5px 8px;
             font-weight: bold;
+            border: 1px solid #D64045;
         }
         td {
-            padding: 8px;
-            border-bottom: 1px solid #ddd;
+            padding: 5px 8px;
+            border: 1px solid #ddd;
             vertical-align: top;
         }
         .total-row {
@@ -1502,7 +1516,7 @@ function exportEstimate(estimate) {
             color: white;
         }
         .signature-section {
-            margin-top: 50px;
+            margin-top: 30px;
             page-break-inside: avoid;
         }
         .signature-line {
@@ -1512,68 +1526,66 @@ function exportEstimate(estimate) {
             padding-top: 5px;
         }
         .terms {
-            font-size: 10pt;
-            margin-top: 30px;
+            font-size: 9pt;
+            margin-top: 15px;
         }
         .footer {
             text-align: center;
-            margin-top: 30px;
+            margin-top: 15px;
             font-size: 9pt;
             color: #666;
             border-top: 1px solid #ddd;
-            padding-top: 10px;
+            padding-top: 5px;
         }
         .page-break {
             page-break-after: always;
         }
-        .logo {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .logo img {
-            max-width: 150px;
-            height: auto;
-        }
         .payment-terms, .warranty-info, .insurance-info {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #f9f9f9;
-            border-radius: 5px;
-            font-size: 10pt;
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 9pt;
         }
         .payment-terms h3, .warranty-info h3, .insurance-info h3 {
             color: #D64045;
-            margin-top: 0;
-            font-size: 12pt;
+            margin: 0 0 5px 0;
+            font-size: 11pt;
         }
         ul {
-            margin-bottom: 0;
-            padding-left: 20px;
+            margin: 5px 0 5px 20px;
+            padding: 0;
         }
         li {
-            margin-bottom: 5px;
+            margin-bottom: 3px;
         }
         .project-summary {
-            margin-bottom: 20px;
-            font-size: 11pt;
+            margin-bottom: 10px;
+            font-size: 10pt;
         }
         .note {
             font-style: italic;
             color: #666;
-            font-size: 10pt;
+            font-size: 9pt;
         }
         .material-markup {
-            font-size: 9pt;
+            font-size: 8pt;
             color: #666;
+            display: block;
+        }
+        .job-header {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .job-description {
+            margin-bottom: 10px;
+            font-size: 10pt;
         }
     </style>
 </head>
 <body>
-    <div class="logo">
-        <img src="${base64Image}" alt="Ace Handyman Services Logo">
-    </div>
-    
     <div class="header">
+        <img src="${base64Image}" alt="Ace Handyman Services Logo">
         <h1>ACE HANDYMAN SERVICES</h1>
         <h2>Detailed Estimate</h2>
         <p>207 N Harlem Ave. Oak Park, IL 60302 | (708) 773-0218</p>
@@ -1605,6 +1617,8 @@ function exportEstimate(estimate) {
         </div>
     </div>
     
+    <div class="page-break"></div>
+    
     <div class="section">
         <div class="section-title">Detailed Scope of Work</div>
         
@@ -1617,19 +1631,21 @@ function exportEstimate(estimate) {
             const jobTotal = jobSubtotal - jobDiscount + jobEstimateFee;
             
             return `
-                <h4>Job ${index + 1}: ${job.name}</h4>
-                <p><strong>Work Description:</strong> ${job.name}</p>
-                <p><strong>Duration:</strong> ${job.days} days (${job.hours} hours) with ${job.workers} skilled worker${job.workers > 1 ? 's' : ''} 
-                ${job.apprenticeCount > 0 ? `and ${job.apprenticeCount} apprentice${job.apprenticeCount > 1 ? 's' : ''}` : ''}</p>
+                <div class="job-header">Job ${index + 1}: ${job.name}</div>
+                <div class="job-description">
+                    <p><strong>Work Description:</strong> ${job.name}</p>
+                    <p><strong>Duration:</strong> ${job.days} days (${job.hours} hours) with ${job.workers} skilled worker${job.workers > 1 ? 's' : ''} 
+                    ${job.apprenticeCount > 0 ? `and ${job.apprenticeCount} apprentice${job.apprenticeCount > 1 ? 's' : ''}` : ''}</p>
+                </div>
                 
                 <table>
                     <thead>
                         <tr>
-                            <th>Item</th>
-                            <th>Description</th>
-                            <th>Qty</th>
-                            <th>Unit Price</th>
-                            <th>Amount</th>
+                            <th width="5%">Item</th>
+                            <th width="45%">Description</th>
+                            <th width="10%">Qty</th>
+                            <th width="15%">Unit Price</th>
+                            <th width="15%">Amount</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1657,7 +1673,7 @@ function exportEstimate(estimate) {
                         ${job.materials.map((mat, matIndex) => `
                         <tr>
                             <td>2.${matIndex + 1}</td>
-                            <td>${mat.name} <span class="material-markup">(includes 50% markup)</span></td>
+                            <td>${mat.name}<span class="material-markup">(includes 50% markup)</span></td>
                             <td>${mat.quantity}</td>
                             <td>$${formatAccounting(mat.price)}</td>
                             <td>$${formatAccounting(mat.total)}</td>
@@ -1716,8 +1732,8 @@ function exportEstimate(estimate) {
         <table>
             <thead>
                 <tr>
-                    <th>Category</th>
-                    <th>Amount</th>
+                    <th width="70%">Category</th>
+                    <th width="30%">Amount</th>
                 </tr>
             </thead>
             <tbody>
@@ -1815,12 +1831,12 @@ function exportEstimate(estimate) {
         
         <div style="margin-top: 40px;">
             <p><strong>For Ace Handyman Services:</strong></p>
-            <p>Samuel Cundari, Operations Manager</p>
+            <p><strong>Samuel Cundari</strong>, Operations Manager</p>
             <div class="signature-line"></div>
             <p>Date: _________________________</p>
         </div>
         
-        <div style="margin-top: 60px;">
+        <div style="margin-top: 40px;">
             <p><strong>Client Acceptance:</strong></p>
             <p>${estimate.customer.name}</p>
             <div class="signature-line"></div>
