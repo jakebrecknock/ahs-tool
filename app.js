@@ -523,41 +523,30 @@ function editEstimateFromCard(estimateId) {
                 const estimateData = doc.data();
                 currentEstimate = {
                     id: doc.id,
-                    ...estimateData
+                    customer: estimateData.customer || {},
+                    jobs: estimateData.jobs || [],
+                    total: estimateData.total || 0,
+                    createdAt: estimateData.createdAt,
+                    updatedAt: estimateData.updatedAt
                 };
-                
-                // Properly populate all customer info fields
-                const customerInfoForm = document.getElementById('customerInfoForm');
-                if (customerInfoForm) {
-                    document.getElementById('customerName').value = currentEstimate.customer.name || '';
-                    document.getElementById('customerEmail').value = currentEstimate.customer.email || '';
-                    document.getElementById('customerPhone').value = currentEstimate.customer.phone || '';
-                    document.getElementById('jobLocation').value = currentEstimate.customer.location || '';
-                    
-                    // Explicitly save customer info to currentEstimate
-                    currentEstimate.customer = {
-                        name: currentEstimate.customer.name || '',
-                        email: currentEstimate.customer.email || '',
-                        phone: currentEstimate.customer.phone || '',
-                        location: currentEstimate.customer.location || ''
-                    };
-                }
-                
+
+                // Populate customer info fields
+                document.getElementById('customerName').value = currentEstimate.customer.name || '';
+                document.getElementById('customerEmail').value = currentEstimate.customer.email || '';
+                document.getElementById('customerPhone').value = currentEstimate.customer.phone || '';
+                document.getElementById('jobLocation').value = currentEstimate.customer.location || '';
+
                 showNewEstimate();
-                
-                // Update job tabs and details for all jobs
+
                 if (currentEstimate.jobs.length > 0) {
-                    // Clear any existing jobs
-                    currentEstimate.jobs = [...estimateData.jobs];
                     currentJobId = currentEstimate.jobs[0].id;
                     
                     // Update UI for all jobs
                     updateJobTabs();
                     
-                    // Get the first job's data
+                    // Populate first job's data
                     const firstJob = currentEstimate.jobs[0];
                     if (firstJob) {
-                        // Populate job fields
                         document.getElementById('jobDescription').value = firstJob.name || '';
                         document.getElementById('jobDays').value = firstJob.days || 0;
                         document.getElementById('jobHours').value = firstJob.hours || 0;
@@ -566,7 +555,7 @@ function editEstimateFromCard(estimateId) {
                         document.getElementById('apprenticeHours').value = firstJob.apprenticeHours || 0;
                         document.getElementById('apprenticeCount').value = firstJob.apprenticeCount || 0;
                         document.getElementById('jobDiscountPercentage').value = firstJob.discountPercentage || 0;
-                        
+
                         // Update estimate fee button state
                         const feeBtn = document.getElementById('waiveEstimateFeeBtn');
                         if (firstJob.waiveEstimateFee) {
@@ -576,10 +565,7 @@ function editEstimateFromCard(estimateId) {
                             feeBtn.classList.remove('active');
                             feeBtn.innerHTML = '<i class="fas fa-dollar-sign"></i> Waive $75 Estimate Fee';
                         }
-                        
-                        // Force update of labor calculations
-                        updateCurrentJobDetails();
-                        
+
                         // Update materials and fees lists
                         updateMaterialsList();
                         updateJobFeesList(currentJobId);
@@ -590,7 +576,12 @@ function editEstimateFromCard(estimateId) {
                     showJobDetails(currentJobId);
                 }
                 
-                nextStep(2); // Skip to jobs step
+                // Force update of labor calculations
+                updateCurrentJobDetails();
+                updateEstimatePreview();
+                
+                // Skip to jobs step
+                nextStep(2);
             }
         })
         .catch(error => {
