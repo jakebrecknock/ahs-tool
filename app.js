@@ -1,6 +1,7 @@
 
 // DOM Elements
-const base64Image = "https://raw.githubusercontent.com/jakebrecknock/ahs-tool/refs/heads/main/ace-handy-logos.webp";
+const base64Image = "app-logo.png";
+//https://raw.githubusercontent.com/jakebrecknock/ahs-tool/refs/heads/main/ace-handy-logos.webp
 const dashboardView = document.getElementById('dashboardView');
 const newEstimateView = document.getElementById('newEstimateView');
 const dashboardBtn = document.getElementById('dashboardBtn');
