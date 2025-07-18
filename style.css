@@ -952,6 +952,10 @@ nav button:hover:not(.active) {
     font-size: 1.5rem;
 }
 
+.export-html-btn i {
+  color: #D64045;
+}
+
 #passwordInput {
     width: 100%;
     padding: 12px 15px;

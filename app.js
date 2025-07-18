@@ -1134,9 +1134,9 @@ function displayEstimates(estimates) {
                     <button class="delete" onclick="event.stopPropagation(); deleteEstimateFromCard('${estimate.id}')">
                         <i class="fas fa-trash"></i>
                     </button>
-                    <button class="export" onclick="event.stopPropagation(); exportEstimateFromCard('${estimate.id}')">
-                        <i class="fas fa-file-export"></i>
-                    </button>
+                    <button class="export-html-btn" onclick="exportEstimate(estimate)">
+  <i class="fas fa-file-alt"></i>
+</button>
                 </div>
                 <p class="estimate-customer"><i class="fas fa-user"></i> ${estimate.customer.name}</p>
                 <p class="estimate-location"><i class="fas fa-map-marker-alt"></i> ${estimate.customer.location}</p>
@@ -1384,13 +1384,6 @@ function exportEstimate(estimate) {
         limitations: "Does not cover damage from misuse, neglect, or acts of nature"
     };
 
-    // Insurance information
-    const insurance = {
-        generalLiability: "$2,000,000 coverage",
-        workersComp: "Fully insured",
-        additionalInsured: "Available upon request with 48 hours notice"
-    };
-
     let html = `
 <!DOCTYPE html>
 <html>
@@ -1399,14 +1392,14 @@ function exportEstimate(estimate) {
     <style>
         @page {
             size: letter;
-            margin: 0.5in;
+            margin: 1in;
         }
         body {
             font-family: 'Times New Roman', Times, serif;
             color: #333;
             line-height: 1.4;
-            margin: 0;
-            padding: 0;
+            margin: 1;
+            padding: 0 0.5;
             font-size: 11pt;
         }
         .header {
@@ -1814,7 +1807,6 @@ function exportEstimate(estimate) {
             <p><strong>Client Acceptance:</strong></p>
             <p>${estimate.customer.name}</p>
             <div class="signature-line"></div>
-            <p>X _________________________</p>
             <p>Date: _________________________</p>
         </div>
     </div>
