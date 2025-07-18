@@ -7,7 +7,25 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="style.css">
+<script>
+  function loadGoogleMaps() {
+    const script = document.createElement('script');
+    script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyAfqQbcAJvmr4tdGTEFSrpx5OqwCxoMrPE&libraries=places&loading=async&callback=initializeGoogleMaps';
+    script.async = true;
+    script.defer = true;
+    document.head.appendChild(script);
+  }
 
+  // This will be called when the API is loaded
+  function initializeGoogleMaps() {
+    if (typeof initAutocomplete === 'function') {
+      initAutocomplete();
+    }
+  }
+
+  // Load Google Maps after the page loads
+  window.addEventListener('DOMContentLoaded', loadGoogleMaps);
+</script>
 </head>
 <body>
     <div class="container">
@@ -245,7 +263,6 @@
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAfqQbcAJvmr4tdGTEFSrpx5OqwCxoMrPE&libraries=places&callback=initAutocomplete" async defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="app.js"></script>
 </body>

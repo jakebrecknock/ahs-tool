@@ -330,13 +330,14 @@ function addNewJob() {
 function initAutocomplete() {
     const locationInput = document.getElementById('jobLocation');
     
-    if (locationInput) {
-        autocomplete = new google.maps.places.Autocomplete(locationInput, {
-            types: ['address'],  // restrict to addresses
-            componentRestrictions: { country: 'us' }  // restrict to US addresses if desired
+    if (locationInput && typeof google !== 'undefined') {
+        // Create the autocomplete element
+        const autocomplete = new google.maps.places.PlaceAutocompleteElement({
+            inputElement: locationInput,
+            componentRestrictions: { country: 'us' }
         });
-        
-        // Prevent form submission when pressing Enter on the autocomplete field
+
+        // Prevent form submission when pressing Enter
         locationInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
