@@ -10,11 +10,15 @@
 <script>
   function loadGoogleMaps() {
     const script = document.createElement('script');
-    script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyAfqQbcAJvmr4tdGTEFSrpx5OqwCxoMrPE&libraries=places&loading=async&callback=initializeGoogleMaps';
+    script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyAfqQbcAJvmr4tdGTEFSrpx5OqwCxoMrPE&libraries=places&callback=initAutocomplete';
     script.async = true;
     script.defer = true;
     document.head.appendChild(script);
   }
+
+  // Load Google Maps when the page loads
+  window.addEventListener('DOMContentLoaded', loadGoogleMaps);
+</script>
 
   // This will be called when the API is loaded
   function initializeGoogleMaps() {

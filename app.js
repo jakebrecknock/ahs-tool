@@ -330,17 +330,30 @@ function addNewJob() {
 function initAutocomplete() {
     const locationInput = document.getElementById('jobLocation');
     
-    if (locationInput && typeof google !== 'undefined') {
-        // Create the autocomplete element
-        const autocomplete = new google.maps.places.PlaceAutocompleteElement({
-            inputElement: locationInput,
-            componentRestrictions: { country: 'us' }
-        });
+    if (locationInput && typeof google !== 'undefined' && google.maps && google.maps.places) {
+        const autocomplete = new google.maps.places.Autocomplete(
+            locationInput,
+            {
+                types: ['address'],
+                componentRestrictions: { country: 'us' }
+            }
+        );
 
-        // Prevent form submission when pressing Enter
+        // Prevent form submission when pressing Enter on the autocomplete field
         locationInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
+            }
+        });
+
+        // Add a listener for when a place is selected
+        autocomplete.addListener('place_changed', function() {
+            const place = autocomplete.getPlace();
+            if (!place.geometry) {
+                // User entered the name of a Place that was not suggested and
+                // pressed the Enter key, or the Place Details request failed.
+                console.log("No details available for input: '" + place.name + "'");
+                return;
             }
         });
     }
