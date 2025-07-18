@@ -542,12 +542,12 @@ function editEstimateFromCard(estimateId) {
                     
                     // Update UI for all jobs
                     updateJobTabs();
-                    showJobDetails(currentJobId);
                     
-                    // Force update of all fields for the first job
+                    // Get the first job's data
                     const firstJob = currentEstimate.jobs[0];
                     if (firstJob) {
-                        document.getElementById('jobDescription').value = firstJob.name || 'Job description required!';
+                        // Populate job fields
+                        document.getElementById('jobDescription').value = firstJob.name || '';
                         document.getElementById('jobDays').value = firstJob.days || 0;
                         document.getElementById('jobHours').value = firstJob.hours || 0;
                         document.getElementById('jobWorkers').value = firstJob.workers || 1;
@@ -566,16 +566,25 @@ function editEstimateFromCard(estimateId) {
                             feeBtn.innerHTML = '<i class="fas fa-dollar-sign"></i> Waive $75 Estimate Fee';
                         }
                         
+                        // Force update of labor calculations
+                        updateCurrentJobDetails();
+                        
                         // Update materials and fees lists
                         updateMaterialsList();
                         updateJobFeesList(currentJobId);
                         updateJobDiscountDisplay(currentJobId);
-                        updateCurrentJobDetails();
                     }
+                    
+                    // Show the first job's details
+                    showJobDetails(currentJobId);
                 }
                 
                 nextStep(2); // Skip to jobs step
             }
+        })
+        .catch(error => {
+            console.error('Error loading estimate:', error);
+            alert('Error loading estimate. Please try again.');
         });
 }
 
