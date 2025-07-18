@@ -87,26 +87,30 @@ function setupEventListeners() {
     closeModal.addEventListener('click', closeEstimateModal);
     editEstimateBtn.addEventListener('click', editEstimate);
     deleteEstimateBtn.addEventListener('click', deleteEstimate);
-    exportEstimateBtn.addEventListener('click', exportEstimateToWord);
+    exportEstimateBtn.addEventListener('click', exportEstimate);
     
     // Estimate form elements
     saveEstimateBtn.addEventListener('click', saveEstimate);
     
     // Labor calculation inputs
-    const laborInputs = [
-        'jobDays', 'jobHours', 'jobWorkers', 
-        'apprenticeDays', 'apprenticeHours', 'apprenticeCount'
-    ];
-    
-    laborInputs.forEach(id => {
-        const input = document.getElementById(id);
-        if (input) {
-            input.addEventListener('input', function() {
-                updateCurrentJobDetails();
-                updateEstimatePreview();
-            });
-        }
-    });
+const laborInputs = [
+    'jobDays', 'jobHours', 'jobWorkers', 
+    'apprenticeDays', 'apprenticeHours', 'apprenticeCount'
+];
+
+laborInputs.forEach(id => {
+    const input = document.getElementById(id);
+    if (input) {
+        input.addEventListener('input', function() {
+            updateCurrentJobDetails();
+            updateEstimatePreview();
+        });
+        input.addEventListener('change', function() {
+            updateCurrentJobDetails();
+            updateEstimatePreview();
+        });
+    }
+});
 
     // Material and fee buttons
     document.getElementById('addMaterial')?.addEventListener('click', addMaterialToJob);
@@ -133,7 +137,7 @@ function verifyPassword() {
         passwordModal.style.display = 'none';
         passwordError.style.display = 'none';
         passwordInput.value = '';
-        document.body.style.overflow = '';
+        document.body.style.overflow = 'auto'; // Fix: Change from '' to 'auto'
         return true;
     } else {
         passwordError.style.display = 'block';
@@ -146,7 +150,7 @@ function verifyPassword() {
 function checkPassword() {
     if (sessionStorage.getItem('ahs-authenticated') === 'true') {
         passwordModal.style.display = 'none';
-        document.body.style.overflow = '';
+        document.body.style.overflow = 'auto'; // Fix: Change from '' to 'auto'
         return;
     }
     
@@ -261,7 +265,7 @@ function initDateFilters() {
 function addNewJob() {
     const newJob = {
         id: Date.now(),
-        name: `Job ${currentEstimate.jobs.length + 1}`, // Default name with sequence number
+        name: '',
         days: 0,
         hours: 0,
         workers: 1,
@@ -281,6 +285,8 @@ function addNewJob() {
     
     // Clear and focus the job description field
     const jobDescInput = document.getElementById('jobDescription');
+jobDescInput.value = "";
+jobDescInput.placeholder = "Describe the work (required)"
     jobDescInput.value = "";
     jobDescInput.placeholder = "Describe the work";
     jobDescInput.focus();
@@ -745,23 +751,27 @@ function nextStep(step) {
     if (step === 2 && !validateCustomerInfo()) return;
    
     // Update job details before checking
-    if (step === 3) {
-        // Validate job descriptions
-        for (const job of currentEstimate.jobs) {
-            const description = job.name.trim();
-            if (!description || description === "New Job") {
-                alert('Please enter a description for all jobs');
-                // Focus on the first empty job description
+if (step === 3) {
+    // Validate job descriptions
+    for (const job of currentEstimate.jobs) {
+        const description = job.name.trim();
+        if (!description || description === "New Job" || description === "Describe the work (required)") {
+            alert('Please enter a valid description for all jobs');
+            // Find and focus on the job tab with empty description
+            const jobIndex = currentEstimate.jobs.findIndex(j => j.id === job.id);
+            if (jobIndex >= 0) {
+                showJobDetails(job.id);
                 document.getElementById('jobDescription').focus();
-                return;
             }
-        }
-       
-        if (currentEstimate.jobs.length === 0) {
-            alert('Please add at least one job');
             return;
         }
     }
+    
+    if (currentEstimate.jobs.length === 0) {
+        alert('Please add at least one job');
+        return;
+    }
+}
    
     // Hide current step
     document.querySelector('.estimate-step.active-step').classList.remove('active-step');
@@ -846,18 +856,18 @@ function updateEstimatePreview() {
         estimateFeeTotal += jobEstimateFee;
 
         return `
-            <div class="estimate-job-section">
-                <h4>${job.name || 'New Job'} (${job.days}d ${job.hours}h, ${job.workers} worker${job.workers > 1 ? 's' : ''}${job.apprenticeCount > 0 ? `, ${job.apprenticeCount} apprentice${job.apprenticeCount > 1 ? 's' : ''}` : ''})</h4>
-                <div class="estimate-row">
-                    <span>Skilled Labor:</span>
-                    <span>$${formatAccounting(job.labor)}</span>
-                </div>
-                ${job.apprenticeCount > 0 ? `
-                <div class="estimate-row">
-                    <span>Apprentice Labor (${job.apprenticeCount} apprentice${job.apprenticeCount > 1 ? 's' : ''}):</span>
-                    <span>$${formatAccounting(job.apprenticeLabor || 0)}</span>
-                </div>
-                ` : ''}
+    <div class="estimate-job-section">
+        <h4>${job.name || 'New Job'} (${job.days}d ${job.hours}h, ${job.workers} worker${job.workers > 1 ? 's' : ''}${job.apprenticeCount > 0 ? `, ${job.apprenticeCount} apprentice${job.apprenticeCount > 1 ? 's' : ''}` : ''})</h4>
+        <div class="estimate-row">
+            <span>Skilled Labor (${job.workers} worker${job.workers > 1 ? 's' : ''}):</span>
+            <span>$${formatAccounting(job.labor)}</span>
+        </div>
+        ${job.apprenticeCount > 0 ? `
+        <div class="estimate-row">
+            <span>Apprentice Labor (${job.apprenticeCount} apprentice${job.apprenticeCount > 1 ? 's' : ''}):</span>
+            <span>$${formatAccounting(job.apprenticeLabor || 0)}</span>
+        </div>
+        ` : ''}
                 ${job.materials.map(mat => `
                 <div class="estimate-row">
                     <span>${mat.name} (${mat.quantity} @ $${formatAccounting(mat.price)})</span>
