@@ -94,6 +94,21 @@ function setupEventListeners() {
     // Estimate form elements
     if (saveEstimateBtn) saveEstimateBtn.addEventListener('click', saveEstimate);
     
+        const laborInputs = [
+        'jobDays', 'jobHours', 'jobWorkers', 
+        'apprenticeDays', 'apprenticeHours', 'apprenticeCount'
+    ];
+    
+    laborInputs.forEach(id => {
+        const input = document.getElementById(id);
+        if (input) {
+            input.addEventListener('input', function() {
+                updateCurrentJobDetails();
+                updateEstimatePreview();
+            });
+        }
+    });
+
     // Job calculation elements
     const jobInputs = ['jobDays', 'jobHours', 'jobWorkers', 'apprenticeDays', 'apprenticeHours', 'apprenticeCount'];
     jobInputs.forEach(id => {
@@ -327,7 +342,7 @@ function calculateLaborCost(days, hours, workers, apprenticeDays, apprenticeHour
 function updateCurrentJobDetails() {
     const job = currentEstimate.jobs.find(j => j.id === currentJobId);
     if (job) {
-        job.name = document.getElementById('jobDescription').value || "New Job";
+        job.name = document.getElementById('jobDescription').value || `Job ${currentEstimate.jobs.findIndex(j => j.id === currentJobId) + 1}`;
         job.days = parseInt(document.getElementById('jobDays').value) || 0;
         job.hours = parseInt(document.getElementById('jobHours').value) || 0;
         job.workers = parseInt(document.getElementById('jobWorkers').value) || 1;
@@ -838,6 +853,10 @@ function updateEstimatePreview() {
         const jobEstimateFee = job.waiveEstimateFee ? -75 : 75;
         const jobTotal = jobSubtotal - jobDiscount + jobEstimateFee;
         
+    
+        const grandTotal = laborTotal + apprenticeLaborTotal + materialsTotal + feesTotal - discountTotal + estimateFeeTotal;
+        currentEstimate.total = grandTotal;
+
         return `
             <div class="estimate-job-section">
                 <h4>${job.name || 'New Job'} (${job.days}d ${job.hours}h, ${job.workers} worker${job.workers > 1 ? 's' : ''}${job.apprenticeCount > 0 ? `, ${job.apprenticeCount} apprentice${job.apprenticeCount > 1 ? 's' : ''}` : ''})</h4>
@@ -880,9 +899,6 @@ function updateEstimatePreview() {
             </div>
         `;
     }).join('');
-    
-    const grandTotal = laborTotal + apprenticeLaborTotal + materialsTotal + feesTotal - discountTotal + estimateFeeTotal;
-    currentEstimate.total = grandTotal;
     
     const html = `
         <div class="estimate-section">
@@ -950,10 +966,49 @@ function updateEstimatePreview() {
 
 
 function saveEstimate() {
+    // First update all job details before saving
+    currentEstimate.jobs.forEach(job => {
+        if (job.id === currentJobId) {
+            // Update current job from form fields
+            job.name = document.getElementById('jobDescription').value || `Job ${currentEstimate.jobs.findIndex(j => j.id === currentJobId) + 1}`;
+            job.days = parseInt(document.getElementById('jobDays').value) || 0;
+            job.hours = parseInt(document.getElementById('jobHours').value) || 0;
+            job.workers = parseInt(document.getElementById('jobWorkers').value) || 1;
+            job.apprenticeDays = parseInt(document.getElementById('apprenticeDays').value) || 0;
+            job.apprenticeHours = parseInt(document.getElementById('apprenticeHours').value) || 0;
+            job.apprenticeCount = parseInt(document.getElementById('apprenticeCount').value) || 0;
+            job.discountPercentage = parseFloat(document.getElementById('jobDiscountPercentage').value) || 0;
+            
+            const feeBtn = document.getElementById('waiveEstimateFeeBtn');
+            job.waiveEstimateFee = feeBtn.classList.contains('active');
+            
+            // Recalculate labor costs
+            const laborCosts = calculateLaborCost(
+                job.days, 
+                job.hours, 
+                job.workers,
+                job.apprenticeDays,
+                job.apprenticeHours,
+                job.apprenticeCount
+            );
+            
+            job.labor = laborCosts.workerLabor;
+            job.apprenticeLabor = laborCosts.apprenticeLabor;
+        }
+    });
+
     if (!currentEstimate.customer.name || currentEstimate.jobs.length === 0) {
         alert('Please complete all required fields and add at least one job');
         return;
     }
+
+    // Ensure customer info is saved
+    currentEstimate.customer = {
+        name: document.getElementById('customerName').value,
+        email: document.getElementById('customerEmail').value,
+        phone: document.getElementById('customerPhone').value,
+        location: document.getElementById('jobLocation').value
+    };
 
     // Add timestamp
     const now = new Date().toISOString();
