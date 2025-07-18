@@ -268,46 +268,34 @@ function initDateFilters() {
 
 
 function addNewJob() {
-    // Save current job details before creating new one
+    // Save current job before switching
     if (currentJobId) {
         const currentJob = currentEstimate.jobs.find(j => j.id === currentJobId);
-        if (currentJob) {
-            currentJob.name = document.getElementById('jobDescription').value || 'Job description required!';
-            currentJob.days = parseInt(document.getElementById('jobDays').value) || 0;
-            currentJob.hours = parseInt(document.getElementById('jobHours').value) || 0;
-            currentJob.workers = parseInt(document.getElementById('jobWorkers').value) || 1;
-            currentJob.apprenticeDays = parseInt(document.getElementById('apprenticeDays').value) || 0;
-            currentJob.apprenticeHours = parseInt(document.getElementById('apprenticeHours').value) || 0;
-            currentJob.apprenticeCount = parseInt(document.getElementById('apprenticeCount').value) || 0;
-            currentJob.discountPercentage = parseFloat(document.getElementById('jobDiscountPercentage').value) || 0;
-            
-            const feeBtn = document.getElementById('waiveEstimateFeeBtn');
-            currentJob.waiveEstimateFee = feeBtn.classList.contains('active');
-        }
+        if (currentJob) updateCurrentJobDetails();
     }
 
     const newJob = {
         id: Date.now(),
-        name: 'Job description required!', // Default text
+        name: 'Job description required!',
         days: 0,
         hours: 0,
-        workers: 1, // Default to 1 worker
+        workers: 1,
         apprenticeDays: 0,
         apprenticeHours: 0,
         apprenticeCount: 0,
         labor: 0,
         apprenticeLabor: 0,
-        materials: [],
-        fees: [],
+        materials: [],    // reset to empty
+        fees: [],         // reset to empty
         discountPercentage: 0,
-        waiveEstimateFee: true // Default to waived
+        waiveEstimateFee: true
     };
-    
+
     currentEstimate.jobs.push(newJob);
     currentJobId = newJob.id;
-    
-    // Reset form fields for the new job
-    document.getElementById('jobDescription').value = "Job description required!";
+
+
+    document.getElementById('jobDescription').value = "";
     document.getElementById('jobDays').value = "0";
     document.getElementById('jobHours').value = "0";
     document.getElementById('jobWorkers').value = "1";
@@ -315,24 +303,21 @@ function addNewJob() {
     document.getElementById('apprenticeHours').value = "0";
     document.getElementById('apprenticeCount').value = "0";
     document.getElementById('jobDiscountPercentage').value = "0";
-    
-    // Reset materials and fees lists
+
     document.getElementById('materialsList').innerHTML = '<p class="no-materials">No materials added yet</p>';
     document.getElementById('jobFeesList').innerHTML = '<p class="no-fees">No fees added yet</p>';
-    
-    // Reset fee waiver button
+
     const feeBtn = document.getElementById('waiveEstimateFeeBtn');
     feeBtn.classList.add('active');
     feeBtn.innerHTML = '<i class="fas fa-check"></i> Estimate Fee Waived';
-    
-    // Reset labor display
+
     document.getElementById('liveLaborTotal').textContent = '$0.00';
-    
-    // Update UI
+
     updateJobTabs();
     showJobDetails(newJob.id);
     updateEstimatePreview();
 }
+
 
 
 function calculateLaborCost(days, hours, workers, apprenticeDays, apprenticeHours, apprenticeCount) {
@@ -524,13 +509,13 @@ function editEstimateFromCard(estimateId) {
                 currentEstimate = {
                     id: doc.id,
                     customer: estimateData.customer || {},
-                    jobs: estimateData.jobs || [],
+                    jobs: [],
                     total: estimateData.total || 0,
                     createdAt: estimateData.createdAt,
                     updatedAt: estimateData.updatedAt
                 };
 
-                // Populate customer info fields
+                // Populate customer fields
                 document.getElementById('customerName').value = currentEstimate.customer.name || '';
                 document.getElementById('customerEmail').value = currentEstimate.customer.email || '';
                 document.getElementById('customerPhone').value = currentEstimate.customer.phone || '';
@@ -538,49 +523,28 @@ function editEstimateFromCard(estimateId) {
 
                 showNewEstimate();
 
+                // Rebuild all job tabs and data
+                (estimateData.jobs || []).forEach((jobData, index) => {
+                    const newJob = {
+                        ...jobData,
+                        id: jobData.id || Date.now() + index,
+                        materials: jobData.materials || [],
+                        fees: jobData.fees || [],
+                        discountPercentage: jobData.discountPercentage || 0,
+                        waiveEstimateFee: jobData.waiveEstimateFee ?? true,
+                        labor: jobData.labor || 0,
+                        apprenticeLabor: jobData.apprenticeLabor || 0
+                    };
+                    currentEstimate.jobs.push(newJob);
+                });
+
                 if (currentEstimate.jobs.length > 0) {
                     currentJobId = currentEstimate.jobs[0].id;
-                    
-                    // Update UI for all jobs
                     updateJobTabs();
-                    
-                    // Populate first job's data
-                    const firstJob = currentEstimate.jobs[0];
-                    if (firstJob) {
-                        document.getElementById('jobDescription').value = firstJob.name || '';
-                        document.getElementById('jobDays').value = firstJob.days || 0;
-                        document.getElementById('jobHours').value = firstJob.hours || 0;
-                        document.getElementById('jobWorkers').value = firstJob.workers || 1;
-                        document.getElementById('apprenticeDays').value = firstJob.apprenticeDays || 0;
-                        document.getElementById('apprenticeHours').value = firstJob.apprenticeHours || 0;
-                        document.getElementById('apprenticeCount').value = firstJob.apprenticeCount || 0;
-                        document.getElementById('jobDiscountPercentage').value = firstJob.discountPercentage || 0;
-
-                        // Update estimate fee button state
-                        const feeBtn = document.getElementById('waiveEstimateFeeBtn');
-                        if (firstJob.waiveEstimateFee) {
-                            feeBtn.classList.add('active');
-                            feeBtn.innerHTML = '<i class="fas fa-check"></i> Estimate Fee Waived';
-                        } else {
-                            feeBtn.classList.remove('active');
-                            feeBtn.innerHTML = '<i class="fas fa-dollar-sign"></i> Waive $75 Estimate Fee';
-                        }
-
-                        // Update materials and fees lists
-                        updateMaterialsList();
-                        updateJobFeesList(currentJobId);
-                        updateJobDiscountDisplay(currentJobId);
-                    }
-                    
-                    // Show the first job's details
                     showJobDetails(currentJobId);
                 }
-                
-                // Force update of labor calculations
-                updateCurrentJobDetails();
+
                 updateEstimatePreview();
-                
-                // Skip to jobs step
                 nextStep(2);
             }
         })
@@ -589,6 +553,7 @@ function editEstimateFromCard(estimateId) {
             alert('Error loading estimate. Please try again.');
         });
 }
+
 
 function deleteEstimateFromCard(estimateId) {
     if (confirm('Are you sure you want to delete this estimate?')) {
@@ -1380,12 +1345,10 @@ function exportEstimate(estimate) {
 
     // Payment terms
     const paymentTerms = {
-        depositRequired: true,
+        depositRequired: total > 5000,
         depositPercentage: 50,
-        progressPayments: true,
-        finalPaymentDue: "upon completion",
+        billingMethod: "For multi-day projects, we bill daily and collect payment at the end of each work day",
         paymentMethods: ["Check", "Credit Card", "Bank Transfer"],
-        lateFee: "1.5% monthly (18% APR) on balances over 30 days",
         changeOrders: "Any changes to scope require written approval"
     };
 
@@ -1428,7 +1391,7 @@ function exportEstimate(estimate) {
             border-bottom: 1px solid #D64045;
         }
         .header img {
-            height: 60px;
+            height: 30px; /* Reduced logo size */
             margin-bottom: 5px;
         }
         .header h1 {
@@ -1457,8 +1420,9 @@ function exportEstimate(estimate) {
         .info-block {
             width: 48%;
             padding: 10px;
-            border: 1px solid #ddd;
+            border: 2px solid #ddd; /* Thicker border */
             border-radius: 4px;
+            background-color: #f9f9f9; /* Light background */
         }
         .info-block h3 {
             color: #D64045;
@@ -1543,9 +1507,10 @@ function exportEstimate(estimate) {
         .payment-terms, .warranty-info, .insurance-info {
             margin-top: 10px;
             padding: 10px;
-            border: 1px solid #ddd;
+            border: 2px solid #ddd; /* Thicker border */
             border-radius: 4px;
             font-size: 9pt;
+            background-color: #f9f9f9; /* Light background */
         }
         .payment-terms h3, .warranty-info h3, .insurance-info h3 {
             color: #D64045;
@@ -1602,10 +1567,8 @@ function exportEstimate(estimate) {
         </div>
         <div class="info-block">
             <h3>Project Summary</h3>
-            <p><strong>Project ID:</strong> ${estimate.id || 'N/A'}</p>
             <p><strong>Total Jobs:</strong> ${estimate.jobs.length}</p>
             <p><strong>Total Estimate:</strong> $${formatAccounting(total)}</p>
-            <p><strong>Priority:</strong> Standard</p>
         </div>
     </div>
     
@@ -1721,11 +1684,10 @@ function exportEstimate(estimate) {
                         </tr>
                     </tbody>
                 </table>
+                <div class="page-break"></div>
             `;
         }).join('')}
     </div>
-    
-    <div class="page-break"></div>
     
     <div class="section">
         <div class="section-title">Summary of Costs</div>
@@ -1782,11 +1744,11 @@ function exportEstimate(estimate) {
     <div class="payment-terms">
         <h3>Payment Terms & Schedule</h3>
         <ul>
-            <li><strong>Deposit:</strong> ${paymentTerms.depositPercentage}% deposit ($${formatAccounting(total * paymentTerms.depositPercentage/100)}) required to secure start date</li>
-            <li><strong>Progress Payments:</strong> ${paymentTerms.progressPayments ? 'Due at agreed milestones' : 'Not applicable'}</li>
-            <li><strong>Final Payment:</strong> Due ${paymentTerms.finalPaymentDue} ($${formatAccounting(total * (100-paymentTerms.depositPercentage)/100)})</li>
+            ${total > 5000 ? `
+            <li><strong>Deposit:</strong> 50% deposit ($${formatAccounting(total * 0.5)}) required for projects over $5,000</li>
+            ` : ''}
+            <li><strong>Billing Method:</strong> ${paymentTerms.billingMethod}</li>
             <li><strong>Accepted Payment Methods:</strong> ${paymentTerms.paymentMethods.join(", ")}</li>
-            <li><strong>Late Fees:</strong> ${paymentTerms.lateFee}</li>
             <li><strong>Change Orders:</strong> ${paymentTerms.changeOrders}</li>
         </ul>
     </div>
@@ -1814,7 +1776,7 @@ function exportEstimate(estimate) {
     <div class="section">
         <div class="section-title">Terms & Conditions</div>
         <div class="terms">
-            <p><strong>1. Acceptance:</strong> This estimate is valid for 30 days from the date above. Work will commence upon receipt of signed agreement and deposit.</p>
+            <p><strong>1. Acceptance:</strong> This estimate is valid for 30 days from the date above. Work will commence upon receipt of signed agreement ${total > 5000 ? 'and deposit' : ''}.</p>
             <p><strong>2. Pricing:</strong> Prices are based on current material costs and labor rates. Significant changes may require adjustment.</p>
             <p><strong>3. Change Orders:</strong> Any changes to the scope of work must be approved in writing and may affect timeline and budget.</p>
             <p><strong>4. Access:</strong> Client agrees to provide uninterrupted access to the work area during scheduled work hours.</p>
@@ -1826,14 +1788,10 @@ function exportEstimate(estimate) {
     </div>
     
     <div class="signature-section">
-        <h3>Acceptance of Estimate</h3>
-        <p>By signing below, I acknowledge that I have reviewed and accept this estimate in its entirety, including all terms and conditions.</p>
-        
         <div style="margin-top: 40px;">
-            <p><strong>For Ace Handyman Services:</strong></p>
+            <p><strong>Estimate Approved By:</strong></p>
             <p><strong>Samuel Cundari</strong>, Operations Manager</p>
             <div class="signature-line"></div>
-            <p>Date: _________________________</p>
         </div>
         
         <div style="margin-top: 40px;">
