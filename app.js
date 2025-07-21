@@ -146,7 +146,7 @@ function verifyPassword() {
         passwordModal.style.display = 'none';
         passwordError.style.display = 'none';
         passwordInput.value = '';
-        document.body.style.overflow = 'auto'; // Fix: Change from '' to 'auto'
+        document.body.style.overflow = 'auto';
         return true;
     } else {
         passwordError.style.display = 'block';
@@ -159,7 +159,7 @@ function verifyPassword() {
 function checkPassword() {
     if (sessionStorage.getItem('ahs-authenticated') === 'true') {
         passwordModal.style.display = 'none';
-        document.body.style.overflow = 'auto'; // Fix: Change from '' to 'auto'
+        document.body.style.overflow = 'auto'; 
         return;
     }
 
@@ -543,7 +543,7 @@ function editEstimateFromCard(estimateId) {
             if (doc.exists) {
                 const estimateData = doc.data();
 
-                isEditingExistingEstimate = true; // ✅ Set before switching views
+                isEditingExistingEstimate = true; 
 
                 currentEstimate = {
                     id: doc.id,
@@ -553,8 +553,7 @@ function editEstimateFromCard(estimateId) {
                     createdAt: estimateData.createdAt,
                     updatedAt: estimateData.updatedAt
                 };
-
-                // Now show the edit view without resetting
+                
                 showNewEstimate();
 
                 // Populate customer fields
