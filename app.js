@@ -58,7 +58,7 @@ let currentEstimate = {
 
 
 // Initialize the app
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     checkPassword();
     loadEstimates();
     initPhoneNumberFormatting();
@@ -66,10 +66,10 @@ document.addEventListener('DOMContentLoaded', function() {
     addNewJob();
     setupEventListeners();
     submitPassword.addEventListener('click', verifyPassword);
-    passwordInput.addEventListener('keypress', function(e) {
+    passwordInput.addEventListener('keypress', function (e) {
         if (e.key === 'Enter') verifyPassword();
     });
-    
+
     // Initialize autocomplete when the page loads
     if (typeof google !== 'undefined') {
         initAutocomplete();
@@ -81,44 +81,44 @@ function setupEventListeners() {
     // Dashboard elements
     dashboardBtn.addEventListener('click', showDashboard);
     newEstimateBtn.addEventListener('click', showNewEstimate);
-    
+
     // Search elements
-    searchInput.addEventListener('keyup', function(e) {
+    searchInput.addEventListener('keyup', function (e) {
         if (e.key === 'Enter') searchEstimates();
     });
     searchBtn.addEventListener('click', searchEstimates);
-    
+
     // Modal elements
     closeModal.addEventListener('click', closeEstimateModal);
     editEstimateBtn.addEventListener('click', editEstimate);
     deleteEstimateBtn.addEventListener('click', deleteEstimate);
-    exportEstimateBtn.addEventListener('click', function() {
+    exportEstimateBtn.addEventListener('click', function () {
         const estimateData = JSON.parse(modalContent.dataset.estimateData);
         exportEstimate(estimateData);
     });
-    
+
     // Estimate form elements
     saveEstimateBtn.addEventListener('click', saveEstimate);
-    
-    // Labor calculation inputs
-const laborInputs = [
-    'jobDays', 'jobHours', 'jobWorkers', 
-    'apprenticeDays', 'apprenticeHours', 'apprenticeCount'
-];
 
-laborInputs.forEach(id => {
-    const input = document.getElementById(id);
-    if (input) {
-        input.addEventListener('input', function() {
-            updateCurrentJobDetails();
-            updateEstimatePreview();
-        });
-        input.addEventListener('change', function() {
-            updateCurrentJobDetails();
-            updateEstimatePreview();
-        });
-    }
-});
+    // Labor calculation inputs
+    const laborInputs = [
+        'jobDays', 'jobHours', 'jobWorkers',
+        'apprenticeDays', 'apprenticeHours', 'apprenticeCount'
+    ];
+
+    laborInputs.forEach(id => {
+        const input = document.getElementById(id);
+        if (input) {
+            input.addEventListener('input', function () {
+                updateCurrentJobDetails();
+                updateEstimatePreview();
+            });
+            input.addEventListener('change', function () {
+                updateCurrentJobDetails();
+                updateEstimatePreview();
+            });
+        }
+    });
 
     // Material and fee buttons
     document.getElementById('addMaterial')?.addEventListener('click', addMaterialToJob);
@@ -162,7 +162,7 @@ function checkPassword() {
         document.body.style.overflow = 'auto'; // Fix: Change from '' to 'auto'
         return;
     }
-    
+
     passwordModal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
     passwordInput.focus();
@@ -184,7 +184,7 @@ function showNewEstimate() {
     newEstimateView.classList.add('active-view');
     dashboardBtn.classList.remove('active');
     newEstimateBtn.classList.add('active');
-        if (!isEditingExistingEstimate) {
+    if (!isEditingExistingEstimate) {
         resetEstimateForm();
     }
 
@@ -200,32 +200,32 @@ function resetEstimateForm() {
     };
     currentJobId = 1;
     addNewJob();
-    
+
     // Reset form steps
     document.querySelectorAll('.estimate-step').forEach(step => {
         step.classList.remove('active-step');
     });
     document.getElementById('customerInfoStep').classList.add('active-step');
-    
+
     // Reset progress steps
     document.querySelectorAll('.progress-step').forEach(step => {
         step.classList.remove('active');
     });
     document.querySelector('.progress-step[data-step="1"]').classList.add('active');
-    
+
     // Clear form inputs
     document.getElementById('customerInfoForm').reset();
-    
+
     // Set fee waiver to active by default
     const feeBtn = document.getElementById('waiveEstimateFeeBtn');
     if (feeBtn) {
         feeBtn.classList.add('active');
         feeBtn.innerHTML = '<i class="fas fa-check"></i> Estimate Fee Waived';
     }
-    
+
     document.getElementById('liveLaborTotal').textContent = '$0.00';
 }
-    
+
 /*    // Safely handle apprentice checkbox
     const hasApprentice = document.getElementById('hasApprentice');
     if (hasApprentice) {
@@ -243,13 +243,13 @@ function resetEstimateForm() {
 function initPhoneNumberFormatting() {
     const phoneInput = document.getElementById('customerPhone');
     if (!phoneInput) return;
-    
-    phoneInput.addEventListener('input', function(e) {
-        const input = e.target.value.replace(/\D/g,'').substring(0,10);
-        const areaCode = input.substring(0,3);
-        const middle = input.substring(3,6);
-        const last = input.substring(6,10);
-        
+
+    phoneInput.addEventListener('input', function (e) {
+        const input = e.target.value.replace(/\D/g, '').substring(0, 10);
+        const areaCode = input.substring(0, 3);
+        const middle = input.substring(3, 6);
+        const last = input.substring(6, 10);
+
         if (input.length > 6) {
             e.target.value = `(${areaCode}) ${middle}-${last}`;
         } else if (input.length > 3) {
@@ -264,14 +264,14 @@ function initPhoneNumberFormatting() {
 function initDateFilters() {
     const yearFilter = document.getElementById('yearFilter');
     const currentYear = new Date().getFullYear();
-   
+
     for (let year = currentYear; year >= currentYear - 5; year--) {
         const option = document.createElement('option');
         option.value = year;
         option.textContent = year;
         yearFilter.appendChild(option);
     }
-   
+
     document.getElementById('monthFilter').addEventListener('change', filterByDate);
     document.getElementById('yearFilter').addEventListener('change', filterByDate);
 }
@@ -330,7 +330,7 @@ function addNewJob() {
 
 function initAutocomplete() {
     const locationInput = document.getElementById('jobLocation');
-    
+
     if (locationInput && typeof google !== 'undefined' && google.maps && google.maps.places) {
         const autocomplete = new google.maps.places.Autocomplete(
             locationInput,
@@ -341,14 +341,14 @@ function initAutocomplete() {
         );
 
         // Prevent form submission when pressing Enter on the autocomplete field
-        locationInput.addEventListener('keydown', function(e) {
+        locationInput.addEventListener('keydown', function (e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
             }
         });
 
         // Add a listener for when a place is selected
-        autocomplete.addListener('place_changed', function() {
+        autocomplete.addListener('place_changed', function () {
             const place = autocomplete.getPlace();
             if (!place.geometry) {
                 // User entered the name of a Place that was not suggested and
@@ -364,22 +364,22 @@ function calculateLaborCost(days, hours, workers, apprenticeDays, apprenticeHour
     const WORKER_RATE = 135; // $135/hour for skilled workers
     const APPRENTICE_RATE = 65; // $65/hour for apprentices
     const SERVICE_FEE = 65; // $65 service fee per worker per day
-    
+
     // Calculate worker labor (days are 8-hour packages)
     const workerFullDays = days * 8 * WORKER_RATE * workers;
     const workerPartialDay = hours * WORKER_RATE * workers;
-    
+
     // Calculate apprentice labor
     const apprenticeFullDays = apprenticeDays * 8 * APPRENTICE_RATE * apprenticeCount;
     const apprenticePartialDay = apprenticeHours * APPRENTICE_RATE * apprenticeCount;
-    
+
     // Calculate service fees (one per worker per day, including partial days)
     const totalWorkerDays = hours > 0 ? days + 1 : days;
     const serviceFees = totalWorkerDays * SERVICE_FEE * workers;
-    
+
     const totalApprenticeDays = apprenticeHours > 0 ? apprenticeDays + 1 : apprenticeDays;
     const apprenticeServiceFees = apprenticeCount > 0 ? totalApprenticeDays * SERVICE_FEE * apprenticeCount : 0;
-    
+
     return {
         workerLabor: workerFullDays + workerPartialDay + serviceFees,
         apprenticeLabor: apprenticeFullDays + apprenticePartialDay + apprenticeServiceFees,
@@ -398,19 +398,19 @@ function updateCurrentJobDetails() {
         job.apprenticeDays = parseInt(document.getElementById('apprenticeDays').value) || 0;
         job.apprenticeHours = parseInt(document.getElementById('apprenticeHours').value) || 0;
         job.apprenticeCount = parseInt(document.getElementById('apprenticeCount').value) || 0;
-        
+
         const laborCosts = calculateLaborCost(
-            job.days, 
-            job.hours, 
+            job.days,
+            job.hours,
             job.workers,
             job.apprenticeDays,
             job.apprenticeHours,
             job.apprenticeCount
         );
-        
+
         job.labor = laborCosts.workerLabor;
         job.apprenticeLabor = laborCosts.apprenticeLabor;
-        
+
         // Update live display immediately
         const liveLaborDisplay = document.getElementById('liveLaborTotal');
         if (liveLaborDisplay) {
@@ -433,7 +433,7 @@ function showJobDetails(jobId) {
             currentJob.apprenticeHours = parseInt(document.getElementById('apprenticeHours').value) || 0;
             currentJob.apprenticeCount = parseInt(document.getElementById('apprenticeCount').value) || 0;
             currentJob.discountPercentage = parseFloat(document.getElementById('jobDiscountPercentage').value) || 0;
-            
+
             const feeBtn = document.getElementById('waiveEstimateFeeBtn');
             currentJob.waiveEstimateFee = feeBtn.classList.contains('active');
         }
@@ -441,7 +441,7 @@ function showJobDetails(jobId) {
 
     currentJobId = jobId;
     const job = currentEstimate.jobs.find(j => j.id === jobId);
-    
+
     if (!job) return;
 
     // Update form fields with the job's values
@@ -453,7 +453,7 @@ function showJobDetails(jobId) {
     document.getElementById('apprenticeHours').value = job.apprenticeHours;
     document.getElementById('apprenticeCount').value = job.apprenticeCount;
     document.getElementById('jobDiscountPercentage').value = job.discountPercentage || 0;
-    
+
     // Update estimate fee button state
     const feeBtn = document.getElementById('waiveEstimateFeeBtn');
     if (job.waiveEstimateFee) {
@@ -463,7 +463,7 @@ function showJobDetails(jobId) {
         feeBtn.classList.remove('active');
         feeBtn.innerHTML = '<i class="fas fa-dollar-sign"></i> Waive $75 Estimate Fee';
     }
-    
+
     // Update labor calculations
     updateCurrentJobDetails();
     updateMaterialsList();
@@ -493,7 +493,7 @@ function updateJobTabs() {
         `;
 
         // Click tab to switch jobs (unless click was on the remove button)
-        tab.addEventListener('click', function(e) {
+        tab.addEventListener('click', function (e) {
             if (!e.target.classList.contains('remove-job-btn') &&
                 !e.target.closest('.remove-job-btn')) {
                 const clickedJobId = parseInt(this.dataset.jobId);
@@ -508,7 +508,7 @@ function updateJobTabs() {
         // Handle remove button
         const removeBtn = tab.querySelector('.remove-job-btn');
         if (removeBtn) {
-            removeBtn.addEventListener('click', function(e) {
+            removeBtn.addEventListener('click', function (e) {
                 e.stopPropagation();
                 const jobId = parseInt(this.dataset.jobId);
                 removeJob(jobId);
@@ -528,7 +528,7 @@ function updateJobTabs() {
 
 // Update job details when typing
 
-document.getElementById('jobDescription')?.addEventListener('input', function(e) {
+document.getElementById('jobDescription')?.addEventListener('input', function (e) {
     const job = currentEstimate.jobs.find(j => j.id === currentJobId);
     if (job) {
         job.name = e.target.value || `Job ${currentEstimate.jobs.findIndex(j => j.id === currentJobId) + 1}`;
@@ -627,11 +627,11 @@ function exportEstimateToPDF() {
     }
 
     const opt = {
-        margin:       0.25,
-        filename:     `Estimate-${currentEstimate.customer.name || 'Export'}.pdf`,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true },
-        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+        margin: 0.25,
+        filename: `Estimate-${currentEstimate.customer.name || 'Export'}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
     };
 
     html2pdf().set(opt).from(previewElement).save();
@@ -643,18 +643,18 @@ function removeJob(jobId) {
         alert("You must have at least one job");
         return;
     }
-   
+
     const jobIndex = currentEstimate.jobs.findIndex(job => job.id === jobId);
     if (jobIndex === -1) return;
-   
+
     currentEstimate.jobs.splice(jobIndex, 1);
-   
+
     // Set currentJobId to the first remaining job
     if (currentEstimate.jobs.length > 0) {
         currentJobId = currentEstimate.jobs[0].id;
         showJobDetails(currentJobId);
     }
-   
+
     updateEstimatePreview();
 }
 
@@ -662,14 +662,14 @@ function removeJob(jobId) {
 function updateMaterialsList() {
     const job = currentEstimate.jobs.find(j => j.id === currentJobId);
     if (!job) return;
-   
+
     const materialsList = document.getElementById('materialsList');
-   
+
     if (!job.materials || job.materials.length === 0) {
         materialsList.innerHTML = '<p class="no-materials">No materials added yet</p>';
         return;
     }
-   
+
     materialsList.innerHTML = '';
     job.materials.forEach((mat, index) => {
         const item = document.createElement('div');
@@ -687,27 +687,27 @@ function addMaterialToJob() {
     const name = document.getElementById('materialName').value.trim();
     const price = parseFloat(document.getElementById('materialPrice').value);
     const qty = parseInt(document.getElementById('materialQty').value);
-   
+
     if (!name || isNaN(price) || price <= 0 || isNaN(qty) || qty <= 0) {
         alert('Please enter valid material details');
         return;
     }
-   
+
     const job = currentEstimate.jobs.find(j => j.id === currentJobId);
     if (!job) return;
-   
+
     job.materials.push({
         name: name,
         price: price,
         quantity: qty,
         total: price * qty
     });
-   
+
     // Clear form
     document.getElementById('materialName').value = '';
     document.getElementById('materialPrice').value = '';
     document.getElementById('materialQty').value = '1';
-   
+
     updateMaterialsList();
     updateEstimatePreview();
 }
@@ -716,7 +716,7 @@ function addMaterialToJob() {
 function removeMaterialFromJob(index) {
     const job = currentEstimate.jobs.find(j => j.id === currentJobId);
     if (!job) return;
-   
+
     job.materials.splice(index, 1);
     updateMaterialsList();
     updateEstimatePreview();
@@ -726,22 +726,22 @@ function removeMaterialFromJob(index) {
 function addFeeToJob(jobId) {
     const name = document.getElementById('jobFeeName').value.trim();
     const amount = parseFloat(document.getElementById('jobFeeAmount').value);
-   
+
     if (!name || isNaN(amount) || amount <= 0) {
         alert('Please enter valid fee details');
         return;
     }
-   
+
     const job = currentEstimate.jobs.find(j => j.id === jobId);
     if (!job) return;
-   
+
     if (!job.fees) job.fees = [];
     job.fees.push({ name, amount });
-   
+
     // Clear inputs
     document.getElementById('jobFeeName').value = '';
     document.getElementById('jobFeeAmount').value = '';
-   
+
     updateJobFeesList(jobId);
     updateEstimatePreview();
 }
@@ -750,12 +750,12 @@ function addFeeToJob(jobId) {
 function updateJobFeesList(jobId) {
     const job = currentEstimate.jobs.find(j => j.id === jobId);
     const feesList = document.getElementById('jobFeesList');
-   
+
     if (!job || !job.fees || job.fees.length === 0) {
         feesList.innerHTML = '<p class="no-fees">No fees added yet</p>';
         return;
     }
-   
+
     feesList.innerHTML = '';
     job.fees.forEach((fee, index) => {
         const item = document.createElement('div');
@@ -772,7 +772,7 @@ function updateJobFeesList(jobId) {
 function removeFeeFromJob(jobId, index) {
     const job = currentEstimate.jobs.find(j => j.id === jobId);
     if (!job || !job.fees) return;
-   
+
     job.fees.splice(index, 1);
     updateJobFeesList(jobId);
     updateEstimatePreview();
@@ -782,7 +782,7 @@ function removeFeeFromJob(jobId, index) {
 function updateJobDiscount(jobId, discountPercentage) {
     const job = currentEstimate.jobs.find(j => j.id === jobId);
     if (!job) return;
-   
+
     job.discountPercentage = parseFloat(discountPercentage) || 0;
     updateJobDiscountDisplay(jobId);
     updateEstimatePreview();
@@ -792,9 +792,9 @@ function updateJobDiscount(jobId, discountPercentage) {
 function updateJobDiscountDisplay(jobId) {
     const job = currentEstimate.jobs.find(j => j.id === jobId);
     const discountDisplay = document.getElementById('jobDiscountDisplay');
-   
+
     if (!job) return;
-   
+
     if (job.discountPercentage > 0) {
         discountDisplay.textContent = `${job.discountPercentage}% discount applied`;
         discountDisplay.style.color = '#28a745';
@@ -808,10 +808,10 @@ function updateJobDiscountDisplay(jobId) {
 function toggleEstimateFee() {
     const job = currentEstimate.jobs.find(j => j.id === currentJobId);
     if (!job) return;
-   
+
     job.waiveEstimateFee = !job.waiveEstimateFee;
     const btn = document.getElementById('waiveEstimateFeeBtn');
-   
+
     if (job.waiveEstimateFee) {
         btn.classList.add('active');
         btn.innerHTML = '<i class="fas fa-check"></i> Estimate Fee Waived';
@@ -819,7 +819,7 @@ function toggleEstimateFee() {
         btn.classList.remove('active');
         btn.innerHTML = '<i class="fas fa-dollar-sign"></i> Waive $75 Estimate Fee';
     }
-   
+
     updateEstimatePreview();
 }
 
@@ -827,40 +827,40 @@ function toggleEstimateFee() {
 function nextStep(step) {
     // Validate current step before proceeding
     if (step === 2 && !validateCustomerInfo()) return;
-   
+
     // Update job details before checking
-if (step === 3) {
-    // Validate job descriptions
-    for (const job of currentEstimate.jobs) {
-        const description = job.name.trim();
-        if (!description || description === "New Job" || description === "Describe the work (required)") {
-            alert('Please enter a valid description for all jobs');
-            // Find and focus on the job tab with empty description
-            const jobIndex = currentEstimate.jobs.findIndex(j => j.id === job.id);
-            if (jobIndex >= 0) {
-                showJobDetails(job.id);
-                document.getElementById('jobDescription').focus();
+    if (step === 3) {
+        // Validate job descriptions
+        for (const job of currentEstimate.jobs) {
+            const description = job.name.trim();
+            if (!description || description === "New Job" || description === "Describe the work (required)") {
+                alert('Please enter a valid description for all jobs');
+                // Find and focus on the job tab with empty description
+                const jobIndex = currentEstimate.jobs.findIndex(j => j.id === job.id);
+                if (jobIndex >= 0) {
+                    showJobDetails(job.id);
+                    document.getElementById('jobDescription').focus();
+                }
+                return;
             }
+        }
+
+        if (currentEstimate.jobs.length === 0) {
+            alert('Please add at least one job');
             return;
         }
     }
-    
-    if (currentEstimate.jobs.length === 0) {
-        alert('Please add at least one job');
-        return;
-    }
-}
-   
+
     // Hide current step
     document.querySelector('.estimate-step.active-step').classList.remove('active-step');
-   
+
     // Show next step
     document.getElementById(`${getStepName(step)}Step`).classList.add('active-step');
-   
+
     // Update progress indicator
     document.querySelector('.progress-step.active').classList.remove('active');
     document.querySelector(`.progress-step[data-step="${step}"]`).classList.add('active');
-   
+
     // If moving to review step, update preview
     if (step === 3) {
         updateEstimatePreview();
@@ -871,10 +871,10 @@ if (step === 3) {
 function prevStep(step) {
     // Hide current step
     document.querySelector('.estimate-step.active-step').classList.remove('active-step');
-   
+
     // Show previous step
     document.getElementById(`${getStepName(step)}Step`).classList.add('active-step');
-   
+
     // Update progress indicator
     document.querySelector('.progress-step.active').classList.remove('active');
     document.querySelector(`.progress-step[data-step="${step}"]`).classList.add('active');
@@ -882,7 +882,7 @@ function prevStep(step) {
 
 
 function getStepName(step) {
-    switch(step) {
+    switch (step) {
         case 1: return 'customerInfo';
         case 2: return 'jobs';
         case 3: return 'review';
@@ -896,7 +896,7 @@ function validateCustomerInfo() {
         alert('Please fill out all required customer information fields');
         return false;
     }
-   
+
     // Save customer info to current estimate
     currentEstimate.customer = {
         name: document.getElementById('customerName').value,
@@ -904,7 +904,7 @@ function validateCustomerInfo() {
         phone: document.getElementById('customerPhone').value,
         location: document.getElementById('jobLocation').value
     };
-   
+
     return true;
 }
 
@@ -916,7 +916,7 @@ function updateEstimatePreview() {
     let feesTotal = 0;
     let discountTotal = 0;
     let estimateFeeTotal = 0;
-    
+
     const jobsHTML = currentEstimate.jobs.map(job => {
         const jobMaterialsTotal = job.materials.reduce((sum, mat) => sum + mat.total, 0);
         const jobFeesTotal = job.fees.reduce((sum, fee) => sum + fee.amount, 0);
@@ -924,7 +924,7 @@ function updateEstimatePreview() {
         const jobDiscount = jobSubtotal * (job.discountPercentage / 100);
         const jobEstimateFee = job.waiveEstimateFee ? -75 : 75;
         const jobTotal = jobSubtotal - jobDiscount + jobEstimateFee;
-        
+
         // Accumulate totals
         laborTotal += job.labor || 0;
         apprenticeLaborTotal += job.apprenticeLabor || 0;
@@ -975,7 +975,7 @@ function updateEstimatePreview() {
             </div>
         `;
     }).join('');
-    
+
     const grandTotal = laborTotal + apprenticeLaborTotal + materialsTotal + feesTotal - discountTotal + estimateFeeTotal;
     currentEstimate.total = grandTotal;
 
@@ -1040,7 +1040,7 @@ function updateEstimatePreview() {
             </div>
         </div>
     `;
-    
+
     const estimatePreview = document.getElementById('estimatePreview');
     if (estimatePreview) {
         estimatePreview.innerHTML = html;
@@ -1061,20 +1061,20 @@ function saveEstimate() {
             job.apprenticeHours = parseInt(document.getElementById('apprenticeHours').value) || 0;
             job.apprenticeCount = parseInt(document.getElementById('apprenticeCount').value) || 0;
             job.discountPercentage = parseFloat(document.getElementById('jobDiscountPercentage').value) || 0;
-            
+
             const feeBtn = document.getElementById('waiveEstimateFeeBtn');
             job.waiveEstimateFee = feeBtn.classList.contains('active');
-            
+
             // Recalculate labor costs
             const laborCosts = calculateLaborCost(
-                job.days, 
-                job.hours, 
+                job.days,
+                job.hours,
                 job.workers,
                 job.apprenticeDays,
                 job.apprenticeHours,
                 job.apprenticeCount
             );
-            
+
             job.labor = laborCosts.workerLabor;
             job.apprenticeLabor = laborCosts.apprenticeLabor;
         }
@@ -1096,12 +1096,12 @@ function saveEstimate() {
     // Add timestamp
     const now = new Date().toISOString();
     currentEstimate.updatedAt = now;
-    
+
     if (!currentEstimate.id) {
         currentEstimate.createdAt = now;
     }
 
-    const estimateRef = currentEstimate.id ? 
+    const estimateRef = currentEstimate.id ?
         db.collection("estimates").doc(currentEstimate.id) :
         db.collection("estimates").doc();
 
@@ -1142,20 +1142,20 @@ function loadEstimates() {
 
 function displayEstimates(estimates) {
     estimatesList.innerHTML = '';
-   
+
     // Calculate totals
     const totalCount = estimates.length;
     const totalAmount = estimates.reduce((sum, estimate) => sum + estimate.total, 0);
-   
+
     // Update counter display
     document.getElementById('estimatesCount').textContent = totalCount;
     document.getElementById('estimatesTotal').textContent = formatAccounting(totalAmount);
-   
+
     if (estimates.length === 0) {
         estimatesList.innerHTML = '<p class="no-estimates">No estimates found</p>';
         return;
     }
-   
+
     estimates.forEach(estimate => {
         const date = new Date(estimate.createdAt);
         const formattedDate = date.toLocaleDateString('en-US', {
@@ -1163,7 +1163,7 @@ function displayEstimates(estimates) {
             month: 'short',
             day: 'numeric'
         });
-       
+
         const estimateCard = document.createElement('div');
         estimateCard.className = 'estimate-card';
         estimateCard.innerHTML = `
@@ -1185,7 +1185,7 @@ function displayEstimates(estimates) {
                 <p class="estimate-total">$${formatAccounting(estimate.total)}</p>
             </div>
         `;
-       
+
         estimateCard.addEventListener('click', () => openEstimateModal(estimate));
         estimatesList.appendChild(estimateCard);
     });
@@ -1201,7 +1201,7 @@ function openEstimateModal(estimate) {
         hour: '2-digit',
         minute: '2-digit'
     });
-   
+
     modalContent.dataset.estimateId = estimate.id;
     modalContent.dataset.estimateData = JSON.stringify(estimate);
 
@@ -1212,7 +1212,7 @@ function openEstimateModal(estimate) {
     let feesTotal = 0;
     let discountTotal = 0;
     let estimateFeeTotal = 0;
-   
+
     estimate.jobs.forEach(job => {
         laborTotal += job.labor || 0;
         materialsTotal += job.materials.reduce((sum, mat) => sum + mat.total, 0);
@@ -1220,7 +1220,7 @@ function openEstimateModal(estimate) {
         discountTotal += (job.labor + materialsTotal + feesTotal) * (job.discountPercentage / 100);
         estimateFeeTotal += job.waiveEstimateFee ? -75 : 75;
     });
-   
+
     const total = laborTotal + materialsTotal + feesTotal - discountTotal + estimateFeeTotal;
 
 
@@ -1253,14 +1253,14 @@ function openEstimateModal(estimate) {
         <div class="estimate-section">
             <h3>Jobs</h3>
             ${estimate.jobs.map(job => {
-                const jobMaterialsTotal = job.materials.reduce((sum, mat) => sum + mat.total, 0);
-                const jobFeesTotal = job.fees.reduce((sum, fee) => sum + fee.amount, 0);
-                const jobSubtotal = job.labor + jobMaterialsTotal + jobFeesTotal;
-                const jobDiscount = jobSubtotal * (job.discountPercentage / 100);
-                const jobEstimateFee = job.waiveEstimateFee ? -75 : 75;
-                const jobTotal = jobSubtotal - jobDiscount + jobEstimateFee;
-               
-                return `
+        const jobMaterialsTotal = job.materials.reduce((sum, mat) => sum + mat.total, 0);
+        const jobFeesTotal = job.fees.reduce((sum, fee) => sum + fee.amount, 0);
+        const jobSubtotal = job.labor + jobMaterialsTotal + jobFeesTotal;
+        const jobDiscount = jobSubtotal * (job.discountPercentage / 100);
+        const jobEstimateFee = job.waiveEstimateFee ? -75 : 75;
+        const jobTotal = jobSubtotal - jobDiscount + jobEstimateFee;
+
+        return `
                     <div class="estimate-job-section">
                         <h4>${job.name} (${job.days} days, ${job.workers} worker${job.workers > 1 ? 's' : ''}${job.hasApprentice ? ' (includes apprentice)' : ''})</h4>
                         <div class="estimate-row">
@@ -1295,7 +1295,7 @@ function openEstimateModal(estimate) {
                         </div>
                     </div>
                 `;
-            }).join('')}
+    }).join('')}
         </div>
        
         <div class="estimate-section">
@@ -1325,7 +1325,7 @@ function openEstimateModal(estimate) {
             </div>
         </div>
     `;
-   
+
     modalContent.innerHTML = html;
     estimateModal.style.display = 'block';
 }
@@ -1339,21 +1339,21 @@ function closeEstimateModal() {
 function editEstimate() {
     const estimateId = modalContent.dataset.estimateId;
     const estimateData = JSON.parse(modalContent.dataset.estimateData);
-   
+
     currentEstimate = {
         id: estimateId,
         ...estimateData
     };
-   
+
     // Set currentJobId to the first job
     if (currentEstimate.jobs.length > 0) {
         currentJobId = currentEstimate.jobs[0].id;
     }
-   
+
     showNewEstimate();
     showJobDetails(currentJobId);
     nextStep(2); // Skip to jobs step
-   
+
     // Close the modal
     closeEstimateModal();
 }
@@ -1362,7 +1362,7 @@ function editEstimate() {
 function deleteEstimate() {
     if (confirm('Are you sure you want to delete this estimate?')) {
         const estimateId = modalContent.dataset.estimateId;
-       
+
         db.collection("estimates").doc(estimateId).delete()
             .then(() => {
                 alert('Estimate deleted successfully');
@@ -1397,7 +1397,7 @@ function exportEstimate(estimate) {
     let feesTotal = 0;
     let discountTotal = 0;
     let estimateFeeTotal = 0;
-    
+
     estimate.jobs.forEach(job => {
         laborTotal += job.labor || 0;
         apprenticeLaborTotal += job.apprenticeLabor || 0;
@@ -1406,7 +1406,7 @@ function exportEstimate(estimate) {
         discountTotal += (job.labor + (job.apprenticeLabor || 0) + materialsTotal + feesTotal) * (job.discountPercentage / 100);
         estimateFeeTotal += job.waiveEstimateFee ? -75 : 75;
     });
-    
+
     const total = laborTotal + apprenticeLaborTotal + materialsTotal + feesTotal - discountTotal + estimateFeeTotal;
 
     // Payment terms
@@ -1645,14 +1645,14 @@ function exportEstimate(estimate) {
         <div class="section-title">Detailed Scope of Work</div>
         
         ${estimate.jobs.map((job, index) => {
-            const jobMaterialsTotal = job.materials.reduce((sum, mat) => sum + mat.total, 0);
-            const jobFeesTotal = job.fees.reduce((sum, fee) => sum + fee.amount, 0);
-            const jobSubtotal = job.labor + (job.apprenticeLabor || 0) + jobMaterialsTotal + jobFeesTotal;
-            const jobDiscount = jobSubtotal * (job.discountPercentage / 100);
-            const jobEstimateFee = job.waiveEstimateFee ? -75 : 75;
-            const jobTotal = jobSubtotal - jobDiscount + jobEstimateFee;
-            
-            return `
+        const jobMaterialsTotal = job.materials.reduce((sum, mat) => sum + mat.total, 0);
+        const jobFeesTotal = job.fees.reduce((sum, fee) => sum + fee.amount, 0);
+        const jobSubtotal = job.labor + (job.apprenticeLabor || 0) + jobMaterialsTotal + jobFeesTotal;
+        const jobDiscount = jobSubtotal * (job.discountPercentage / 100);
+        const jobEstimateFee = job.waiveEstimateFee ? -75 : 75;
+        const jobTotal = jobSubtotal - jobDiscount + jobEstimateFee;
+
+        return `
                 <div class="job-header">Job ${index + 1}: ${job.name}</div>
                 <div class="job-description">
                     <p><strong>Work Description:</strong> ${job.name}</p>
@@ -1676,7 +1676,7 @@ function exportEstimate(estimate) {
                             <td>1.1</td>
                             <td>Skilled Labor (${job.workers} worker${job.workers > 1 ? 's' : ''})</td>
                             <td>${job.days} days</td>
-                            <td>$${formatAccounting(job.labor/job.days)}/day</td>
+                            <td>$${formatAccounting(job.labor / job.days)}/day</td>
                             <td>$${formatAccounting(job.labor)}</td>
                         </tr>
                         
@@ -1686,7 +1686,7 @@ function exportEstimate(estimate) {
                             <td>1.2</td>
                             <td>Apprentice Labor (${job.apprenticeCount} apprentice${job.apprenticeCount > 1 ? 's' : ''})</td>
                             <td>${job.apprenticeDays} days</td>
-                            <td>$${formatAccounting(job.apprenticeLabor/job.apprenticeDays)}/day</td>
+                            <td>$${formatAccounting(job.apprenticeLabor / job.apprenticeDays)}/day</td>
                             <td>$${formatAccounting(job.apprenticeLabor)}</td>
                         </tr>
                         ` : ''}
@@ -1745,7 +1745,7 @@ function exportEstimate(estimate) {
                 </table>
                 <div class="page-break"></div>
             `;
-        }).join('')}
+    }).join('')}
     </div>
     
     <div class="section">
@@ -1874,12 +1874,12 @@ function exportEstimate(estimate) {
 
 function searchEstimates() {
     const searchTerm = searchInput.value.trim().toLowerCase();
-   
+
     if (searchTerm === '') {
         loadEstimates();
         return;
     }
-   
+
     db.collection("estimates")
         .orderBy("createdAt", "desc")
         .get()
@@ -1904,12 +1904,12 @@ function searchEstimates() {
 function filterByDate() {
     const month = document.getElementById('monthFilter').value;
     const year = document.getElementById('yearFilter').value;
-    
+
     if (!month && !year) {
         loadEstimates();
         return;
     }
-    
+
     db.collection("estimates")
         .orderBy("createdAt", "desc")
         .get()
@@ -1920,7 +1920,7 @@ function filterByDate() {
                 const date = new Date(estimateData.createdAt);
                 const estimateMonth = date.getMonth() + 1; // Months are 0-indexed
                 const estimateYear = date.getFullYear();
-                
+
                 if ((!month || estimateMonth == month) && (!year || estimateYear == year)) {
                     estimates.push({
                         id: doc.id,

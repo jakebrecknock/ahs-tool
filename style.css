@@ -1,21 +1,32 @@
 /* Base Styles */
 :root {
-    --primary-color: #D64045; /* Coral red */
-    --primary-light: #E9B44C; /* Mustard yellow */
-    --secondary-color: #1B9AAA; /* Teal blue */
-    --dark-color: #2D2D2A; /* Dark gray */
-    --light-color: #F7F7F2; /* Cream */
-    --accent-color: #98D2EB; /* Light blue */
-    --success-color: #4CAF50; /* Green */
-    --warning-color: #FFC107; /* Amber */
-    --danger-color: #F44336; /* Red */
-    --gray-color: #9E9E9E; /* Medium gray */
-    --light-gray: #E0E0E0; /* Light gray */
+    --primary-color: #D64045;
+    /* Coral red */
+    --primary-light: #E9B44C;
+    /* Mustard yellow */
+    --secondary-color: #1B9AAA;
+    /* Teal blue */
+    --dark-color: #2D2D2A;
+    /* Dark gray */
+    --light-color: #F7F7F2;
+    /* Cream */
+    --accent-color: #98D2EB;
+    /* Light blue */
+    --success-color: #4CAF50;
+    /* Green */
+    --warning-color: #FFC107;
+    /* Amber */
+    --danger-color: #F44336;
+    /* Red */
+    --gray-color: #9E9E9E;
+    /* Medium gray */
+    --light-gray: #E0E0E0;
+    /* Light gray */
     --white: #FFFFFF;
     --black: #212121;
-    --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
-    --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
-    --shadow-lg: 0 10px 20px rgba(0,0,0,0.1);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.1);
     --radius-sm: 4px;
     --radius-md: 8px;
     --radius-lg: 12px;
@@ -48,7 +59,7 @@ header {
     align-items: center;
     padding: 20px 0;
     margin-bottom: 20px;
-    border-bottom: 1px solid rgba(0,0,0,0.1);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 header h1 {
@@ -102,8 +113,15 @@ nav button:hover:not(.active) {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Dashboard Styles */
@@ -297,18 +315,21 @@ nav button:hover:not(.active) {
         flex-direction: row;
         flex-wrap: wrap;
     }
+
     .form-row .form-group {
         min-width: calc(50% - 8px);
     }
 }
 
-.estimate-location, 
+.estimate-location,
 .estimate-jobs {
-    margin-right: 40px; /* Make space for actions */
+    margin-right: 40px;
+    /* Make space for actions */
     margin-bottom: 10px;
 }
 
-.estimate-location i, .estimate-jobs i {
+.estimate-location i,
+.estimate-jobs i {
     font-size: 0.9rem;
 }
 
@@ -486,7 +507,10 @@ nav button:hover:not(.active) {
     margin-top: 30px;
 }
 
-.btn-prev, .btn-next, .btn-cancel, #saveEstimateBtn {
+.btn-prev,
+.btn-next,
+.btn-cancel,
+#saveEstimateBtn {
     padding: 10px 20px;
     border: none;
     border-radius: var(--radius-md);
@@ -506,7 +530,8 @@ nav button:hover:not(.active) {
     color: var(--dark-color);
 }
 
-.btn-next, #saveEstimateBtn {
+.btn-next,
+#saveEstimateBtn {
     background-color: var(--primary-color);
     color: var(--white);
 }
@@ -522,7 +547,8 @@ nav button:hover:not(.active) {
     transform: translateY(-1px);
 }
 
-.btn-next:hover, #saveEstimateBtn:hover {
+.btn-next:hover,
+#saveEstimateBtn:hover {
     background-color: #c5394b;
     transform: translateY(-1px);
 }
@@ -600,7 +626,8 @@ nav button:hover:not(.active) {
 }
 
 /* Materials and Fees Sections */
-.materials-section, .job-fees-section {
+.materials-section,
+.job-fees-section {
     margin-bottom: 25px;
     background-color: var(--white);
     padding: 20px;
@@ -608,7 +635,8 @@ nav button:hover:not(.active) {
     box-shadow: var(--shadow-sm);
 }
 
-.materials-section h3, .job-fees-section h3 {
+.materials-section h3,
+.job-fees-section h3 {
     margin-bottom: 15px;
     color: var(--dark-color);
     font-size: 1.1rem;
@@ -616,7 +644,8 @@ nav button:hover:not(.active) {
     border-bottom: 1px solid var(--light-gray);
 }
 
-.materials-list, #jobFeesList {
+.materials-list,
+#jobFeesList {
     margin-bottom: 15px;
     border: 1px solid var(--light-gray);
     border-radius: var(--radius-sm);
@@ -627,14 +656,16 @@ nav button:hover:not(.active) {
     background-color: var(--light-color);
 }
 
-.no-materials, .no-fees {
+.no-materials,
+.no-fees {
     color: var(--gray-color);
     text-align: center;
     padding: 10px;
     font-size: 0.9rem;
 }
 
-.material-item, .fee-item {
+.material-item,
+.fee-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -643,15 +674,18 @@ nav button:hover:not(.active) {
     transition: all 0.2s;
 }
 
-.material-item:hover, .fee-item:hover {
-    background-color: rgba(255,255,255,0.7);
+.material-item:hover,
+.fee-item:hover {
+    background-color: rgba(255, 255, 255, 0.7);
 }
 
-.material-item:last-child, .fee-item:last-child {
+.material-item:last-child,
+.fee-item:last-child {
     border-bottom: none;
 }
 
-.material-item button, .fee-item button {
+.material-item button,
+.fee-item button {
     background: none;
     border: none;
     color: var(--danger-color);
@@ -662,19 +696,22 @@ nav button:hover:not(.active) {
     transition: all 0.2s;
 }
 
-.material-item button:hover, .fee-item button:hover {
+.material-item button:hover,
+.fee-item button:hover {
     opacity: 1;
     transform: scale(1.1);
 }
 
-.material-form, .fee-form {
+.material-form,
+.fee-form {
     display: flex;
     gap: 10px;
     margin-top: 15px;
     flex-wrap: wrap;
 }
 
-.material-form input, .fee-form input {
+.material-form input,
+.fee-form input {
     flex: 1;
     min-width: 120px;
     padding: 10px;
@@ -683,7 +720,8 @@ nav button:hover:not(.active) {
     font-size: 0.95rem;
 }
 
-.material-form button, .fee-form button {
+.material-form button,
+.fee-form button {
     padding: 10px 20px;
     background-color: var(--secondary-color);
     color: var(--white);
@@ -697,7 +735,8 @@ nav button:hover:not(.active) {
     gap: 8px;
 }
 
-.material-form button:hover, .fee-form button:hover {
+.material-form button:hover,
+.fee-form button:hover {
     background-color: #168392;
     transform: translateY(-2px);
     box-shadow: var(--shadow-sm);
@@ -811,7 +850,8 @@ nav button:hover:not(.active) {
     font-size: 1.1rem;
 }
 
-.estimate-job-total, .estimate-grand-total {
+.estimate-job-total,
+.estimate-grand-total {
     font-weight: bold;
     margin-top: 15px;
     font-size: 1.1rem;
@@ -836,7 +876,7 @@ nav button:hover:not(.active) {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0,0,0,0.5);
+    background-color: rgba(0, 0, 0, 0.5);
     z-index: 1000;
     overflow-y: auto;
     animation: fadeIn 0.3s ease;
@@ -855,8 +895,15 @@ nav button:hover:not(.active) {
 }
 
 @keyframes slideDown {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .close-modal {
@@ -953,7 +1000,7 @@ nav button:hover:not(.active) {
 }
 
 .export-html-btn i {
-  color: #D64045;
+    color: #D64045;
 }
 
 #passwordInput {
@@ -1027,54 +1074,56 @@ nav button:hover:not(.active) {
     .container {
         padding: 15px;
     }
-    
+
     header {
         flex-direction: column;
         align-items: flex-start;
         gap: 15px;
     }
-    
+
     nav {
         width: 100%;
         flex-wrap: wrap;
     }
-    
+
     .dashboard-header {
         flex-direction: column;
         align-items: stretch;
     }
-    
+
     .search-container {
         min-width: 100%;
     }
-    
+
     .estimates-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .form-row {
         flex-direction: column;
         gap: 0;
     }
-    
-    .material-form, .fee-form {
+
+    .material-form,
+    .fee-form {
         flex-direction: column;
     }
-    
-    .material-form button, .fee-form button {
+
+    .material-form button,
+    .fee-form button {
         width: 100%;
         justify-content: center;
     }
-    
+
     .modal-content {
         width: 95%;
         padding: 20px;
     }
-    
+
     .modal-actions {
         flex-wrap: wrap;
     }
-    
+
     .modal-actions button {
         flex: 1;
         min-width: 120px;
@@ -1085,14 +1134,17 @@ nav button:hover:not(.active) {
     .progress-step .step-title {
         display: none;
     }
-    
+
     .job-tab {
         padding: 8px 12px;
         font-size: 0.85rem;
         min-width: 100px;
     }
-    
-    .btn-prev, .btn-next, .btn-cancel, #saveEstimateBtn,
+
+    .btn-prev,
+    .btn-next,
+    .btn-cancel,
+    #saveEstimateBtn,
     .modal-actions button {
         padding: 10px 15px;
         font-size: 0.9rem;

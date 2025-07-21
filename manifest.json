@@ -1,21 +1,21 @@
 {
-  "name": "ACE Handyman Services",
-  "short_name": "AHS Tools",
-  "description": "Estimate generator for ACE Handyman Services",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#D64045",
-  "icons": [
-    {
-      "src": "app-logo.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "app-logo.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ]
+    "name": "ACE Handyman Services",
+    "short_name": "AHS Tools",
+    "description": "Estimate generator for ACE Handyman Services",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#D64045",
+    "icons": [
+        {
+            "src": "app-logo.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "app-logo.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
 }
