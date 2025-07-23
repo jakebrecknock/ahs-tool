@@ -1854,7 +1854,7 @@ function exportEstimate(estimate) {
     <div class="footer">
         <p>Ace Handyman Services Oak Park River Forest | 207 N Harlem Ave, Oak Park, IL 60302</p>
         <p>Phone: (708) 773-0218 | Email: OakParkRiverForest@AceHandymanServices.com</p>
-        <p>License #: 123456 | Insured and Bonded</p>
+        <p>Licensed Insured and Bonded</p>
     </div>
 </body>
 </html>
